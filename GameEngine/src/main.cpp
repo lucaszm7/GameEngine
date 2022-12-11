@@ -4,6 +4,8 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void APIENTRY DebugCallBack(GLenum source, GLenum type, GLuint id, GLenum severity,
+    GLsizei length, const GLchar* message, const void* userParam);
 
 int main()
 {
@@ -21,9 +23,9 @@ int main()
         std::cin.get();
         return -1;
     }
-
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
 
     if (glewInit() != GLEW_OK)
     {
@@ -33,9 +35,10 @@ int main()
         return -1;
     }
     std::cout << "\033[1;32m" << glGetString(GL_VERSION) << "\033[0m" << std::endl;
+    glDebugMessageCallback(DebugCallBack, nullptr);
+
 
     glViewport(0, 0, 800, 600);
-
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -46,6 +49,7 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
 
     glfwTerminate();
     return 0;
@@ -60,4 +64,62 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+}
+
+void APIENTRY
+DebugCallBack(GLenum source, GLenum type, GLuint id, GLenum severity,
+    GLsizei length, const GLchar* message, const void* userParam)
+{
+#ifndef DEBUG || DEBINFO
+    if (severity != GL_DEBUG_SEVERITY_MEDIUM && severity != GL_DEBUG_SEVERITY_HIGH) return;
+#endif
+    std::cout << "\n\033[1;31m ------------ DEBUG ------------ \033[0m\n" << std::endl;
+    std::cout << "Message: \033[1;33m" << message << "]\033[0m\n" << std::endl;
+    std::cout << "Type: ";
+    switch (type) {
+    case GL_DEBUG_TYPE_ERROR:
+        std::cout << "ERROR";
+        break;
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+        std::cout << "DEPRECATED_BEHAVIOR";
+        break;
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+        std::cout << "UNDEFINED_BEHAVIOR";
+        break;
+    case GL_DEBUG_TYPE_PORTABILITY:
+        std::cout << "PORTABILITY";
+        break;
+    case GL_DEBUG_TYPE_PERFORMANCE:
+        std::cout << "PERFORMANCE";
+        break;
+    case GL_DEBUG_TYPE_OTHER:
+        std::cout << "OTHER";
+        break;
+    default:
+        std::cout << type;
+        break;
+    }
+    std::cout << std::endl;
+
+    std::cout << "ID: " << id << std::endl;
+    std::cout << "Severity: ";
+    switch (severity) {
+    case GL_DEBUG_SEVERITY_LOW:
+        std::cout << "LOW";
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        std::cout << "MEDIUM";
+        break;
+    case GL_DEBUG_SEVERITY_HIGH:
+        std::cout << "HIGH";
+        break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        std::cout << "Generic Notification";
+        break;
+    default:
+        std::cout << severity;
+        break;
+    }
+    std::cout << std::endl;
+    std::cout << "\n\033[1;31m ------------ END OF DEBUG ------------ \033[0m\n" << std::endl;
 }
