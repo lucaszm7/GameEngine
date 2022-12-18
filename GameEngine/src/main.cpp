@@ -91,10 +91,13 @@ int main()
 
     Texture texture0("resources/textures/container.jpg", GL_RGB, TexParam::LINEAR);
     Texture texture1("resources/textures/awesomeface.png", GL_RGBA, TexParam::REPEAT);
+    Texture texture2("resources/textures/wall.jpg");
 
     shader.Bind();
     shader.SetUniform1i("texture0", 0);
     shader.SetUniform1i("texture1", 1);
+    shader.SetUniform1i("texture2", 2);
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -111,6 +114,7 @@ int main()
 
         texture0.Bind(0);
         texture1.Bind(1);
+        texture2.Bind(2);
         VAO.Bind();
         glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
@@ -138,7 +142,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     else if (key == GLFW_KEY_UP && action == GLFW_RELEASE && isPressedUp)
     {
         isPressedUp = false;
-        if (smilePercentage < 1.0f) smilePercentage += 0.1f;
+        if (smilePercentage < 1.0f) smilePercentage += 0.2f;
     }
 
     else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && !isPressedDown)
@@ -146,7 +150,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE && isPressedDown)
     {
         isPressedDown = false;
-        if (smilePercentage > -1.0f) smilePercentage -= 0.1f;
+        if (smilePercentage > -1.0f) smilePercentage -= 0.2f;
     }
 }
 
