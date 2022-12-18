@@ -1,11 +1,14 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <STB/stb_image.h>
 #include "core/Shader.h"
 #include "core/VertexArray.h"
 #include "core/VertexBuffer.h"
 #include "core/IndexBuffer.h"
 #include "core/VertexBufferLayout.h"
+#include "core/Texture.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -45,30 +48,44 @@ int main()
 
     Shader shader("resources/shaders/vertex.shader", "resources/shaders/fragment.shader");
 
-    float vertices[] = {
-         0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
-         0.0f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f
+    std::vector<float> vertices = 
+    {
+        // positions         // colors          // texture coords
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f
     };
 
-    unsigned int indices[] = {
+    std::vector<unsigned int> indices = 
+    {
         0, 1, 2,
+        0, 2, 3
+    };
+
+    std::vector<float> texCoords =
+    {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.5f, 1.0f
     };
 
     VertexArray VAO;
     VAO.Bind();
-    VertexBuffer VBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
+    VertexBuffer VBO(&vertices[0], static_cast<unsigned int>(vertices.size() * sizeof(float)), GL_STATIC_DRAW);
     VBO.Bind();
-    IndexBuffer EBO(indices, sizeof(indices), GL_STATIC_DRAW);
+    IndexBuffer EBO(&indices[0], static_cast<unsigned int>(indices.size() * sizeof(unsigned int)), GL_STATIC_DRAW);
     EBO.Bind();
     VertexBufferLayout VBL;
-    VBL.Push<float>(3);
-    VBL.Push<float>(3);
+    VBL.Push<float>(3); // positions
+    VBL.Push<float>(3); // colors
+    VBL.Push<float>(2); // texture coords
     VAO.AddBuffer(VBO, VBL);
 
     VBO.Unbind();
     VAO.Unbind();
 
+    Texture texture("resources/textures/container.jpg");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -84,8 +101,9 @@ int main()
 
         shader.SetUniform4f("outColor", 0.0f, colorValue, 0.0f, 1.0f);
 
+        texture.Bind();
         VAO.Bind();
-        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);

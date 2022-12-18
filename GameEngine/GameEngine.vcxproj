@@ -73,25 +73,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
+    <ClCompile Include="src\core\Texture.cpp" />
     <ClCompile Include="src\core\VertexArray.cpp" />
     <ClCompile Include="src\core\VertexBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -184,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h" />
     <ClInclude Include="src\core\Shader.h" />
+    <ClInclude Include="src\core\Texture.h" />
     <ClInclude Include="src\core\VertexArray.h" />
     <ClInclude Include="src\core\VertexBuffer.h" />
     <ClInclude Include="src\core\VertexBufferLayout.h" />
