@@ -5,9 +5,12 @@ in vec2 outTexCoord;
 
 out vec4 FragColor;
 
-uniform sampler2D ourTexture;
+uniform sampler2D texture0;
+uniform sampler2D texture1;
+
+uniform float smilePercentage;
 
 void main()
 {
-	FragColor = texture(ourTexture, outTexCoord) * vec4(outColor, 1.0);
+	FragColor = mix(texture(texture0, outTexCoord), texture(texture1, outTexCoord), smilePercentage);
 }

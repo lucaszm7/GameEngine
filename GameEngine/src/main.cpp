@@ -11,9 +11,13 @@
 #include "core/Texture.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void APIENTRY DebugCallBack(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam);
+
+float smilePercentage = 0.2f;
+bool isPressedUp = false;
+bool isPressedDown = false;
 
 
 int main()
@@ -34,7 +38,7 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
+    glfwSetKeyCallback(window, key_callback);
 
     if (glewInit() != GLEW_OK)
     {
@@ -51,10 +55,10 @@ int main()
     std::vector<float> vertices = 
     {
         // positions         // colors          // texture coords
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  2.0f, 2.0f,
+         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  2.0f, 0.0f,
         -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f
+        -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 2.0f
     };
 
     std::vector<unsigned int> indices = 
@@ -85,25 +89,30 @@ int main()
     VBO.Unbind();
     VAO.Unbind();
 
-    Texture texture("resources/textures/container.jpg");
+    Texture texture0("resources/textures/container.jpg", GL_RGB, TexParam::LINEAR);
+    Texture texture1("resources/textures/awesomeface.png", GL_RGBA, TexParam::REPEAT);
+
+    shader.Bind();
+    shader.SetUniform1i("texture0", 0);
+    shader.SetUniform1i("texture1", 1);
 
     while (!glfwWindowShouldClose(window))
     {
-        processInput(window);
-
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         shader.Bind();
 
-        float timeValue = glfwGetTime();
+        float timeValue = (float)glfwGetTime();
         float colorValue = (sin(timeValue) / 2.0f) + 0.5f;
 
         shader.SetUniform4f("outColor", 0.0f, colorValue, 0.0f, 1.0f);
+        shader.SetUniform1f("smilePercentage", smilePercentage);
 
-        texture.Bind();
+        texture0.Bind(0);
+        texture1.Bind(1);
         VAO.Bind();
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
@@ -119,10 +128,26 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window)
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    else if (key == GLFW_KEY_UP && action == GLFW_PRESS && !isPressedUp)
+        isPressedUp = true;
+    else if (key == GLFW_KEY_UP && action == GLFW_RELEASE && isPressedUp)
+    {
+        isPressedUp = false;
+        if (smilePercentage < 1.0f) smilePercentage += 0.1f;
+    }
+
+    else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && !isPressedDown)
+        isPressedDown = true;
+    else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE && isPressedDown)
+    {
+        isPressedDown = false;
+        if (smilePercentage > -1.0f) smilePercentage -= 0.1f;
+    }
 }
 
 void APIENTRY
