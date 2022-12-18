@@ -18,9 +18,38 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\IndexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\VertexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\IndexBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\VertexArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\VertexBufferLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\VertexBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -171,11 +171,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\IndexBuffer.cpp" />
+    <ClCompile Include="src\core\Shader.cpp" />
+    <ClCompile Include="src\core\VertexArray.cpp" />
+    <ClCompile Include="src\core\VertexBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fragment.shader" />
     <None Include="resources\shaders\vertex.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\IndexBuffer.h" />
+    <ClInclude Include="src\core\Shader.h" />
+    <ClInclude Include="src\core\VertexArray.h" />
+    <ClInclude Include="src\core\VertexBuffer.h" />
+    <ClInclude Include="src\core\VertexBufferLayout.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
