@@ -2,6 +2,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "core/Shader.h"
+#include "core/VertexArray.h"
+#include "core/VertexBuffer.h"
+#include "core/IndexBuffer.h"
+#include "core/VertexBufferLayout.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -42,42 +46,29 @@ int main()
     Shader shader("resources/shaders/vertex.shader", "resources/shaders/fragment.shader");
 
     float vertices[] = {
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f
+         0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
+         0.0f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f
     };
 
     unsigned int indices[] = {
         0, 1, 2,
     };
 
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    VertexArray VAO;
+    VAO.Bind();
+    VertexBuffer VBO(vertices, sizeof(vertices), GL_STATIC_DRAW);
+    VBO.Bind();
+    IndexBuffer EBO(indices, sizeof(indices), GL_STATIC_DRAW);
+    EBO.Bind();
+    VertexBufferLayout VBL;
+    VBL.Push<float>(3);
+    VBL.Push<float>(3);
+    VAO.AddBuffer(VBO, VBL);
 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    VBO.Unbind();
+    VAO.Unbind();
 
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    //           Index int vertex buffer
-    //               How many elements this attribute has
-    //                  Of witch type the elements are
-    //                      Normalized?
-    //                        Stride (Distance between vertex a.k.a. size of the vertex)
-    //                          offset from the start of the vertex
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE,  6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -93,17 +84,13 @@ int main()
 
         shader.SetUniform4f("outColor", 0.0f, colorValue, 0.0f, 1.0f);
 
-        glBindVertexArray(VAO);
+        VAO.Bind();
         glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
