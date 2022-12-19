@@ -16,5 +16,5 @@ void main()
 	vec4 finalColor0 = mix(texture(texture0, outTexCoord), texture(texture1, outTexCoord), smilePercentage);
 	vec4 finalColor1 = mix(texture(texture0, outTexCoord), texture(texture2, outTexCoord), smilePercentage);
 
-	FragColor = mix(finalColor0, finalColor1, 0.5) * vec4(outColor, 1.0);
+	FragColor = mix(finalColor0, finalColor1, 0.5);
 }

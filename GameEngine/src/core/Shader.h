@@ -5,6 +5,9 @@
 #include <fstream>
 #include <sstream>
 #include <GL/glew.h>
+#include <GLM/glm.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
 
 class Shader
@@ -26,6 +29,8 @@ public:
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 	void SetUniform1i(const std::string& name, int v0);
 	void SetUniform1f(const std::string& name, float v0);
+	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4);
+
 	// void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
 
 private:

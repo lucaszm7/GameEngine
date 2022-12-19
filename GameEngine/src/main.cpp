@@ -9,6 +9,9 @@
 #include "core/IndexBuffer.h"
 #include "core/VertexBufferLayout.h"
 #include "core/Texture.h"
+#include <GLM/glm.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -109,9 +112,13 @@ int main()
         float timeValue = (float)glfwGetTime();
         float colorValue = (sin(timeValue) / 2.0f) + 0.5f;
 
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+
         shader.SetUniform4f("outColor", 0.0f, colorValue, 0.0f, 1.0f);
         shader.SetUniform1f("smilePercentage", smilePercentage);
-
+        shader.SetUniformMatrix4fv("transform", trans);
         texture0.Bind(0);
         texture1.Bind(1);
         texture2.Bind(2);
