@@ -22,6 +22,8 @@ float smilePercentage = 0.2f;
 bool isPressedUp = false;
 bool isPressedDown = false;
 
+unsigned int screenWidth = 800;
+unsigned int screenHeight = 600;
 
 int main()
 {
@@ -58,10 +60,47 @@ int main()
     std::vector<float> vertices = 
     {
         // positions         // colors          // texture coords
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  2.0f, 2.0f,
-         0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  2.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 2.0f
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
     std::vector<unsigned int> indices = 
@@ -85,7 +124,7 @@ int main()
     EBO.Bind();
     VertexBufferLayout VBL;
     VBL.Push<float>(3); // positions
-    VBL.Push<float>(3); // colors
+    // VBL.Push<float>(3); // colors
     VBL.Push<float>(2); // texture coords
     VAO.AddBuffer(VBO, VBL);
 
@@ -101,29 +140,37 @@ int main()
     shader.SetUniform1i("texture1", 1);
     shader.SetUniform1i("texture2", 2);
 
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // move in oposite direction that we want
+
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), (float)screenWidth / (float)screenHeight, 0.1f, 1000.0f);
 
     while (!glfwWindowShouldClose(window))
     {
+        glEnable(GL_DEPTH_TEST);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.Bind();
 
-        float timeValue = (float)glfwGetTime();
-        float colorValue = (sin(timeValue) / 2.0f) + 0.5f;
-
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-
-        shader.SetUniform4f("outColor", 0.0f, colorValue, 0.0f, 1.0f);
         shader.SetUniform1f("smilePercentage", smilePercentage);
-        shader.SetUniformMatrix4fv("transform", trans);
+
+        model = glm::rotate(model, 0.001f, glm::vec3(0.5f, 1.0f, 0.0f));
+
+        shader.SetUniformMatrix4fv("model", model);
+        shader.SetUniformMatrix4fv("view", view);
+        shader.SetUniformMatrix4fv("projection", projection);
+        
         texture0.Bind(0);
         texture1.Bind(1);
         texture2.Bind(2);
         VAO.Bind();
-        glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, nullptr);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
@@ -136,7 +183,10 @@ int main()
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    screenHeight = height;
+    screenWidth = width;
     glViewport(0, 0, width, height);
+
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
