@@ -189,6 +189,7 @@
     <ClInclude Include="src\core\VertexArray.h" />
     <ClInclude Include="src\core\VertexBuffer.h" />
     <ClInclude Include="src\core\VertexBufferLayout.h" />
+    <ClInclude Include="src\engine\camera.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

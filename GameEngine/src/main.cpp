@@ -1,17 +1,28 @@
+
+// STL
 #include <iostream>
+#include <vector>
+#include <string>
+
+// Dependencies
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <STB/stb_image.h>
+#include <GLM/glm.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
+
+// Core
 #include "core/Shader.h"
 #include "core/VertexArray.h"
 #include "core/VertexBuffer.h"
 #include "core/IndexBuffer.h"
 #include "core/VertexBufferLayout.h"
 #include "core/Texture.h"
-#include <GLM/glm.hpp>
-#include <GLM/gtc/matrix_transform.hpp>
-#include <GLM/gtc/type_ptr.hpp>
+
+// Engine
+#include "engine/camera.h"
 
 void processInputs(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -31,18 +42,12 @@ unsigned int screenHeight = 600;
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
 
-glm::vec3 cameraPos   = glm::vec3( 0.0f,  0.0f,  3.0f);
-glm::vec3 cameraFront = glm::vec3( 0.0f,  0.0f, -1.0f);
-glm::vec3 cameraUp    = glm::vec3( 0.0f,  1.0f,  0.0f);
-
 bool firstMouse = true;
-float yaw = -90.0f;
-float pitch = 0.0f;
 
 float lastX = screenWidth / 2;
 float lastY = screenHeight / 2;
 
-float fov = 45.0f;
+Camera camera;
 
 int main()
 {
@@ -133,13 +138,6 @@ int main()
         0, 2, 3
     };
 
-    std::vector<float> texCoords =
-    {
-        0.0f, 0.0f,
-        1.0f, 0.0f,
-        0.5f, 1.0f
-    };
-
     VertexArray VAO;
     VAO.Bind();
     VertexBuffer VBO(&vertices[0], static_cast<unsigned int>(vertices.size() * sizeof(float)), GL_STATIC_DRAW);
@@ -204,8 +202,8 @@ int main()
         texture2.Bind(2);
         VAO.Bind();
 
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        projection = glm::perspective(glm::radians(fov), (float)screenWidth / (float)screenHeight, 0.1f, 1000.0f);
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 1000.0f);
 
         for (int i = 0; i < 10; ++i)
         {
@@ -232,20 +230,22 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     screenHeight = height;
     screenWidth = width;
     glViewport(0, 0, width, height);
-
 }
 
 void processInputs(GLFWwindow* window)
 {
-    const float cameraSpeed = 10 * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(CamMovement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(CamMovement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(CamMovement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(CamMovement::RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        camera.ProcessKeyboard(CamMovement::UP, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        camera.ProcessKeyboard(CamMovement::DOWN, deltaTime);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -253,17 +253,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    else if (key == GLFW_KEY_UP && action == GLFW_PRESS && !isPressedUp)
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS && !isPressedUp)
         isPressedUp = true;
-    else if (key == GLFW_KEY_UP && action == GLFW_RELEASE && isPressedUp)
+    if (key == GLFW_KEY_UP && action == GLFW_RELEASE && isPressedUp)
     {
         isPressedUp = false;
         if (smilePercentage < 1.0f) smilePercentage += 0.2f;
     }
-
-    else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && !isPressedDown)
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && !isPressedDown)
         isPressedDown = true;
-    else if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE && isPressedDown)
+    if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE && isPressedDown)
     {
         isPressedDown = false;
         if (smilePercentage > -1.0f) smilePercentage -= 0.2f;
@@ -285,32 +284,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    const float sensitivity = 0.1f;
-    xOffSet *= sensitivity;
-    yOffSet *= sensitivity;
-
-    yaw   += xOffSet;
-    pitch += yOffSet;
-
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(direction);
+    camera.ProcessMouseMovement(xOffSet, yOffSet);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    fov -= (float)yoffset * 1.2f;
-    if (fov < 1.0f)
-        fov = 1.0f;
-    if (fov > 45.0f)
-        fov = 45.0f;
+    camera.ProcessMouseScroll((float)yoffset);
 }
 
 void APIENTRY
