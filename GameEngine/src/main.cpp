@@ -36,8 +36,8 @@ float smilePercentage = 0.2f;
 bool isPressedUp = false;
 bool isPressedDown = false;
 
-unsigned int screenWidth = 800;
-unsigned int screenHeight = 600;
+static unsigned int screenWidth = 800;
+static unsigned int screenHeight = 600;
 
 double deltaTime = 0.0f;
 double lastFrame = 0.0f;
@@ -202,8 +202,8 @@ int main()
         texture2.Bind(2);
         VAO.Bind();
 
-        view = camera.GetViewMatrix();
-        projection = glm::perspective(glm::radians(camera.Zoom), (float)screenWidth / (float)screenHeight, 0.1f, 1000.0f);
+        view       = camera.GetViewMatrix();
+        projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
 
         for (int i = 0; i < 10; ++i)
         {
