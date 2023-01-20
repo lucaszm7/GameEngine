@@ -366,11 +366,8 @@ void processInputs(GLFWwindow* window)
         camera.ProcessKeyboard(CamMovement::UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         camera.ProcessKeyboard(CamMovement::DOWN, deltaTime);
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-    {
-        // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        std::cout << "PRESSED\n";
-    }
+    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
