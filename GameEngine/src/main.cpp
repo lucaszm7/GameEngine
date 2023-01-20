@@ -5,13 +5,17 @@
 #include <string>
 
 // Dependencies
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <IMGUI/imgui.h>                // IMGUI (Interface)
+#include <IMGUI/imgui_impl_glfw.h>
+#include <IMGUI/imgui_impl_opengl3.h>
+#include <GL/glew.h>                    // OpenGL Loader (GLEW)
+#include <GLFW/glfw3.h>                 // GLFW (Window handler)
 #define STB_IMAGE_IMPLEMENTATION
-#include <STB/stb_image.h>
-#include <GLM/glm.hpp>
+#include <STB/stb_image.h>              // STB (Image Loader)
+#include <GLM/glm.hpp>                  // GLM (Math Library)
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
+
 
 // Core
 #include "core/Shader.h"
@@ -207,10 +211,6 @@ int main()
     lightVBL.Push<float>(3); // positions
     lightVAO.AddBuffer(lightVBO, lightVBL);
 
-    // Texture texture0("resources/textures/container.jpg", GL_RGB, TexParam::LINEAR);
-    // Texture texture1("resources/textures/awesomeface.png", GL_RGBA, TexParam::REPEAT);
-    // Texture texture2("resources/textures/wall.jpg");
-
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f,  0.0f,  0.0f),
         glm::vec3(2.0f,  5.0f, -15.0f),
@@ -227,9 +227,43 @@ int main()
     glm::mat4 view;
     glm::mat4 projection;
     
+    // Setup ImGui
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 440 core");
+    ImGui::StyleColorsDark();
+
+    // Our state
+    bool show_demo_window = true;
+    bool show_another_window = true;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window))
     {
+
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        if (show_demo_window)
+            ImGui::ShowDemoWindow(&show_demo_window);
+
+        if (show_another_window)
+        {
+            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+            ImGui::Text("Hello from another window!");
+            if (ImGui::Button("Close Me"))
+                show_another_window = false;
+            ImGui::End();
+        }
+
         double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -287,10 +321,26 @@ int main()
 
         glBindVertexArray(0);
 
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    // Cleanup
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }
@@ -316,12 +366,18 @@ void processInputs(GLFWwindow* window)
         camera.ProcessKeyboard(CamMovement::UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         camera.ProcessKeyboard(CamMovement::DOWN, deltaTime);
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+        // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        std::cout << "PRESSED\n";
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        // glfwSetWindowShouldClose(window, true);
 
     if (key == GLFW_KEY_UP && action == GLFW_PRESS && !isPressedUp)
         isPressedUp = true;

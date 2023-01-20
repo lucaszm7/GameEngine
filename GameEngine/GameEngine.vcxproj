@@ -85,14 +85,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;C:\Users\Visagio\Desktop\GameEngine\GameEngine\src\vendor</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
+    <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;C:\Users\Visagio\Desktop\GameEngine\GameEngine\src\vendor</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
+    <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -177,6 +179,13 @@
     <ClCompile Include="src\core\VertexArray.cpp" />
     <ClCompile Include="src\core\VertexBuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui_demo.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui_draw.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui_tables.cpp" />
+    <ClCompile Include="src\vendor\IMGUI\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fragment.shader" />
@@ -192,6 +201,15 @@
     <ClInclude Include="src\core\VertexBuffer.h" />
     <ClInclude Include="src\core\VertexBufferLayout.h" />
     <ClInclude Include="src\engine\camera.h" />
+    <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
+    <ClInclude Include="src\vendor\IMGUI\imgui.h" />
+    <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />
+    <ClInclude Include="src\vendor\IMGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\vendor\IMGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="src\vendor\IMGUI\imgui_internal.h" />
+    <ClInclude Include="src\vendor\IMGUI\imstb_rectpack.h" />
+    <ClInclude Include="src\vendor\IMGUI\imstb_textedit.h" />
+    <ClInclude Include="src\vendor\IMGUI\imstb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
