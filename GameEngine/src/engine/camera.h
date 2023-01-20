@@ -28,15 +28,18 @@ static const float ZOOM = 45.0f;
 class Camera
 {
 public:
+
     // camera Attributes
     glm::vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
     glm::vec3 Right;
     glm::vec3 WorldUp;
+
     // euler Angles
     float Yaw;
     float Pitch;
+
     // camera options
     float MovementSpeed;
     float MouseSensitivity;
@@ -55,6 +58,7 @@ public:
         Pitch = pitch;
         updateCameraVectors();
     }
+
     // constructor with scalar values
     Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) 
         : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
@@ -112,8 +116,6 @@ public:
             if (Pitch < -89.0f)
                 Pitch = -89.0f;
         }
-
-
 
         // update Front, Right and Up Vectors using the updated Euler angles
         updateCameraVectors();

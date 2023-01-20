@@ -37,6 +37,8 @@
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
+    <None Include="resources\shaders\light_vertex.shader" />
+    <None Include="resources\shaders\light_fragment.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">

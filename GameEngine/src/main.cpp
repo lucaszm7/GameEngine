@@ -49,6 +49,9 @@ float lastY = screenHeight / 2;
 
 Camera camera;
 
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightColor(0.5f, 1.0f, 0.5f);
+
 int main()
 {
     glfwInit();
@@ -84,52 +87,97 @@ int main()
     std::cout << "\033[1;32m" << glGetString(GL_VERSION) << "\033[0m" << std::endl;
     glDebugMessageCallback(DebugCallBack, nullptr);
 
-    Shader shader("resources/shaders/vertex.shader", "resources/shaders/fragment.shader");
+    Shader shader     ("resources/shaders/vertex.shader",       "resources/shaders/fragment.shader");
+    Shader lightShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
 
-    std::vector<float> vertices = 
+    std::vector<float> vertices = {
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    std::vector<float> cubeVertices =
     {
-        // positions         // colors          // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        // positions
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
 
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
 
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
     };
 
     std::vector<unsigned int> indices = 
@@ -146,21 +194,22 @@ int main()
     EBO.Bind();
     VertexBufferLayout VBL;
     VBL.Push<float>(3); // positions
-    // VBL.Push<float>(3); // colors
-    VBL.Push<float>(2); // texture coords
+    VBL.Push<float>(3); // normals
     VAO.AddBuffer(VBO, VBL);
 
     VBO.Unbind();
     VAO.Unbind();
 
-    Texture texture0("resources/textures/container.jpg", GL_RGB, TexParam::LINEAR);
-    Texture texture1("resources/textures/awesomeface.png", GL_RGBA, TexParam::REPEAT);
-    Texture texture2("resources/textures/wall.jpg");
+    VertexArray lightVAO;
+    lightVAO.Bind();
+    VertexBuffer lightVBO(&cubeVertices[0], static_cast<unsigned int>(cubeVertices.size() * sizeof(float)), GL_STATIC_DRAW);
+    VertexBufferLayout lightVBL;
+    lightVBL.Push<float>(3); // positions
+    lightVAO.AddBuffer(lightVBO, lightVBL);
 
-    shader.Bind();
-    shader.SetUniform1i("texture0", 0);
-    shader.SetUniform1i("texture1", 1);
-    shader.SetUniform1i("texture2", 2);
+    // Texture texture0("resources/textures/container.jpg", GL_RGB, TexParam::LINEAR);
+    // Texture texture1("resources/textures/awesomeface.png", GL_RGBA, TexParam::REPEAT);
+    // Texture texture2("resources/textures/wall.jpg");
 
     glm::vec3 cubePositions[] = {
         glm::vec3(0.0f,  0.0f,  0.0f),
@@ -190,31 +239,52 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        view       = camera.GetViewMatrix();
+        projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
+        
+        glm::vec3 rotatedLightPos = glm::vec3(
+            lightPos.x,
+            lightPos.y + (10 * sin((glm::pi<float>() / 180) * (float)glfwGetTime() * 100)),
+            lightPos.z + (10 * cos((glm::pi<float>() / 180) * (float)glfwGetTime() * 100))
+        );
+
+        // Draw Light Source
+        {
+            lightVAO.Bind();
+            lightShader.Bind();
+
+            lightShader.SetUniformMatrix4fv("view", view);
+            lightShader.SetUniformMatrix4fv("projection", projection);
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, rotatedLightPos);
+            model = glm::scale(model, glm::vec3(0.2f));
+            lightShader.SetUniformMatrix4fv("model", model);
+
+            lightShader.SetUniform3f("lightColor", lightColor);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
         shader.Bind();
-
-        shader.SetUniform1f("smilePercentage", smilePercentage);
-
         shader.SetUniformMatrix4fv("view", view);
         shader.SetUniformMatrix4fv("projection", projection);
         
-        texture0.Bind(0);
-        texture1.Bind(1);
-        texture2.Bind(2);
-        VAO.Bind();
+        shader.SetUniform3f("objectColor", 1.0f, 0.5f, 0.31f);
+        shader.SetUniform3f("lightColor",  lightColor);
+        shader.SetUniform3f("lightPos", rotatedLightPos);
+        shader.SetUniform3f("viewPos", camera.Position);
 
-        view       = camera.GetViewMatrix();
-        projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
+        VAO.Bind();
 
         for (int i = 0; i < 10; ++i)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2 * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            // model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2 * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
             shader.SetUniformMatrix4fv("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        // glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, nullptr);
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
