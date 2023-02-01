@@ -140,10 +140,21 @@ void Shader::SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4)
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat4));
 }
 
-//void Shader::SetUniformMat4f(const std::string& name, const glm::mat4& matrix)
-//{
-//    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
-//}
+void Shader::SetUniformMaterial(const Material& mat)
+{
+    this->SetUniform3f("material.ambient", mat.ambient);
+    this->SetUniform3f("material.diffuse", mat.diffuse);
+    this->SetUniform3f("material.specular", mat.specular);
+    this->SetUniform1f("material.shininess", mat.shininess);
+}
+
+void Shader::SetUniformLight(const Light& light)
+{
+    this->SetUniform3f("light.ambient",   light.ambient);
+    this->SetUniform3f("light.diffuse",   light.diffuse);
+    this->SetUniform3f("light.specular",  light.specular);
+    this->SetUniform3f("light.position",  light.position);
+}
 
 int Shader::GetUniformLocation(const std::string& name)
 {

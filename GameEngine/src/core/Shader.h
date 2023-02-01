@@ -8,7 +8,8 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
-
+#include "material.h"
+#include "light.h"
 
 class Shader
 {
@@ -31,6 +32,8 @@ public:
 	void SetUniform3f(const std::string& name, const glm::vec3& v);
 	void SetUniform1i(const std::string& name, int v0);
 	void SetUniform1f(const std::string& name, float v0);
+	void SetUniformMaterial(const Material& mat);
+	void SetUniformLight(const Light& light);
 	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4);
 
 	// void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);

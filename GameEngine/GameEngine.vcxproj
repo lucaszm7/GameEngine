@@ -85,14 +85,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;C:\Users\Visagio\Desktop\GameEngine\GameEngine\src\vendor</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\vendor;$(ProjectDir)src\engine</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;C:\Users\Visagio\Desktop\GameEngine\GameEngine\src\vendor</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\vendor;$(ProjectDir)src\engine</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
@@ -201,6 +201,8 @@
     <ClInclude Include="src\core\VertexBuffer.h" />
     <ClInclude Include="src\core\VertexBufferLayout.h" />
     <ClInclude Include="src\engine\camera.h" />
+    <ClInclude Include="src\engine\light.h" />
+    <ClInclude Include="src\engine\material.h" />
     <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />

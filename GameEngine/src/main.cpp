@@ -227,6 +227,15 @@ int main()
     glm::mat4 view;
     glm::mat4 projection;
     
+    Material mat;
+    mat.ambient  = glm::vec3(0.1f) * glm::vec3(1.0f, 0.5f, 0.31f);
+    mat.diffuse  = glm::vec3(1.0f) * glm::vec3(1.0f, 0.5f, 0.31f);
+    mat.specular = glm::vec3(1.0f) * glm::vec3(0.5f, 0.5f, 0.5f);
+    mat.shininess = 32.0f;
+
+    Light light({1.0f, 1.0f, 1.0f}, lightPos);
+
+
     // Setup ImGui
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -239,30 +248,15 @@ int main()
     ImGui::StyleColorsDark();
 
     // Our state
-    bool show_demo_window = true;
-    bool show_another_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window))
     {
-
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
 
         double currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -276,11 +270,13 @@ int main()
         view       = camera.GetViewMatrix();
         projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
         
-        glm::vec3 rotatedLightPos = glm::vec3(
+        light.position = glm::vec3(
             lightPos.x,
             lightPos.y + (10 * sin((glm::pi<float>() / 180) * (float)glfwGetTime() * 100)),
             lightPos.z + (10 * cos((glm::pi<float>() / 180) * (float)glfwGetTime() * 100))
         );
+
+        light.SetLightColor({ sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f) });
 
         // Draw Light Source
         {
@@ -290,11 +286,11 @@ int main()
             lightShader.SetUniformMatrix4fv("view", view);
             lightShader.SetUniformMatrix4fv("projection", projection);
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, rotatedLightPos);
+            model = glm::translate(model, light.position);
             model = glm::scale(model, glm::vec3(0.2f));
             lightShader.SetUniformMatrix4fv("model", model);
 
-            lightShader.SetUniform3f("lightColor", lightColor);
+            lightShader.SetUniform3f("lightColor", light.GetLightColor());
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
@@ -304,17 +300,18 @@ int main()
         shader.SetUniformMatrix4fv("projection", projection);
         
         shader.SetUniform3f("objectColor", 1.0f, 0.5f, 0.31f);
-        shader.SetUniform3f("lightColor",  lightColor);
-        shader.SetUniform3f("lightPos", rotatedLightPos);
         shader.SetUniform3f("viewPos", camera.Position);
 
         VAO.Bind();
+
+        shader.SetUniformMaterial(mat);
+        shader.SetUniformLight(light);
 
         for (int i = 0; i < 10; ++i)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            // model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2 * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2 * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
             shader.SetUniformMatrix4fv("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
