@@ -1,7 +1,7 @@
 #include "Texture.h"
-#include "stb/stb_image.h"
+#include "STB/stb_image.h"
 
-Texture::Texture(const std::string& path, GLint format, TexParam texParam)
+Texture::Texture(const std::string& path, TexParam texParam)
 	:m_FilePath(path)
 {
 	stbi_set_flip_vertically_on_load(true);
@@ -11,7 +11,16 @@ Texture::Texture(const std::string& path, GLint format, TexParam texParam)
 
 	setTextureParam(texParam);
 
-	m_LocalBuffer = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &m_BPP, 0);
+	m_LocalBuffer = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &nrComponents, 0);
+
+	GLenum format = 0;
+	if (nrComponents == 1)
+		format = GL_RED;
+	else if (nrComponents == 3)
+		format = GL_RGB;
+	else if (nrComponents == 4)
+		format = GL_RGBA;
+
 	if (m_LocalBuffer)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_LocalBuffer);

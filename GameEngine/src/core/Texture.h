@@ -21,9 +21,9 @@ private:
 	unsigned char* m_LocalBuffer = nullptr;
 	int m_Width = 0;
 	int m_Height = 0;
-	int m_BPP = 0;
+	int nrComponents = 0;
 public:
-	Texture(const std::string& path, GLint format = GL_RGB, TexParam texParam = TexParam::LINEAR);
+	Texture(const std::string& path, TexParam texParam = TexParam::LINEAR);
 	~Texture();
 
 	void Bind(unsigned int slot = 0) const;

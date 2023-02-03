@@ -35,10 +35,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void APIENTRY DebugCallBack(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam);
-
-float smilePercentage = 0.2f;
-bool isPressedUp = false;
-bool isPressedDown = false;
+GLFWwindow* InitGLFW();
+void InitGLEW();
+void InitImGui(GLFWwindow* window);
+void UpdateImGui();
 
 static unsigned int screenWidth = 800;
 static unsigned int screenHeight = 600;
@@ -53,89 +53,58 @@ float lastY = screenHeight / 2;
 
 Camera camera;
 
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-glm::vec3 lightColor(0.5f, 1.0f, 0.5f);
-
 int main()
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-    // Tells OpenGL we want the core-profile (the good one, with just the newer stuff)
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    GLFWwindow* window = InitGLFW();
+    InitGLEW();
+    
+    Shader lightingShader     ("resources/shaders/vertex.shader",       "resources/shaders/fragment.shader");
+    Shader lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "GameEngine", nullptr, nullptr);
-    if (!window)
+    std::vector<float> vertices = 
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        std::cin.get();
-        return -1;
-    }
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-    if (glewInit() != GLEW_OK)
-    {
-        std::cout << "Failed to initialize GLEW" << std::endl;
-        glfwTerminate();
-        std::cin.get();
-        return -1;
-    }
-    std::cout << "\033[1;32m" << glGetString(GL_VERSION) << "\033[0m" << std::endl;
-    glDebugMessageCallback(DebugCallBack, nullptr);
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-    Shader shader     ("resources/shaders/vertex.shader",       "resources/shaders/fragment.shader");
-    Shader lightShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-    std::vector<float> vertices = {
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
     std::vector<float> cubeVertices =
@@ -199,8 +168,8 @@ int main()
     VertexBufferLayout VBL;
     VBL.Push<float>(3); // positions
     VBL.Push<float>(3); // normals
+    VBL.Push<float>(2); // texCoord
     VAO.AddBuffer(VBO, VBL);
-
     VBO.Unbind();
     VAO.Unbind();
 
@@ -211,7 +180,8 @@ int main()
     lightVBL.Push<float>(3); // positions
     lightVAO.AddBuffer(lightVBO, lightVBL);
 
-    glm::vec3 cubePositions[] = {
+    std::vector<glm::vec3> cubePositions = 
+    {
         glm::vec3(0.0f,  0.0f,  0.0f),
         glm::vec3(2.0f,  5.0f, -15.0f),
         glm::vec3(-1.5f, -2.2f, -2.5f),
@@ -233,26 +203,23 @@ int main()
     mat.specular = glm::vec3(1.0f) * glm::vec3(0.5f, 0.5f, 0.5f);
     mat.shininess = 32.0f;
 
-    Light light({1.0f, 1.0f, 1.0f}, lightPos);
+    glm::vec3 lightPos = { 1.2f, 1.0f, 2.0f };
+    Light light( {1.0f, 1.0f, 1.0f}, lightPos);
 
+    Texture textureContainer("resources/textures/container2.png", TexParam::REPEAT);
+    Texture textureContainerSpecular("resources/textures/container2_specular.png", TexParam::REPEAT);
+    Texture textureEmissionMap("resources/textures/emission_map2.png", TexParam::REPEAT);
 
-    // Setup ImGui
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 440 core");
-    ImGui::StyleColorsDark();
-
-    // Our state
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    InitImGui(window);
 
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
     while (!glfwWindowShouldClose(window))
     {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        processInputs(window);
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -262,71 +229,64 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInputs(window);
-
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         view       = camera.GetViewMatrix();
         projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
         
         light.position = glm::vec3(
             lightPos.x,
-            lightPos.y + (10 * sin((glm::pi<float>() / 180) * (float)glfwGetTime() * 100)),
-            lightPos.z + (10 * cos((glm::pi<float>() / 180) * (float)glfwGetTime() * 100))
+            lightPos.y + (2 * sin((glm::pi<float>() / 180) * (float)glfwGetTime() * 50)),
+            lightPos.z + (2 * cos((glm::pi<float>() / 180) * (float)glfwGetTime() * 50))
         );
 
-        light.SetLightColor({ sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f) });
+        // light.SetLightColor({ sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f) });
 
         // Draw Light Source
         {
             lightVAO.Bind();
-            lightShader.Bind();
+            lightSourceShader.Bind();
 
-            lightShader.SetUniformMatrix4fv("view", view);
-            lightShader.SetUniformMatrix4fv("projection", projection);
+            lightSourceShader.SetUniformMatrix4fv("view", view);
+            lightSourceShader.SetUniformMatrix4fv("projection", projection);
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, light.position);
             model = glm::scale(model, glm::vec3(0.2f));
-            lightShader.SetUniformMatrix4fv("model", model);
-
-            lightShader.SetUniform3f("lightColor", light.GetLightColor());
+            lightSourceShader.SetUniformMatrix4fv("model", model);
+            lightSourceShader.SetUniform3f("lightColor", light.GetLightColor());
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        shader.Bind();
-        shader.SetUniformMatrix4fv("view", view);
-        shader.SetUniformMatrix4fv("projection", projection);
-        
-        shader.SetUniform3f("objectColor", 1.0f, 0.5f, 0.31f);
-        shader.SetUniform3f("viewPos", camera.Position);
+        lightingShader.Bind();
+        lightingShader.SetUniformMatrix4fv("view", view);
+        lightingShader.SetUniformMatrix4fv("projection", projection);
+
+
+        lightingShader.SetUniform3f("viewPos", camera.Position);
 
         VAO.Bind();
+        textureContainer.Bind(0);
+        textureContainerSpecular.Bind(1);
+        textureEmissionMap.Bind(2);
 
-        shader.SetUniformMaterial(mat);
-        shader.SetUniformLight(light);
+        lightingShader.SetUniform1i("material.diffuse", 0);
+        lightingShader.SetUniform1i("material.specular", 1);
+        lightingShader.SetUniform1i("material.emission", 2);
+        lightingShader.SetUniform1f("material.shininess", 64.0f);
+
+        lightingShader.SetUniformLight(light);
 
         for (int i = 0; i < 10; ++i)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2 * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-            shader.SetUniformMatrix4fv("model", model);
+            lightingShader.SetUniformMatrix4fv("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         glBindVertexArray(0);
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-        {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
-        }
+        UpdateImGui();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -372,21 +332,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         // glfwSetWindowShouldClose(window, true);
-
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS && !isPressedUp)
-        isPressedUp = true;
-    if (key == GLFW_KEY_UP && action == GLFW_RELEASE && isPressedUp)
-    {
-        isPressedUp = false;
-        if (smilePercentage < 1.0f) smilePercentage += 0.2f;
-    }
-    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && !isPressedDown)
-        isPressedDown = true;
-    if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE && isPressedDown)
-    {
-        isPressedDown = false;
-        if (smilePercentage > -1.0f) smilePercentage -= 0.2f;
-    }
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -410,6 +355,71 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll((float)yoffset);
+}
+
+GLFWwindow* InitGLFW()
+{
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+    // Tells OpenGL we want the core-profile (the good one, with just the newer stuff)
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, "GameEngine", nullptr, nullptr);
+    if (!window)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        std::cin.get();
+    }
+
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    return window;
+}
+
+void InitGLEW()
+{
+    if (glewInit() != GLEW_OK)
+    {
+        std::cout << "Failed to initialize GLEW" << std::endl;
+        glfwTerminate();
+        std::cin.get();
+    }
+    std::cout << "\033[1;32m" << glGetString(GL_VERSION) << "\033[0m" << std::endl;
+    glDebugMessageCallback(DebugCallBack, nullptr);
+}
+
+void InitImGui(GLFWwindow* window)
+{
+    // Setup ImGui
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 440 core");
+    ImGui::StyleColorsDark();
+}
+
+void UpdateImGui()
+{
+    const ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+        glfwMakeContextCurrent(backup_current_context);
+    }
 }
 
 void APIENTRY
