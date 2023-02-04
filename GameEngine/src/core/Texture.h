@@ -1,5 +1,5 @@
 #pragma once
-#pragma once
+
 #ifndef GLEW_STATIC
 #define GLEW_STATIC
 #endif
@@ -7,11 +7,6 @@
 #include <iostream>
 #include <string>
 
-enum class TexParam
-{
-	LINEAR = 0,
-	REPEAT = 1
-};
 
 class Texture
 {
@@ -23,7 +18,11 @@ private:
 	int m_Height = 0;
 	int nrComponents = 0;
 public:
-	Texture(const std::string& path, TexParam texParam = TexParam::LINEAR);
+	enum class Parameter;
+	enum class Type;
+	Texture::Type type;
+
+	Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam = Texture::Parameter::LINEAR);
 	~Texture();
 
 	void Bind(unsigned int slot = 0) const;
@@ -31,6 +30,36 @@ public:
 
 	inline int GetWidth() const { return m_Width; };
 	inline int GetHeight() const { return m_Height; };
+	inline int GetID() const { return m_RendererID; };
 private:
-	void setTextureParam(TexParam param) const;
+	void setTextureParam(Texture::Parameter param) const;
+
+public:
+	enum class Parameter
+	{
+		LINEAR = 0,
+		REPEAT = 1
+	};
+
+	enum class Type
+	{
+		DIFFUSE,
+		SPECULAR,
+		EMISSION
+	};
+
+	static std::string to_string(Texture::Type type)
+	{
+		using enum Texture::Type;
+		switch (type)
+		{
+		case DIFFUSE:
+			return "diffuse";
+		case SPECULAR:
+			return "specular";
+		case EMISSION:
+			return "emission";
+		}
+	}
+
 };

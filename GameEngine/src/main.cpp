@@ -15,7 +15,7 @@
 #include <GLM/glm.hpp>                  // GLM (Math Library)
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
-
+#include <assimp/Importer.hpp>
 
 // Core
 #include "core/Shader.h"
@@ -27,6 +27,11 @@
 
 // Engine
 #include "engine/camera.h"
+#include "engine/light.h"
+#include "engine/material.h"
+#include "engine/mesh.h"
+
+
 
 void processInputs(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -215,9 +220,9 @@ int main()
 
     SpotLight spotlight({1.0f, 1.0f, 1.0f}, camera.Position, camera.Front);
 
-    Texture textureContainer        ("resources/textures/container2.png",          TexParam::REPEAT);
-    Texture textureContainerSpecular("resources/textures/container2_specular.png", TexParam::REPEAT);
-    Texture textureEmissionMap      ("resources/textures/emission_map2.png",       TexParam::REPEAT);
+    Texture textureContainer        ("resources/textures/container2.png"         , Texture::Type::DIFFUSE,  Texture::Parameter::REPEAT);
+    Texture textureContainerSpecular("resources/textures/container2_specular.png", Texture::Type::SPECULAR, Texture::Parameter::REPEAT);
+    Texture textureEmissionMap      ("resources/textures/emission_map2.png",       Texture::Type::EMISSION, Texture::Parameter::REPEAT);
 
     InitImGui(window);
 

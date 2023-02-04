@@ -1,10 +1,15 @@
 #version 440 core
 
+#define NR_MAX_DIFFUSE  3
+#define NR_MAX_SPECULAR 2
+#define NR_MAX_EMISSION 1
+
 struct Material
 {
-	sampler2D diffuse;
-	sampler2D specular;
-	sampler2D emission;
+	// Textures of 1 Mesh
+	sampler2D diffuse [NR_MAX_DIFFUSE];
+	sampler2D specular[NR_MAX_SPECULAR];
+	sampler2D emission[NR_MAX_EMISSION];
 	float shininess;
 };
 
