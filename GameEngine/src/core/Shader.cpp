@@ -148,12 +148,51 @@ void Shader::SetUniformMaterial(const Material& mat)
     this->SetUniform1f("material.shininess", mat.shininess);
 }
 
-void Shader::SetUniformLight(const Light& light)
+void Shader::SetUniformLight(const DirectionalLight& light)
 {
-    this->SetUniform3f("light.ambient",   light.ambient);
-    this->SetUniform3f("light.diffuse",   light.diffuse);
-    this->SetUniform3f("light.specular",  light.specular);
-    this->SetUniform3f("light.position",  light.position);
+    this->SetUniform3f("dirLight.ambient", light.ambient);
+    this->SetUniform3f("dirLight.diffuse", light.diffuse);
+    this->SetUniform3f("dirLight.specular", light.specular);
+    this->SetUniform3f("dirLight.direction", light.direction);
+}
+
+void Shader::SetUniformLight(const PointLight& light)
+{
+    this->SetUniform3f("pointLight.ambient", light.ambient);
+    this->SetUniform3f("pointLight.diffuse", light.diffuse);
+    this->SetUniform3f("pointLight.specular", light.specular);
+    this->SetUniform3f("pointLight.position", light.position);
+    this->SetUniform1f("pointLight.constant", light.constant);
+    this->SetUniform1f("pointLight.linear", light.linear);
+    this->SetUniform1f("pointLight.quadratic", light.quadratic);
+}
+
+void Shader::SetUniformLight(const std::vector<PointLight>& lights)
+{
+    for (int i = 0; i < lights.size(); ++i)
+    {
+        this->SetUniform3f("pointLights[" + std::to_string(i) + "].ambient",  lights[i].ambient);
+        this->SetUniform3f("pointLights[" + std::to_string(i) + "].diffuse",  lights[i].diffuse);
+        this->SetUniform3f("pointLights[" + std::to_string(i) + "].specular", lights[i].specular);
+        this->SetUniform3f("pointLights[" + std::to_string(i) + "].position", lights[i].position);
+        this->SetUniform1f("pointLights[" + std::to_string(i) + "].constant", lights[i].constant);
+        this->SetUniform1f("pointLights[" + std::to_string(i) + "].linear",   lights[i].linear);
+        this->SetUniform1f("pointLights[" + std::to_string(i) + "].quadratic",lights[i].quadratic);
+    }
+}
+
+void Shader::SetUniformLight(const SpotLight& light)
+{
+    this->SetUniform3f("spotlight.ambient",     light.ambient);
+    this->SetUniform3f("spotlight.diffuse",     light.diffuse);
+    this->SetUniform3f("spotlight.specular",    light.specular);
+    this->SetUniform3f("spotlight.position",    light.position);
+    this->SetUniform3f("spotlight.direction",   light.direction);
+    this->SetUniform1f("spotlight.cutOff",      light.cutOff);
+    this->SetUniform1f("spotlight.outerCutOff", light.outerCutOff);
+    this->SetUniform1f("spotlight.constant",    light.constant);
+    this->SetUniform1f("spotlight.linear",      light.linear);
+    this->SetUniform1f("spotlight.quadratic",   light.quadratic);
 }
 
 int Shader::GetUniformLocation(const std::string& name)

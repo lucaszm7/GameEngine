@@ -23,7 +23,7 @@ private:
 public:
 	Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 	~Shader();
-	// We call bind here just for consistency, but in behin its actully
+	// We call bind here just for consistency, but in behind its actully:
 	// gl_useProgram();
 	void Bind() const;
 	void Unbind() const;
@@ -32,11 +32,13 @@ public:
 	void SetUniform3f(const std::string& name, const glm::vec3& v);
 	void SetUniform1i(const std::string& name, int v0);
 	void SetUniform1f(const std::string& name, float v0);
-	void SetUniformMaterial(const Material& mat);
-	void SetUniformLight(const Light& light);
 	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4);
-
-	// void SetUniformMat4f(const std::string& name, const glm::mat4& matrix);
+	
+	void SetUniformMaterial(const Material& mat);
+	void SetUniformLight(const DirectionalLight& light);
+	void SetUniformLight(const PointLight& light);
+	void SetUniformLight(const std::vector<PointLight>& lights);
+	void SetUniformLight(const SpotLight& light);
 
 private:
 	std::string ParseShader(const std::string& filepath) const;

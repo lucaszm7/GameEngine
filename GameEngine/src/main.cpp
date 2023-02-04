@@ -203,12 +203,21 @@ int main()
     mat.specular = glm::vec3(1.0f) * glm::vec3(0.5f, 0.5f, 0.5f);
     mat.shininess = 32.0f;
 
-    glm::vec3 lightPos = { 1.2f, 1.0f, 2.0f };
-    Light light( {1.0f, 1.0f, 1.0f}, lightPos);
+    DirectionalLight dirLight( {1.0f, 1.0f, 1.0f}, { -0.2f, -1.0f, -0.3f });
 
-    Texture textureContainer("resources/textures/container2.png", TexParam::REPEAT);
+    std::vector<PointLight> pointLights =
+    {
+        { {1.0f, 1.0f, 1.0f}, {0.7f,  0.2f,  2.0f}},
+        { {1.0f, 1.0f, 1.0f}, {2.3f, -3.3f, -4.0f}},
+        { {1.0f, 1.0f, 1.0f}, {-4.0f,  2.0f, -12.0f}},
+        { {1.0f, 1.0f, 1.0f}, {0.0f,  0.0f, -3.0f}}
+    };
+
+    SpotLight spotlight({1.0f, 1.0f, 1.0f}, camera.Position, camera.Front);
+
+    Texture textureContainer        ("resources/textures/container2.png",          TexParam::REPEAT);
     Texture textureContainerSpecular("resources/textures/container2_specular.png", TexParam::REPEAT);
-    Texture textureEmissionMap("resources/textures/emission_map2.png", TexParam::REPEAT);
+    Texture textureEmissionMap      ("resources/textures/emission_map2.png",       TexParam::REPEAT);
 
     InitImGui(window);
 
@@ -231,55 +240,51 @@ int main()
 
         view       = camera.GetViewMatrix();
         projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
-        
-        light.position = glm::vec3(
-            lightPos.x,
-            lightPos.y + (2 * sin((glm::pi<float>() / 180) * (float)glfwGetTime() * 50)),
-            lightPos.z + (2 * cos((glm::pi<float>() / 180) * (float)glfwGetTime() * 50))
-        );
-
-        // light.SetLightColor({ sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f) });
 
         // Draw Light Source
+        lightVAO.Bind();
+        lightSourceShader.Bind();
+        lightSourceShader.SetUniformMatrix4fv("view", view);
+        lightSourceShader.SetUniformMatrix4fv("projection", projection);
+        for(const auto& pointLight : pointLights)
         {
-            lightVAO.Bind();
-            lightSourceShader.Bind();
-
-            lightSourceShader.SetUniformMatrix4fv("view", view);
-            lightSourceShader.SetUniformMatrix4fv("projection", projection);
             glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, light.position);
+            model = glm::translate(model, pointLight.position);
             model = glm::scale(model, glm::vec3(0.2f));
             lightSourceShader.SetUniformMatrix4fv("model", model);
-            lightSourceShader.SetUniform3f("lightColor", light.GetLightColor());
+            lightSourceShader.SetUniform3f("lightColor", pointLight.GetLightColor());
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         lightingShader.Bind();
+        VAO.Bind();
+
         lightingShader.SetUniformMatrix4fv("view", view);
         lightingShader.SetUniformMatrix4fv("projection", projection);
-
-
         lightingShader.SetUniform3f("viewPos", camera.Position);
 
-        VAO.Bind();
         textureContainer.Bind(0);
         textureContainerSpecular.Bind(1);
-        textureEmissionMap.Bind(2);
+        // textureEmissionMap.Bind(2);
 
         lightingShader.SetUniform1i("material.diffuse", 0);
         lightingShader.SetUniform1i("material.specular", 1);
         lightingShader.SetUniform1i("material.emission", 2);
         lightingShader.SetUniform1f("material.shininess", 64.0f);
 
-        lightingShader.SetUniformLight(light);
+        // Lights Sources
+        lightingShader.SetUniformLight(dirLight);
+        spotlight.position = camera.Position;
+        spotlight.direction = camera.Front;
+        lightingShader.SetUniformLight(spotlight);
+        lightingShader.SetUniformLight(pointLights);
 
         for (int i = 0; i < 10; ++i)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2 * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2, glm::vec3(1.0f, 0.3f, 0.5f));
             lightingShader.SetUniformMatrix4fv("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
