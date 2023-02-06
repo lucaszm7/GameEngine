@@ -74,14 +74,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		Vertex vertex;
 		vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-		vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+
+		if(mesh->HasNormals())
+			vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
 
 		if (mesh->mTextureCoords[0]) // Has texture coords
-		{
 			vertex.TexCoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-		}
+
 		else
-			vertex.TexCoord = glm::vec2(0.0f);
+			vertex.TexCoord = glm::vec2(0.0f, 0.0f);
 
 		vertices.push_back(vertex);
 	}
@@ -95,16 +96,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	}
 
 	// Textures
-	if (mesh->mMaterialIndex >= 0)
-	{
-		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		std::vector<Texture> diffuseMaps = loadMaterialTexture(material, aiTextureType_DIFFUSE, Texture::Type::DIFFUSE);
-		std::vector<Texture> specularMaps = loadMaterialTexture(material, aiTextureType_SPECULAR, Texture::Type::SPECULAR);
-		std::vector<Texture> emissionMaps = loadMaterialTexture(material, aiTextureType_EMISSION_COLOR, Texture::Type::SPECULAR);
-		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
-	}
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	std::vector<Texture> diffuseMaps = loadMaterialTexture(material, aiTextureType_DIFFUSE, Texture::Type::DIFFUSE);
+	std::vector<Texture> specularMaps = loadMaterialTexture(material, aiTextureType_SPECULAR, Texture::Type::SPECULAR);
+	std::vector<Texture> emissionMaps = loadMaterialTexture(material, aiTextureType_EMISSION_COLOR, Texture::Type::EMISSION);
+	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+	textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
 
 	return Mesh(vertices, indices, textures);
 }
@@ -120,7 +118,9 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		bool skip = false;
 		for (unsigned int j = 0; j < textures_loaded.size(); ++j)
 		{
-			if (std::strcmp(textures_loaded[j].GetPath().c_str(), str.C_Str()) == 0)
+			std::string texPath = textures_loaded[j].GetPath();
+			std::string fileName = texPath.substr(texPath.find_last_of('/') + 1, texPath.size());
+			if (std::strcmp(fileName.c_str(), str.C_Str()) == 0)
 			{
 				textures.push_back(textures_loaded[j]);
 				skip = true;

@@ -124,14 +124,14 @@ int main()
     glm::mat4 view;
     glm::mat4 projection;
 
-    DirectionalLight dirLight( {1.0f, 1.0f, 1.0f}, { -0.2f, -1.0f, -0.3f });
+    DirectionalLight dirLight( {0.0f, 0.0f, 0.0f}, { -0.2f, -1.0f, -0.3f });
 
     std::vector<PointLight> pointLights =
     {
-        { {1.0f, 1.0f, 1.0f}, {0.7f,  0.2f,  2.0f}},
-        { {1.0f, 1.0f, 1.0f}, {2.3f, -3.3f, -4.0f}},
-        { {1.0f, 1.0f, 1.0f}, {-4.0f,  2.0f, -12.0f}},
-        { {1.0f, 1.0f, 1.0f}, {0.0f,  0.0f, -3.0f}}
+        { {0.1f, 0.0f, 0.0f}, { 0.7f,  0.2f,  2.0f}},
+        { {0.1f, 0.0f, 0.0f}, { 2.3f, -3.3f, -4.0f}},
+        { {0.1f, 0.0f, 0.0f}, {-4.0f,  2.0f, -12.0f}},
+        { {0.1f, 0.0f, 0.0f}, { 0.0f,  0.0f, -3.0f}}
     };
 
     SpotLight spotlight({1.0f, 1.0f, 1.0f}, camera.Position, camera.Front);

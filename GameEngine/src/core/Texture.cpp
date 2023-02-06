@@ -4,27 +4,27 @@
 Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam)
 	:m_FilePath(path), type(type)
 {
+	unsigned char* m_LocalBuffer = nullptr;
 	stbi_set_flip_vertically_on_load(true);
-
 	glGenTextures(1, &m_RendererID);
-	glBindTexture(GL_TEXTURE_2D, m_RendererID);
-
-	setTextureParam(texParam);
-
 	m_LocalBuffer = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &nrComponents, 0);
-
-	GLenum format = 0;
-	if (nrComponents == 1)
-		format = GL_RED;
-	else if (nrComponents == 3)
-		format = GL_RGB;
-	else if (nrComponents == 4)
-		format = GL_RGBA;
 
 	if (m_LocalBuffer)
 	{
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
+		GLenum format = 0;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
 		glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_LocalBuffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
+		setTextureParam(texParam);
+		stbi_image_free(m_LocalBuffer);
 	}
 	else
 	{
@@ -32,7 +32,6 @@ Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter
 		__cpp_static_assert;
 	}
 
-	stbi_image_free(m_LocalBuffer);
 }
 
 void Texture::setTextureParam(Texture::Parameter texParam) const
@@ -62,7 +61,7 @@ void Texture::setTextureParam(Texture::Parameter texParam) const
 
 Texture::~Texture()
 {
-	std::cout << "Deleting texture " << m_RendererID << " of\n" << m_FilePath << "\n";
+	// std::cout << "Deleting texture " << m_RendererID << " of\n" << m_FilePath << "\n";
 	// glDeleteTextures(1, &m_RendererID);
 }
 
