@@ -63,7 +63,7 @@ int main()
     GLFWwindow* window = InitGLFW();
     InitGLEW();
     
-    Shader lightingShader     ("resources/shaders/vertex.shader",       "resources/shaders/fragment.shader");
+    Shader lightingShader    ("resources/shaders/vertex.shader",      "resources/shaders/fragment.shader");
     Shader lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
 
     std::vector<float> cubeVertices =
@@ -128,10 +128,10 @@ int main()
 
     std::vector<PointLight> pointLights =
     {
-        { {0.1f, 0.0f, 0.0f}, { 0.7f,  0.2f,  2.0f}},
-        { {0.1f, 0.0f, 0.0f}, { 2.3f, -3.3f, -4.0f}},
-        { {0.1f, 0.0f, 0.0f}, {-4.0f,  2.0f, -12.0f}},
-        { {0.1f, 0.0f, 0.0f}, { 0.0f,  0.0f, -3.0f}}
+        { {0.3f, 0.3f, 0.3f}, { 0.7f,  0.2f,  2.0f}},
+        { {0.3f, 0.3f, 0.3f}, { 2.3f, -3.3f, -4.0f}},
+        { {0.3f, 0.3f, 0.3f}, {-4.0f,  2.0f, -12.0f}},
+        { {0.3f, 0.3f, 0.3f}, { 0.0f,  0.0f, -3.0f}}
     };
 
     SpotLight spotlight({1.0f, 1.0f, 1.0f}, camera.Position, camera.Front);
@@ -176,7 +176,6 @@ int main()
 
         lightingShader.Bind();
 
-        lightingShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
         lightingShader.SetUniformMatrix4fv("view", view);
         lightingShader.SetUniformMatrix4fv("projection", projection);
 

@@ -10,6 +10,13 @@
 #include "shader.h"
 #include "mesh.h"
 
+struct Transform
+{
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 rotation = glm::vec3(0.0f);
+	glm::vec3 scale    = glm::vec3(1.0f);
+};
+
 struct Model
 {
 public:
@@ -21,6 +28,8 @@ public:
 	std::vector<Mesh> meshes;
 	std::string directory;
 	std::vector<Texture> textures_loaded;
+
+	Transform transform;
 private:
 	void loadModel(const std::string& path);
 	void processNode(aiNode* node, const aiScene* scene);
@@ -30,6 +39,14 @@ private:
 
 void Model::Draw(Shader& shader)
 {
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, transform.position);
+	model = glm::rotate(model, transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, transform.scale);
+	shader.SetUniformMatrix4fv("model", model);
+
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
 		meshes[i].Draw(shader);
