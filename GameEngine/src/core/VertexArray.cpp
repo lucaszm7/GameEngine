@@ -9,12 +9,12 @@ VertexArray::VertexArray()
 VertexArray::~VertexArray()
 {
     Unbind();
-    // std::cout << "Deleting Vertex Array - " << m_RendererID << "\n";
+    std::cout << "Deleting Vertex Array - " << m_RendererID << "\n";
     glDeleteVertexArrays(1, &m_RendererID);
 }
 
 // We bind our VAO, bind our Buffer and set up our Layout
-void VertexArray::AddBuffer(const VertexBuffer& vb, VertexBufferLayout& layout) const
+void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout) const
 {
     Bind();
 	vb.Bind();

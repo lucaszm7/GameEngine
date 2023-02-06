@@ -30,7 +30,7 @@
 #include "engine/light.h"
 #include "engine/material.h"
 #include "engine/mesh.h"
-
+#include "engine/model.h"
 
 
 void processInputs(GLFWwindow* window);
@@ -65,52 +65,6 @@ int main()
     
     Shader lightingShader     ("resources/shaders/vertex.shader",       "resources/shaders/fragment.shader");
     Shader lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
-
-    std::vector<float> vertices = 
-    {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
 
     std::vector<float> cubeVertices =
     {
@@ -158,25 +112,7 @@ int main()
         -0.5f,  0.5f, -0.5f,
     };
 
-    std::vector<unsigned int> indices = 
-    {
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    VertexArray VAO;
-    VAO.Bind();
-    VertexBuffer VBO(&vertices[0], static_cast<unsigned int>(vertices.size() * sizeof(float)), GL_STATIC_DRAW);
-    VBO.Bind();
-    IndexBuffer EBO(&indices[0], static_cast<unsigned int>(indices.size() * sizeof(unsigned int)), GL_STATIC_DRAW);
-    EBO.Bind();
-    VertexBufferLayout VBL;
-    VBL.Push<float>(3); // positions
-    VBL.Push<float>(3); // normals
-    VBL.Push<float>(2); // texCoord
-    VAO.AddBuffer(VBO, VBL);
-    VBO.Unbind();
-    VAO.Unbind();
+    Model backpack("resources/models/backpack/backpack.obj");
 
     VertexArray lightVAO;
     lightVAO.Bind();
@@ -185,28 +121,8 @@ int main()
     lightVBL.Push<float>(3); // positions
     lightVAO.AddBuffer(lightVBO, lightVBL);
 
-    std::vector<glm::vec3> cubePositions = 
-    {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
     glm::mat4 view;
     glm::mat4 projection;
-    
-    Material mat;
-    mat.ambient  = glm::vec3(0.1f) * glm::vec3(1.0f, 0.5f, 0.31f);
-    mat.diffuse  = glm::vec3(1.0f) * glm::vec3(1.0f, 0.5f, 0.31f);
-    mat.specular = glm::vec3(1.0f) * glm::vec3(0.5f, 0.5f, 0.5f);
-    mat.shininess = 32.0f;
 
     DirectionalLight dirLight( {1.0f, 1.0f, 1.0f}, { -0.2f, -1.0f, -0.3f });
 
@@ -219,10 +135,6 @@ int main()
     };
 
     SpotLight spotlight({1.0f, 1.0f, 1.0f}, camera.Position, camera.Front);
-
-    Texture textureContainer        ("resources/textures/container2.png"         , Texture::Type::DIFFUSE,  Texture::Parameter::REPEAT);
-    Texture textureContainerSpecular("resources/textures/container2_specular.png", Texture::Type::SPECULAR, Texture::Parameter::REPEAT);
-    Texture textureEmissionMap      ("resources/textures/emission_map2.png",       Texture::Type::EMISSION, Texture::Parameter::REPEAT);
 
     InitImGui(window);
 
@@ -263,20 +175,12 @@ int main()
         }
 
         lightingShader.Bind();
-        VAO.Bind();
 
+        lightingShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
         lightingShader.SetUniformMatrix4fv("view", view);
         lightingShader.SetUniformMatrix4fv("projection", projection);
+
         lightingShader.SetUniform3f("viewPos", camera.Position);
-
-        textureContainer.Bind(0);
-        textureContainerSpecular.Bind(1);
-        // textureEmissionMap.Bind(2);
-
-        lightingShader.SetUniform1i("material.diffuse", 0);
-        lightingShader.SetUniform1i("material.specular", 1);
-        lightingShader.SetUniform1i("material.emission", 2);
-        lightingShader.SetUniform1f("material.shininess", 64.0f);
 
         // Lights Sources
         lightingShader.SetUniformLight(dirLight);
@@ -285,16 +189,7 @@ int main()
         lightingShader.SetUniformLight(spotlight);
         lightingShader.SetUniformLight(pointLights);
 
-        for (int i = 0; i < 10; ++i)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model, (glm::pi<float>() / 4) * (i + 1)/2, glm::vec3(1.0f, 0.3f, 0.5f));
-            lightingShader.SetUniformMatrix4fv("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
-        glBindVertexArray(0);
+        backpack.Draw(lightingShader);
 
         UpdateImGui();
 

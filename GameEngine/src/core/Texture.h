@@ -31,6 +31,8 @@ public:
 	inline int GetWidth() const { return m_Width; };
 	inline int GetHeight() const { return m_Height; };
 	inline int GetID() const { return m_RendererID; };
+	inline std::string GetPath() const { return this->m_FilePath; };
+
 private:
 	void setTextureParam(Texture::Parameter param) const;
 

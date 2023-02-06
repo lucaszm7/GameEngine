@@ -18,6 +18,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
 
 Shader::~Shader()
 {
+    std::cout << "Deleting Shader "<< m_RendererID <<" of\n" << m_VertexShaderPath << "\n" << m_FragmentShaderPath << "\n";
     glDeleteProgram(m_RendererID);
 }
 

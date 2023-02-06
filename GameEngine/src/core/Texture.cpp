@@ -29,6 +29,7 @@ Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter
 	else
 	{
 		std::cout << "ERROR\nFAILED TO LOAD TEXTURE\n";
+		__cpp_static_assert;
 	}
 
 	stbi_image_free(m_LocalBuffer);
@@ -61,7 +62,8 @@ void Texture::setTextureParam(Texture::Parameter texParam) const
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &m_RendererID);
+	std::cout << "Deleting texture " << m_RendererID << " of\n" << m_FilePath << "\n";
+	// glDeleteTextures(1, &m_RendererID);
 }
 
 void Texture::Bind(unsigned int slot) const
