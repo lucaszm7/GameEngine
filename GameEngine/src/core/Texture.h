@@ -13,7 +13,6 @@ class Texture
 private:
 	unsigned int m_RendererID = 0;
 	std::string m_FilePath = "";
-	unsigned char* m_LocalBuffer = nullptr;
 	int m_Width = 0;
 	int m_Height = 0;
 	int nrComponents = 0;
@@ -39,8 +38,8 @@ private:
 public:
 	enum class Parameter
 	{
-		LINEAR = 0,
-		REPEAT = 1
+		LINEAR,
+		REPEAT
 	};
 
 	enum class Type

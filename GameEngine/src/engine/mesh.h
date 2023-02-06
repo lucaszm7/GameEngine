@@ -31,9 +31,9 @@ public:
 	void Draw(Shader& shader);
 
 private:
-	std::shared_ptr<VertexArray> VAO;
+	std::shared_ptr<VertexArray>  VAO;
 	std::shared_ptr<VertexBuffer> VBO;
-	std::shared_ptr<IndexBuffer> EBO;
+	std::shared_ptr<IndexBuffer>  EBO;
 	VertexBufferLayout VBL;
 
 	void setupMesh();
@@ -43,8 +43,9 @@ Mesh::Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& ind
 	: vertices(vert), indices(indi), textures(text) 
 {
 	VAO = std::make_shared<VertexArray>();
+	VAO->Bind();
 	VBO = std::make_shared<VertexBuffer>(&vertices[0], static_cast<unsigned int>(vertices.size() * sizeof(Vertex)), GL_STATIC_DRAW);
-	EBO = std::make_shared<IndexBuffer>(&indices[0], static_cast<unsigned int>(indices.size()), GL_STATIC_DRAW);
+	EBO = std::make_shared<IndexBuffer> (&indices[0],  static_cast<unsigned int>(indices.size()), GL_STATIC_DRAW);
 	this->setupMesh();
 }
 
@@ -63,30 +64,16 @@ void Mesh::setupMesh()
 
 void Mesh::Draw(Shader& shader)
 {
-	unsigned int diffuseCounter = 0;
-	unsigned int specularCounter = 0;
-	unsigned int emissionCounter = 0;
-
 	for (int i = 0; i < textures.size(); ++i)
 	{
-		using enum Texture::Type;
-		unsigned int counter = 0;
-		if (textures[i].type      == DIFFUSE)
-			counter = diffuseCounter++;
-		else if (textures[i].type == SPECULAR)
-			counter = specularCounter++;
-		else if (textures[i].type == EMISSION)
-			counter = emissionCounter++;
-		else
-			std::cout << "ERROR::NO TEXTURE TYPE FIND\n";
-
 		textures[i].Bind(i);
-		std::string uniformName = std::format("material.{}[{}]", Texture::to_string(textures[i].type), std::to_string(counter));
+		std::string uniformName = std::format("material.{}", Texture::to_string(textures[i].type));
 		shader.SetUniform1i(uniformName, i);
 	}
-	glActiveTexture(GL_TEXTURE0);
-
+	shader.SetUniform1f("material.shininess", 64);
 	VAO->Bind();
 	glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, nullptr);
 	VAO->Unbind();
+
+	glActiveTexture(GL_TEXTURE0);
 }
