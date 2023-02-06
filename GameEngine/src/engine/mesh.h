@@ -70,7 +70,7 @@ void Mesh::Draw(Shader& shader)
 		std::string uniformName = std::format("material.{}", Texture::to_string(textures[i].type));
 		shader.SetUniform1i(uniformName, i);
 	}
-	shader.SetUniform1f("material.shininess", 32);
+	shader.SetUniform1f("material.shininess", 64);
 	VAO->Bind();
 	glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, nullptr);
 	VAO->Unbind();
