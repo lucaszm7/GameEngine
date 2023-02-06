@@ -8,18 +8,25 @@ struct Light
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 
+	glm::vec3 lightColor;
+
 	Light(glm::vec3 lightColor)
+		:lightColor(lightColor)
 	{
-		this->ambient  = lightColor * glm::vec3(0.2f);
-		this->diffuse  = lightColor * glm::vec3(0.5f);
-		this->specular = lightColor * glm::vec3(1.0f);
+		SetLightColor();
 	}
 
-	void SetLightColor(glm::vec3 lightColor)
+	void SetLightColor(glm::vec3 lightCol)
 	{
-		this->ambient = lightColor * glm::vec3(0.2f);
-		this->diffuse = lightColor * glm::vec3(0.5f);
-		this->specular = lightColor;
+		this->lightColor = lightCol;
+		SetLightColor();
+	}
+
+	void SetLightColor()
+	{
+		this->ambient  = this->lightColor * glm::vec3(0.2f);
+		this->diffuse  = this->lightColor * glm::vec3(0.5f);
+		this->specular = this->lightColor * glm::vec3(1.0f);
 	}
 
 	inline glm::vec3 GetLightColor() const

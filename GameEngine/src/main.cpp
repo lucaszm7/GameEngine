@@ -141,6 +141,10 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -189,6 +193,27 @@ int main()
         lightingShader.SetUniformLight(pointLights);
 
         backpack.Draw(lightingShader);
+
+        ImGui::Begin("Scene");
+        {
+            ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
+
+            ImGui::ColorEdit3("Dir Light", (float*)&dirLight.lightColor);
+            dirLight.SetLightColor();
+            ImGui::DragFloat3("Dir Light", (float*)&dirLight.direction, 1.0f, -10.0f, 10.0f);
+
+            ImGui::ColorEdit3("Spotlight", (float*)&spotlight.lightColor);
+            spotlight.SetLightColor();
+            ImGui::DragFloat3("Spotlight", (float*)&spotlight.direction, 1.0f, -10.0f, 10.0f);
+
+            for (int i = 0; i < pointLights.size(); ++i)
+            {
+                ImGui::ColorEdit3(std::to_string(i).c_str(), (float*)&pointLights[i].lightColor);
+                pointLights[i].SetLightColor();
+                ImGui::DragFloat3(std::to_string(i).c_str(), (float*)&pointLights[i].position, 1.0f, -10.0f, 10.0f);
+            }
+        }
+        ImGui::End();
 
         UpdateImGui();
 
@@ -240,6 +265,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL) 
+        return;
+
     if (firstMouse)
     {
         lastX = xpos;
