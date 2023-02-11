@@ -20,6 +20,13 @@ struct Vertex
 	glm::vec2 TexCoord;
 };
 
+struct Transform
+{
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 rotation = glm::vec3(0.0f);
+	glm::vec3 scale = glm::vec3(1.0f);
+};
+
 class Mesh
 {
 public:
@@ -27,30 +34,40 @@ public:
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+	Mesh() = default;
 	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
 	void Draw(Shader& shader);
+	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
 
 private:
 	std::shared_ptr<VertexArray>  VAO;
 	std::shared_ptr<VertexBuffer> VBO;
 	std::shared_ptr<IndexBuffer>  EBO;
 	VertexBufferLayout VBL;
-
-	void setupMesh();
+	void setupBuffers();
 };
 
 Mesh::Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text)
 	: vertices(vert), indices(indi), textures(text) 
 {
+	this->setupBuffers();
+}
+
+void Mesh::SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text)
+{
+	vertices = vert;
+	indices = indi;
+	textures = text;
+	this->setupBuffers();
+}
+
+void Mesh::setupBuffers()
+{
 	VAO = std::make_shared<VertexArray>();
 	VAO->Bind();
 	VBO = std::make_shared<VertexBuffer>(&vertices[0], static_cast<unsigned int>(vertices.size() * sizeof(Vertex)), GL_STATIC_DRAW);
-	EBO = std::make_shared<IndexBuffer> (&indices[0],  static_cast<unsigned int>(indices.size()), GL_STATIC_DRAW);
-	this->setupMesh();
-}
+	EBO = std::make_shared<IndexBuffer>(&indices[0], static_cast<unsigned int>(indices.size()), GL_STATIC_DRAW);
 
-void Mesh::setupMesh()
-{
 	VAO->Bind();
 	VBO->Bind();
 	EBO->Bind();
@@ -61,6 +78,7 @@ void Mesh::setupMesh()
 
 	VAO->Unbind();
 }
+
 
 void Mesh::Draw(Shader& shader)
 {

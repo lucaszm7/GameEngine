@@ -32,6 +32,8 @@
 #include "engine/mesh.h"
 #include "engine/model.h"
 
+// Spline Coll Det
+#include "spline/SplineModel.hpp"
 
 void processInputs(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -64,7 +66,7 @@ int main()
     InitGLEW();
     
     Shader lightingShader    ("resources/shaders/vertex.shader",      "resources/shaders/fragment.shader");
-    Shader lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
+    Shader lightSourceShader ("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
 
     std::vector<float> cubeVertices =
     {
@@ -113,6 +115,11 @@ int main()
     };
 
     Model backpack("resources/models/backpack/backpack.obj");
+
+    SplineModel spline;
+    LoadSplineModel("resources/models/VolumetricSpline.txt", spline);
+    // GenerateSplineMesh(spline);
+    GenerateSurface(spline);
 
     VertexArray lightVAO;
     lightVAO.Bind();
@@ -193,6 +200,7 @@ int main()
         lightingShader.SetUniformLight(pointLights);
 
         backpack.Draw(lightingShader);
+        spline.Draw(lightingShader);
 
         ImGui::Begin("Scene");
         {
