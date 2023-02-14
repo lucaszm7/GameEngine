@@ -18,6 +18,7 @@ public:
 		loadModel(path);
 	}
 	void Draw(Shader& shader);
+	void OnImGui();
 	std::vector<Mesh> meshes;
 	std::string directory;
 	std::vector<Texture> textures_loaded;
@@ -43,6 +44,17 @@ void Model::Draw(Shader& shader)
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
 		meshes[i].Draw(shader);
+	}
+}
+
+void Model::OnImGui()
+{
+	if (ImGui::TreeNode("Transform"))
+	{
+		ImGui::DragFloat3("Colon Position:", &transform.position[0], 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3("Colon Rotation:", &transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
+		ImGui::DragFloat3("Colon Scale:", &transform.scale[0], 0.01f, -10.0f, 10.0f);
+		ImGui::TreePop();
 	}
 }
 
