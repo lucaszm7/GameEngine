@@ -174,11 +174,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\collDet\AccelerationStructures.cpp" />
-    <ClCompile Include="src\collDet\Bezier.cpp" />
     <ClCompile Include="src\collDet\BoundingVolumes.cpp" />
     <ClCompile Include="src\collDet\CatmullRom.cpp" />
     <ClCompile Include="src\collDet\SplineCollDet.cpp" />
-    <ClCompile Include="src\collDet\SplineHelper.cpp" />
     <ClCompile Include="src\collDet\SplineModel.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
@@ -204,13 +202,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\collDet\AccelerationStructures.h" />
-    <ClInclude Include="src\collDet\Bezier.h" />
     <ClInclude Include="src\collDet\BoundingVolumes.h" />
     <ClInclude Include="src\collDet\CatmullRom.h" />
-    <ClInclude Include="src\collDet\NewtonSolver.h" />
     <ClInclude Include="src\collDet\SplineCollDet.h" />
-    <ClInclude Include="src\collDet\SplineHelper.h" />
-    <ClInclude Include="src\collDet\ThreadPool.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />
     <ClInclude Include="src\core\Shader.h" />
     <ClInclude Include="src\core\Texture.h" />
@@ -233,9 +227,6 @@
     <ClInclude Include="src\vendor\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="src\vendor\IMGUI\imstb_textedit.h" />
     <ClInclude Include="src\vendor\IMGUI\imstb_truetype.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="src\collDet\CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,22 +18,25 @@
 #include <assimp/Importer.hpp>
 
 // Core
-#include "core/Shader.h"
-#include "core/VertexArray.h"
-#include "core/VertexBuffer.h"
-#include "core/IndexBuffer.h"
-#include "core/VertexBufferLayout.h"
-#include "core/Texture.h"
+//#include "core/Shader.h"
+//#include "core/VertexArray.h"
+//#include "core/VertexBuffer.h"
+//#include "core/IndexBuffer.h"
+//#include "core/VertexBufferLayout.h"
+//#include "core/Texture.h"
 
 // Engine
 #include "engine/camera.h"
 #include "engine/light.h"
 #include "engine/material.h"
-#include "engine/mesh.h"
-#include "engine/model.h"
+#include "engine/line.h"
+// #include "engine/model.h"
+// #include "engine/mesh.h"
 
 // Spline Coll Det
-#include "spline/SplineModel.hpp"
+// #include "spline/SplineModel.hpp"
+#include "collDet/AccelerationStructures.h"
+#include <Eigen/Core>
 
 void processInputs(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -46,6 +49,8 @@ GLFWwindow* InitGLFW();
 void InitGLEW();
 void InitImGui(GLFWwindow* window);
 void UpdateImGui();
+void OnImGui(SplineModel& spline);
+
 
 static unsigned int screenWidth = 800;
 static unsigned int screenHeight = 600;
@@ -59,6 +64,9 @@ float lastX = screenWidth / 2;
 float lastY = screenHeight / 2;
 
 Camera camera;
+
+bool debugCollDet = false;
+bool debugControlPoints = false;
 
 int main()
 {
@@ -114,12 +122,20 @@ int main()
         -0.5f,  0.5f, -0.5f,
     };
 
-    Model backpack("resources/models/backpack/backpack.obj");
+    // Model backpack("resources/models/backpack/backpack.obj");
 
     SplineModel spline;
     LoadSplineModel("resources/models/VolumetricSpline.txt", spline);
-    // GenerateSplineMesh(spline);
-    GenerateSurface(spline);
+    GenerateSplineMesh(spline, "resources/textures/4x_tex.png", false);
+
+    SplineModel endo;
+    GenerateEndoscope(endo, Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f), 10, 32, 1.0f);
+    GenerateSplineMesh(endo, "resources/textures/wall.jpg", true);
+
+    SplineCollDet collDet;
+
+    Line* line = new Line(10000, collDet.r.linePoints);
+    line->m_vertices.reserve(10000);
 
     VertexArray lightVAO;
     lightVAO.Bind();
@@ -131,7 +147,7 @@ int main()
     glm::mat4 view;
     glm::mat4 projection;
 
-    DirectionalLight dirLight( {0.0f, 0.0f, 0.0f}, { -0.2f, -1.0f, -0.3f });
+    DirectionalLight dirLight( {1.0f, 1.0f, 1.0f}, { -0.2f, -1.0f, -0.3f });
 
     std::vector<PointLight> pointLights =
     {
@@ -169,12 +185,14 @@ int main()
         view       = camera.GetViewMatrix();
         projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
 
+        collDet.CollisionCheck(endo, spline);
+
         // Draw Light Source
         lightVAO.Bind();
         lightSourceShader.Bind();
         lightSourceShader.SetUniformMatrix4fv("view", view);
         lightSourceShader.SetUniformMatrix4fv("projection", projection);
-        for(const auto& pointLight : pointLights)
+        for (const auto& pointLight : pointLights)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, pointLight.position);
@@ -183,6 +201,59 @@ int main()
             lightSourceShader.SetUniform3f("lightColor", pointLight.GetLightColor());
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+
+        line->m_vertices.clear();
+        lightSourceShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
+
+        auto copyEndo = endo;
+        copyEndo.TransformPoints();
+        auto copyColon = spline;
+        copyColon.TransformPoints();
+        if (debugControlPoints)
+        {
+            for (int i = 0; i < copyEndo.controlPoints.size() - 1; ++i)
+            {
+                line->m_vertices.push_back(copyEndo.controlPoints[i]);
+                line->m_vertices.push_back(copyEndo.controlPoints[i + 1]);
+            }
+            for (int i = 0; i < copyEndo.controlRadiiPos.size() - 1; ++i)
+            {
+                for (int j = 0; j < copyEndo.controlRadiiPos[0].size() - 2; ++j)
+                {
+                    line->m_vertices.push_back(copyEndo.controlPoints[i]);
+                    line->m_vertices.push_back(copyEndo.controlRadiiPos[i][j]);
+                }
+            }
+            for (int i = 0; i < copyColon.controlPoints.size() - 1; ++i)
+            {
+                line->m_vertices.push_back(copyColon.controlPoints[i]);
+                line->m_vertices.push_back(copyColon.controlPoints[i + 1]);
+            }
+            for (int i = 0; i < copyColon.controlRadiiPos.size() - 1; ++i)
+            {
+                for (int j = 0; j < copyColon.controlRadiiPos[0].size() - 2; ++j)
+                {
+                    line->m_vertices.push_back(copyColon.controlPoints[i]);
+                    line->m_vertices.push_back(copyColon.controlRadiiPos[i][j]);
+                }
+            }
+
+            line->Buffer();
+            lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
+            line->Draw();
+        }
+        if (debugCollDet)
+        {
+            line->m_vertices.clear();
+            for (int i = 0; i < collDet.r.linePoints.size(); ++i)
+            {
+                line->m_vertices.push_back(collDet.r.linePoints[i]);
+            }
+            line->Buffer();
+            lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
+            line->Draw();
         }
 
         lightingShader.Bind();
@@ -199,26 +270,50 @@ int main()
         lightingShader.SetUniformLight(spotlight);
         lightingShader.SetUniformLight(pointLights);
 
-        backpack.Draw(lightingShader);
+        // backpack.Draw(lightingShader);
         spline.Draw(lightingShader);
+        endo.Draw(lightingShader);
 
         ImGui::Begin("Scene");
         {
             ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
+            ImGui::Text("Collisions Count %d", collDet.r.linePoints.size());
+            
+            if(ImGui::Button("Debug Collision Detection"))
+                debugCollDet = !debugCollDet;
 
-            ImGui::ColorEdit3("Dir Light", (float*)&dirLight.lightColor);
-            dirLight.SetLightColor();
-            ImGui::DragFloat3("Dir Light", (float*)&dirLight.direction, 1.0f, -10.0f, 10.0f);
+            if (ImGui::Button("Debug Control Points"))
+                debugControlPoints = !debugControlPoints;
 
-            ImGui::ColorEdit3("Spotlight", (float*)&spotlight.lightColor);
-            spotlight.SetLightColor();
-            ImGui::DragFloat3("Spotlight", (float*)&spotlight.direction, 1.0f, -10.0f, 10.0f);
+            OnImGui(spline);
+            OnImGui(endo);
 
-            for (int i = 0; i < pointLights.size(); ++i)
+            if (ImGui::TreeNode("Lights"))
             {
-                ImGui::ColorEdit3(std::to_string(i).c_str(), (float*)&pointLights[i].lightColor);
-                pointLights[i].SetLightColor();
-                ImGui::DragFloat3(std::to_string(i).c_str(), (float*)&pointLights[i].position, 1.0f, -10.0f, 10.0f);
+                ImGui::ColorEdit3("Dir Light", (float*)&dirLight.lightColor);
+                dirLight.SetLightColor();
+                ImGui::DragFloat3("Dir Light", (float*)&dirLight.direction, 1.0f, -10.0f, 10.0f);
+
+                ImGui::ColorEdit3("Spotlight", (float*)&spotlight.lightColor);
+                spotlight.SetLightColor();
+                ImGui::DragFloat3("Spotlight", (float*)&spotlight.direction, 1.0f, -10.0f, 10.0f);
+
+                for (int i = 0; i < pointLights.size(); ++i)
+                {
+                    ImGui::ColorEdit3(std::to_string(i).c_str(), (float*)&pointLights[i].lightColor);
+                    pointLights[i].SetLightColor();
+                    ImGui::DragFloat3(std::to_string(i).c_str(), (float*)&pointLights[i].position, 1.0f, -10.0f, 10.0f);
+                }
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Collision Points"))
+            {
+                for (int i = 0; i < collDet.r.linePoints.size(); ++i)
+                {
+                    ImGui::Text((std::to_string(i) + " - %.3f, %.3f, %.3f").c_str(), collDet.r.linePoints[i].x(), collDet.r.linePoints[i].y(), collDet.r.linePoints[i].z());
+                }
+                ImGui::TreePop();
+
             }
         }
         ImGui::End();
@@ -237,6 +332,17 @@ int main()
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
+}
+
+void OnImGui(SplineModel& spline)
+{
+    if (ImGui::TreeNode(("Transform" + spline.name).c_str()))
+    {
+        ImGui::DragFloat3("Position:", &spline.transform.position[0], 0.1f, -100.0f, 100.0f);
+        ImGui::DragFloat3("Rotation:", &spline.transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
+        ImGui::DragFloat3("Scale:", &spline.transform.scale[0], 0.01f, -10.0f, 10.0f);
+        ImGui::TreePop();
+    }
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
