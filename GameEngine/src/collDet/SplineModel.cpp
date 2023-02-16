@@ -15,19 +15,19 @@ void SplineModel::Draw(Shader& shader)
 
 void SplineModel::TransformPoints()
 {
-	for (int i = 0; i < m_controlPoints.size() - 1; ++i)
+	for (auto& controlPoint : m_controlPoints)
 	{
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, transform.position);
-		m_controlPoints[i] = glm::vec3(model * glm::vec4(m_controlPoints[i], 1.0));
+		controlPoint = glm::vec3(model * glm::vec4(controlPoint, 1.0));
 	}
-	for (int i = 0; i < m_controlPointsVectorPos.size() - 2; ++i)
+	for (auto& controlPointsVectorPos : m_controlPointsVectorPos)
 	{
-		for (int j = 0; j < m_controlPointsVectorPos[0].size() - 2; ++j)
+		for (auto& pointsVectorPos : controlPointsVectorPos)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, transform.position);
-			m_controlPointsVectorPos[i][j] = glm::vec3(model * glm::vec4(m_controlPointsVectorPos[i][j], 1.0));
+			pointsVectorPos = glm::vec3(model * glm::vec4(pointsVectorPos, 1.0));
 		}
 	}
 	TransformFromGlmToEigen();
@@ -35,12 +35,14 @@ void SplineModel::TransformPoints()
 
 void SplineModel::TransformFromGlmToEigen()
 {
+	controlPoints.clear();
 	controlPoints.reserve(m_controlPoints.size());
 	for (const auto& controlPoint : m_controlPoints)
 	{
 		controlPoints.emplace_back(controlPoint.x, controlPoint.y, controlPoint.z);
 	}
 
+	controlRadii.clear();
 	controlRadii.reserve(m_controlPointsVectorDir.size());
 	for (const auto& vectorDir : m_controlPointsVectorDir)
 	{
@@ -52,6 +54,7 @@ void SplineModel::TransformFromGlmToEigen()
 		}
 	}
 
+	controlRadiiPos.clear();
 	controlRadiiPos.reserve(m_controlPointsVectorPos.size());
 	for (const auto& vectorPos : m_controlPointsVectorPos)
 	{
@@ -66,12 +69,14 @@ void SplineModel::TransformFromGlmToEigen()
 
 void TransformFromGlmToEigen(SplineModel& splineModel)
 {
+	splineModel.controlPoints.clear();
 	splineModel.controlPoints.reserve(splineModel.m_controlPoints.size());
 	for (const auto& controlPoint : splineModel.m_controlPoints)
 	{
 		splineModel.controlPoints.emplace_back(controlPoint.x, controlPoint.y, controlPoint.z);
 	}
 
+	splineModel.controlRadii.clear();
 	splineModel.controlRadii.reserve(splineModel.m_controlPointsVectorDir.size());
 	for (const auto& vectorDir : splineModel.m_controlPointsVectorDir)
 	{
@@ -83,6 +88,7 @@ void TransformFromGlmToEigen(SplineModel& splineModel)
 		}
 	}
 
+	splineModel.controlRadiiPos.clear();
 	splineModel.controlRadiiPos.reserve(splineModel.m_controlPointsVectorPos.size());
 	for (const auto& vectorPos : splineModel.m_controlPointsVectorPos)
 	{
@@ -97,7 +103,7 @@ void TransformFromGlmToEigen(SplineModel& splineModel)
 
 void LoadSplineModel(const std::string& filePath, SplineModel& splineModel)
 {
-	splineModel.name = filePath.substr(0, filePath.find_last_of("/"));
+	splineModel.name = filePath.substr(filePath.find_last_of("/"), filePath.size() - 1);
 	float scalerFactor = 100.0f;
 	std::ifstream file(filePath);
 	if (file.is_open())

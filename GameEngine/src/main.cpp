@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
 // Dependencies
 #include <IMGUI/imgui.h>                // IMGUI (Interface)
@@ -38,7 +39,7 @@
 #include "collDet/AccelerationStructures.h"
 #include <Eigen/Core>
 
-void processInputs(GLFWwindow* window);
+void processInputs(GLFWwindow* window, double deltaTime);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -51,12 +52,11 @@ void InitImGui(GLFWwindow* window);
 void UpdateImGui();
 void OnImGui(SplineModel& spline);
 
+void CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor = 0.05);
+
 
 static unsigned int screenWidth = 800;
 static unsigned int screenHeight = 600;
-
-double deltaTime = 0.0f;
-double lastFrame = 0.0f;
 
 bool firstMouse = true;
 
@@ -70,6 +70,9 @@ bool debugControlPoints = false;
 
 int main()
 {
+    // CreateCilinderSpline("resources/models/cilinder.txt", 10, 32, 0.05);
+    // CreateCilinderSpline("resources/models/littleCilinder.txt", 10, 32, 0.01);
+
     GLFWwindow* window = InitGLFW();
     InitGLEW();
     
@@ -125,12 +128,13 @@ int main()
     // Model backpack("resources/models/backpack/backpack.obj");
 
     SplineModel spline;
-    LoadSplineModel("resources/models/VolumetricSpline.txt", spline);
-    GenerateSplineMesh(spline, "resources/textures/4x_tex.png", false);
+    LoadSplineModel("resources/models/cilinder.txt", spline);
+    GenerateSplineMesh(spline, "resources/textures/4x_tex.png", true);
 
     SplineModel endo;
-    GenerateEndoscope(endo, Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f), 10, 32, 1.0f);
-    GenerateSplineMesh(endo, "resources/textures/wall.jpg", true);
+    // GenerateEndoscope(endo, Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f), 10, 32, 1.0f);
+    LoadSplineModel("resources/models/littleCilinder.txt", endo);
+    GenerateSplineMesh(endo, "resources/textures/wall.jpg", false);
 
     SplineCollDet collDet;
 
@@ -164,14 +168,16 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    glEnable(GL_CULL_FACE);
+    /*glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    glFrontFace(GL_CCW);*/
 
+    double deltaTime = 0.0f;
+    double lastFrame = 0.0f;
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        processInputs(window);
+        processInputs(window, deltaTime);
 
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -218,9 +224,9 @@ int main()
                 line->m_vertices.push_back(copyEndo.controlPoints[i]);
                 line->m_vertices.push_back(copyEndo.controlPoints[i + 1]);
             }
-            for (int i = 0; i < copyEndo.controlRadiiPos.size() - 1; ++i)
+            for (int i = 0; i < copyEndo.controlRadiiPos.size(); ++i)
             {
-                for (int j = 0; j < copyEndo.controlRadiiPos[0].size() - 2; ++j)
+                for (int j = 0; j < copyEndo.controlRadiiPos[0].size(); ++j)
                 {
                     line->m_vertices.push_back(copyEndo.controlPoints[i]);
                     line->m_vertices.push_back(copyEndo.controlRadiiPos[i][j]);
@@ -231,9 +237,9 @@ int main()
                 line->m_vertices.push_back(copyColon.controlPoints[i]);
                 line->m_vertices.push_back(copyColon.controlPoints[i + 1]);
             }
-            for (int i = 0; i < copyColon.controlRadiiPos.size() - 1; ++i)
+            for (int i = 0; i < copyColon.controlRadiiPos.size(); ++i)
             {
-                for (int j = 0; j < copyColon.controlRadiiPos[0].size() - 2; ++j)
+                for (int j = 0; j < copyColon.controlRadiiPos[0].size(); ++j)
                 {
                     line->m_vertices.push_back(copyColon.controlPoints[i]);
                     line->m_vertices.push_back(copyColon.controlRadiiPos[i][j]);
@@ -279,11 +285,8 @@ int main()
             ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
             ImGui::Text("Collisions Count %d", collDet.r.linePoints.size());
             
-            if(ImGui::Button("Debug Collision Detection"))
-                debugCollDet = !debugCollDet;
-
-            if (ImGui::Button("Debug Control Points"))
-                debugControlPoints = !debugControlPoints;
+            ImGui::Checkbox("Debug Collision Detection", &debugCollDet);
+            ImGui::Checkbox("Debug Control Points", &debugControlPoints);
 
             OnImGui(spline);
             OnImGui(endo);
@@ -306,14 +309,29 @@ int main()
                 }
                 ImGui::TreePop();
             }
+            if (ImGui::TreeNode("Endo Control Points"))
+            {
+                for (int i = 0; i < copyEndo.controlPoints.size(); ++i)
+                {
+                    ImGui::Text((std::to_string(i) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.controlPoints[i].x(), copyEndo.controlPoints[i].y(), copyEndo.controlPoints[i].z());
+                    if (ImGui::TreeNode(((std::to_string(i) + ". Endo Vectors Control Points")).c_str()))
+                    {
+                        for (int j = 0; j < copyEndo.controlRadiiPos.size(); ++j)
+                        {
+                            ImGui::Text((std::to_string(j) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.controlRadiiPos[i][j].x(), copyEndo.controlRadiiPos[i][j].y(), copyEndo.controlRadiiPos[i][j].z());
+                        }
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+            }
             if (ImGui::TreeNode("Collision Points"))
             {
                 for (int i = 0; i < collDet.r.linePoints.size(); ++i)
                 {
-                    ImGui::Text((std::to_string(i) + " - %.3f, %.3f, %.3f").c_str(), collDet.r.linePoints[i].x(), collDet.r.linePoints[i].y(), collDet.r.linePoints[i].z());
+                    ImGui::Text((std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), collDet.r.linePoints[i].x(), collDet.r.linePoints[i].y(), collDet.r.linePoints[i].z());
                 }
                 ImGui::TreePop();
-
             }
         }
         ImGui::End();
@@ -334,6 +352,23 @@ int main()
     return 0;
 }
 
+void CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor)
+{
+    std::ofstream file(filePath);
+    file << nControlPoints << " " << nVectorsPerControlPoints << std::endl;
+    for (int x = -(nControlPoints / 2); x < (nControlPoints / 2); ++x)
+    {
+        file << (x * CorrectionFactor) << " " << 0 << " " << 0 << std::endl;
+        for (int j = 0; j < nVectorsPerControlPoints; ++j)
+        {
+            double z = -cos(((j * 360) / (nVectorsPerControlPoints - 1)) * (glm::pi<double>() / 180));
+            double y =  sin(((j * 360) / (nVectorsPerControlPoints - 1)) * (glm::pi<double>() / 180));
+            file << 0 << " " << (y * CorrectionFactor) << " " << (z * CorrectionFactor) << std::endl;
+        }
+    }
+    file.close();
+}
+
 void OnImGui(SplineModel& spline)
 {
     if (ImGui::TreeNode(("Transform" + spline.name).c_str()))
@@ -352,7 +387,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void processInputs(GLFWwindow* window)
+void processInputs(GLFWwindow* window, double deltaTime)
 {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(CamMovement::FORWARD, deltaTime);
