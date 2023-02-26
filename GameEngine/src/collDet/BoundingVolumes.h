@@ -1,5 +1,4 @@
-#ifndef BOUNDING_VOLUMES_H
-#define BOUNDING_VOLUMES_H
+#pragma once
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -11,17 +10,5 @@ struct AABB
 };
 
 int TestAABBs(const AABB& a, const AABB& b);
-
-int TestAABBs(AABB a, AABB b, const Eigen::Affine3f& ma, const Eigen::Affine3f& mb);
-
-struct Sphere
-{
-	Eigen::Vector3f pos;
-	float r;
-};
-
-int TestSpheres(Sphere a, Sphere b);
-int TestSpheres(Sphere a, Sphere b, const Eigen::Affine3f& ma, const Eigen::Affine3f& mb);
-
-
-#endif
+void AABBEnclosingAABBs(const AABB& a, const AABB& b, AABB& result);
+void CalculateAABBMinMax(const std::vector<const std::vector<Eigen::Vector3f>*>& points, Eigen::Vector3f& min, Eigen::Vector3f& max);

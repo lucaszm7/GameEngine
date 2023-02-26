@@ -1,16 +1,8 @@
-#ifndef CATMULLROM_H
-#define CATMULLROM_H
+#pragma once
 
 #include <string>
 #include <vector>
 #include <Eigen/Dense>
-//#include <GL/glew.h>
-//#include "Camera.h"
-//#include "Circle.h"
-//#include "NewtonSolver.h"
-//#include "SplineHelper.h"
-//#include "Mesh.h"
-//#include "BoundingVolumes.h"
 
 class CatmullRom
 {
@@ -20,4 +12,3 @@ public:
 		std::vector<Eigen::Vector3f>& splinePoints, int nSegments, float alpha);
 };
 
-#endif

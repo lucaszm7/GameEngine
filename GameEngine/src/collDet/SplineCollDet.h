@@ -1,11 +1,8 @@
-#ifndef SPLINE_COLLISION_DETECTION_H
-#define SPLINE_COLLISION_DETECTION_H
+#pragma once
 
-//#include "Bezier.h"
-//#include "CatmullRom.h"
 #include <unordered_map>
-#include <mutex>
 #include <vector>
+#include <mutex>
 #include <Eigen/Core>
 
 
@@ -18,9 +15,6 @@ void DistSampleCPUParallel(std::vector<Eigen::Vector3f>& pointsA, std::vector<Ei
 void DistSampleCPU_old(std::vector<Eigen::Vector3f>& pointsA, std::vector<Eigen::Vector3f>& pointsB,
 		float distLarger, std::vector<Eigen::Vector3f>& pointsLargerDist);
 
-//void DistSampleBilinearCPU(const std::vector<Eigen::Vector3f>& splinePoints, const float radiusRod,
-//		const std::vector<std::vector<std::pair<Eigen::Vector3f,Eigen::Vector3f>>>& radiusLines,
-//		std::vector<Eigen::Vector3f>& linePoints);
 void DistSampleBilinearCPU(std::vector<Eigen::Vector3f>& splinePoints, const float radiusRod,
 		std::unordered_map<Eigen::Vector3f*, std::pair<float, Eigen::Vector3f*>>& endoColonMap,
 		std::unordered_map<Eigen::Vector3f*, std::vector<std::pair<Eigen::Vector3f,Eigen::Vector3f>>>& colonRadiiMap,
@@ -28,4 +22,3 @@ void DistSampleBilinearCPU(std::vector<Eigen::Vector3f>& splinePoints, const flo
 
 inline float DistancePointLineSquared(const Eigen::Vector3f lineP0, const Eigen::Vector3f lineP1, const Eigen::Vector3f p);
 
-#endif

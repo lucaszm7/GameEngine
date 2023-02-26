@@ -1,8 +1,8 @@
 #pragma once
 
-#include "spline/SplineModel.hpp"
-#include "CatmullRom.h"
 #include "BoundingVolumes.h"
+#include "collDet/SplineModel.hpp"
+#include "CatmullRom.h"
 #include "SplineCollDet.h"
 
 #include <unsupported/Eigen/AlignedVector3>
@@ -12,39 +12,13 @@
 #define EIGEN_VECTORIZE_SSSE3
 #define EIGEN_VECTORIZE_SSE3
 
+constexpr auto EPSILON = 0.000001;
 
-#define EPSILON 0.000001
-#define NUM_BUCKETS 1024
-
-struct Cell
+enum class TYPE
 {
-	Cell(int px, int py, int pz);
-	int x, y, z;
+	NODE, 
+	LEAF
 };
-
-struct Object
-{
-	Object* pNextObject;
-	Eigen::Vector3f pos;
-	float radius;
-	int bucket;
-	CatmullRom* spline;
-};
-
-struct UniformGrid
-{
-	Object* objectBucket[NUM_BUCKETS];
-};
-
-int ComputeHashBucketIndex(Cell cellPos);
-
-typedef enum {NODE, LEAF} TYPE;
-
-struct ObjectBVH
-{
-	CatmullRom* spline;
-};
-
 
 struct NodeV7
 {
@@ -57,81 +31,57 @@ struct NodeV7
 	float radiusRod;
 	
 	SplineModel* splineModel;
-	unsigned int startCPIndex;
-	std::vector<std::vector<std::pair<Eigen::Vector3f,Eigen::Vector3f>>> radiusLines;
+	unsigned int ControlPointStartIndex;
 
+	std::vector<std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>> vectorsPerControlPoint;
 };
 
 struct CollisionResult
 {
 	// Vetor com: ponto endoscopio - ponto parede de colon
-	std::vector<Eigen::Vector3f> linePoints;
+	std::vector<Eigen::Vector3f> collisionVectors;
 
 	// Ideia para retornar pontos fora do colon em outra estrutura auxiliar
 	// std::vector<Eigen::Vector3f> linePointsOut;
 
-	std::unordered_map<Eigen::Vector3f*, std::pair<float, Eigen::Vector3f*>> map;
+	//				   Endo Spline Point    Distance    Colon Spline Point
+	std::unordered_map<Eigen::Vector3f*, std::pair<float, Eigen::Vector3f*>> broadPhaseEndoColonClosestSplinePoints;
 	std::unordered_map<Eigen::Vector3f*, float> posRadius;
 
-	std::unordered_map<Eigen::Vector3f*, std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>> colonRadiiMap;
+	//                Colon Spline Point      Vectors Per Spline Point ( Previous Radius   Next Radius )
+	std::unordered_map<Eigen::Vector3f*, std::vector<std::pair<Eigen::Vector3f, Eigen::Vector3f>>> colonInterpolatedVectorsSplinePoints;
 
-	unsigned int controlPointSegments {5};
+	unsigned int nInterpolatedControlPoints = 10;
 
 	float subRadius;
 	float endoRadius;
 
-	float AABBAddFactor = 2.0f;
-	bool OutDetection = true;
-
-	std::mutex mutex;
-	// ThreadPool pool {8};
-
 	std::unordered_map<NodeV7*, std::vector<NodeV7*>> pairsToBeSampled;
-	void SetLeavesEndo(const std::vector<NodeV7*>& nodes);
-	void DistPairsSampleInParallel();
-	void DistPairsSampleInParallelHelp(const unsigned int begin, const unsigned int end, const unsigned size);
-
-	void SetCollisionCheckParam(float AABBNewScaleFactor, bool SetOutDetection);
-
-	std::vector<Eigen::Vector3f>& CalcCollisionPoints();
-	std::vector<Eigen::Vector3f>& CalcCollisionPointsCircle();
 	std::vector<Eigen::Vector3f>& CalcCollisionPointsBilinear();
 };
 
 struct SplineCollDet
 {
-	CollisionResult r;
+	CollisionResult collisionResults;
 
-	std::vector<NodeV7> leavesA, leavesB;
-	std::vector<NodeV7> nodesA, nodesB;
+	std::vector<NodeV7> leavesEndo;
+	std::vector<NodeV7> leavesColon;
+
+	std::vector<NodeV7> nodesEndo;
+	std::vector<NodeV7> nodesColon;
+
 	std::vector<NodeV7*> leavesPointer;
 	std::vector<NodeV7*> bvhBuild1;
 	std::vector<NodeV7*> bvhBuild2;
 
-	void ConstructLeavesBilinearSurfaceV7(SplineModel& splineModel, std::vector<NodeV7>& leaves);
-	NodeV7* BottomUpBVTreeV7(std::vector<NodeV7*>& leaves, std::vector<NodeV7>& nodes);
+	void ConstructLeavesBilinearSurfaceV7(SplineModel& splineModel, std::vector<NodeV7>& leaves) const;
+	NodeV7* BottomUpBVTreeV7(const std::vector<NodeV7*>& leaves, std::vector<NodeV7>& nodesCache);
 	void CollisionCheck(SplineModel endo, SplineModel colon);
 };
 
-void SphereEnclosingSpheres(Sphere s0, Sphere s1, Sphere& s);
-void AABBEnclosingAABBs(const AABB& a0, const AABB& a1, AABB& a);
-void CalculateAABBMinMax(const std::vector<const std::vector<Eigen::Vector3f>*>& points,
-		Eigen::Vector3f& min, Eigen::Vector3f& max, float& AABBAddFactor);
-void LinearInterpolateRadiusBilinearV6(const SplineModel* splineModel, const unsigned int startCPIndex,
+void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel, const unsigned int startCPIndex,
 	std::unordered_map<Eigen::Vector3f*, std::vector<std::pair<Eigen::Vector3f,Eigen::Vector3f>>>& colonRadiiMap,
 	std::vector<Eigen::Vector3f>& splinePoints, const unsigned int nSegments);
-//void GenerateSphereFromLeavesV6(std::vector<NodeV6*> leaves, std::vector<Mesh>& meshes);
-//void GenerateSphereFromTreeV6(NodeV6* root, std::vector<Mesh>& meshes);
-
-
 void BVHCollisionBilinearSurfaceV7(NodeV7* a, NodeV7* b, CollisionResult& result);
 void BVHCollisionBilinearSurfaceParallelV7(NodeV7* a, NodeV7* b, CollisionResult& result);
-
-
-void MostSeparatedPointsOnAABB(int& min, int&max, std::vector<Eigen::Vector3f>& pt);
-void SphereFromDistantPoints(Sphere &s, std::vector<Eigen::Vector3f>& pt);
-void SphereOfSphereAndPt(Sphere &s, Eigen::Vector3f &p);
-void RitterSphere(Sphere &s, std::vector<Eigen::Vector3f>& pt);
-
-
 

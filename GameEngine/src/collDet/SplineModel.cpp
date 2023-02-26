@@ -1,4 +1,4 @@
-#include "spline/SplineModel.hpp"
+#include "collDet/SplineModel.hpp"
 
 void SplineModel::Draw(Shader& shader)
 {
@@ -42,27 +42,27 @@ void SplineModel::TransformFromGlmToEigen()
 		controlPoints.emplace_back(controlPoint.x, controlPoint.y, controlPoint.z);
 	}
 
-	controlRadii.clear();
-	controlRadii.reserve(m_controlPointsVectorDir.size());
+	controlPointsVectorDir.clear();
+	controlPointsVectorDir.reserve(m_controlPointsVectorDir.size());
 	for (const auto& vectorDir : m_controlPointsVectorDir)
 	{
-		controlRadii.push_back(std::vector<Eigen::Vector3f>());
-		controlRadii.back().reserve(vectorDir.size());
+		controlPointsVectorDir.push_back(std::vector<Eigen::Vector3f>());
+		controlPointsVectorDir.back().reserve(vectorDir.size());
 		for (const auto& vector : vectorDir)
 		{
-			controlRadii.back().emplace_back(vector.x, vector.y, vector.z);
+			controlPointsVectorDir.back().emplace_back(vector.x, vector.y, vector.z);
 		}
 	}
 
-	controlRadiiPos.clear();
-	controlRadiiPos.reserve(m_controlPointsVectorPos.size());
+	controlPointsVectorPos.clear();
+	controlPointsVectorPos.reserve(m_controlPointsVectorPos.size());
 	for (const auto& vectorPos : m_controlPointsVectorPos)
 	{
-		controlRadiiPos.push_back(std::vector<Eigen::Vector3f>());
-		controlRadiiPos.back().reserve(vectorPos.size());
+		controlPointsVectorPos.push_back(std::vector<Eigen::Vector3f>());
+		controlPointsVectorPos.back().reserve(vectorPos.size());
 		for (const auto& vector : vectorPos)
 		{
-			controlRadiiPos.back().emplace_back(vector.x, vector.y, vector.z);
+			controlPointsVectorPos.back().emplace_back(vector.x, vector.y, vector.z);
 		}
 	}
 }
@@ -76,27 +76,27 @@ void TransformFromGlmToEigen(SplineModel& splineModel)
 		splineModel.controlPoints.emplace_back(controlPoint.x, controlPoint.y, controlPoint.z);
 	}
 
-	splineModel.controlRadii.clear();
-	splineModel.controlRadii.reserve(splineModel.m_controlPointsVectorDir.size());
+	splineModel.controlPointsVectorDir.clear();
+	splineModel.controlPointsVectorDir.reserve(splineModel.m_controlPointsVectorDir.size());
 	for (const auto& vectorDir : splineModel.m_controlPointsVectorDir)
 	{
-		splineModel.controlRadii.push_back(std::vector<Eigen::Vector3f>());
-		splineModel.controlRadii.back().reserve(vectorDir.size());
+		splineModel.controlPointsVectorDir.push_back(std::vector<Eigen::Vector3f>());
+		splineModel.controlPointsVectorDir.back().reserve(vectorDir.size());
 		for (const auto& vector : vectorDir)
 		{
-			splineModel.controlRadii.back().emplace_back(vector.x, vector.y, vector.z);
+			splineModel.controlPointsVectorDir.back().emplace_back(vector.x, vector.y, vector.z);
 		}
 	}
 
-	splineModel.controlRadiiPos.clear();
-	splineModel.controlRadiiPos.reserve(splineModel.m_controlPointsVectorPos.size());
+	splineModel.controlPointsVectorPos.clear();
+	splineModel.controlPointsVectorPos.reserve(splineModel.m_controlPointsVectorPos.size());
 	for (const auto& vectorPos : splineModel.m_controlPointsVectorPos)
 	{
-		splineModel.controlRadiiPos.push_back(std::vector<Eigen::Vector3f>());
-		splineModel.controlRadiiPos.back().reserve(vectorPos.size());
+		splineModel.controlPointsVectorPos.push_back(std::vector<Eigen::Vector3f>());
+		splineModel.controlPointsVectorPos.back().reserve(vectorPos.size());
 		for (const auto& vector : vectorPos)
 		{
-			splineModel.controlRadiiPos.back().emplace_back(vector.x, vector.y, vector.z);
+			splineModel.controlPointsVectorPos.back().emplace_back(vector.x, vector.y, vector.z);
 		}
 	}
 }

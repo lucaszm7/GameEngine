@@ -1,24 +1,22 @@
 #include "SplineCollDet.h"
 #include <iostream>
 
-
 // General Dist Sampling
 // TODO distLarger not used
-
-
-void DistSampleCPU(std::vector<Eigen::Vector3f>& pointsA, std::vector<Eigen::Vector3f>& pointsB,
-		float distLarger, std::unordered_map<Eigen::Vector3f*, std::pair<float, Eigen::Vector3f*>>& pointsLargerDist)
+void DistSampleCPU(std::vector<Eigen::Vector3f>& endoSplinePoints, 
+				   std::vector<Eigen::Vector3f>& colonSplinePoints,
+		           float distLarger, 
+				   std::unordered_map<Eigen::Vector3f*, std::pair<float, Eigen::Vector3f*>>& endoColonClosestSplinePoints)
 {
 	//distLarger = distLarger * distLarger;
-	unsigned int pointsAsize = pointsA.size();
-	unsigned int pointsBsize = pointsB.size();
-	for (unsigned int i=0;i<pointsAsize;i++)
+
+	for (unsigned int i = 0; i < endoSplinePoints.size(); i++)
 	{
-		float smallestDist = std::numeric_limits<float>().max();
+		float smallestDist = std::numeric_limits<float>::max();
 		int smallestJ = -1;
-		for (int j=0;j<pointsBsize;j++)
+		for (int j = 0; j < colonSplinePoints.size(); j++)
 		{
-			const float dist = (pointsA[i]-pointsB[j]).squaredNorm();
+			const float dist = (endoSplinePoints[i] - colonSplinePoints[j]).squaredNorm();
 			if (dist < smallestDist)
 			{
 				smallestDist = dist;
@@ -27,21 +25,20 @@ void DistSampleCPU(std::vector<Eigen::Vector3f>& pointsA, std::vector<Eigen::Vec
 		}
 		// Found local smallest dist
 		// Update Global State
-		auto it = pointsLargerDist.find(&pointsA[i]);
-		if (it != pointsLargerDist.end())
+		auto it = endoColonClosestSplinePoints.find(&endoSplinePoints[i]);
+		if (it != endoColonClosestSplinePoints.end())
 		{
 			if (smallestDist < it->second.first) 
 			{
-				it->second = std::make_pair(smallestDist, &pointsB[smallestJ]);
+				it->second = std::make_pair(smallestDist, &colonSplinePoints[smallestJ]);
 			}
 		}
 		else
 		{
-			pointsLargerDist[&pointsA[i]] = std::make_pair(smallestDist, &pointsB[smallestJ]);
+			endoColonClosestSplinePoints[&endoSplinePoints[i]] = std::make_pair(smallestDist, &colonSplinePoints[smallestJ]);
 		}
 	}
 }
-
 
 void DistSampleCPUParallel(std::vector<Eigen::Vector3f>& pointsA, std::vector<Eigen::Vector3f>& pointsB,
 		std::unordered_map<Eigen::Vector3f*, std::pair<float, Eigen::Vector3f*>>& pointsLargerDist, std::mutex& mutex)
@@ -107,7 +104,6 @@ void DistSampleCPU_old(std::vector<Eigen::Vector3f>& pointsA, std::vector<Eigen:
 		}
 	}
 }
-
 
 //DistSampleBilinearCPU(a->splinePoints, a->radiusRod, b->radiusLines, result.linePoints);
 void DistSampleBilinearCPU(std::vector<Eigen::Vector3f>& splinePoints, const float radiusRod,
