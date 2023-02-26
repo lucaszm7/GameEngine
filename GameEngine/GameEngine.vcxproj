@@ -217,7 +217,8 @@
     <ClInclude Include="src\engine\material.h" />
     <ClInclude Include="src\engine\mesh.h" />
     <ClInclude Include="src\engine\model.h" />
-    <ClInclude Include="src\spline\SplineModel.hpp" />
+    <ClInclude Include="src\engine\Timer.hpp" />
+    <ClInclude Include="src\collDet\SplineModel.hpp" />
     <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />

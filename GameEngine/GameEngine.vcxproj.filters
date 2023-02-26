@@ -57,9 +57,6 @@
     <ClCompile Include="src\collDet\AccelerationStructures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collDet\BoundingVolumes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\collDet\CatmullRom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -73,6 +70,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\line.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\collDet\BoundingVolumes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,7 +143,7 @@
     <ClInclude Include="src\engine\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\spline\SplineModel.hpp">
+    <ClInclude Include="src\collDet\SplineModel.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\collDet\AccelerationStructures.h">
@@ -159,6 +159,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\line.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Timer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
