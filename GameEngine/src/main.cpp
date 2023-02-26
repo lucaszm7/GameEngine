@@ -31,6 +31,7 @@
 #include "engine/light.h"
 #include "engine/material.h"
 #include "engine/line.h"
+#include "engine/Timer.hpp"
 // #include "engine/model.h"
 // #include "engine/mesh.h"
 
@@ -67,6 +68,7 @@ Camera camera;
 
 bool debugCollDet = false;
 bool debugControlPoints = false;
+bool hasCollisionDetection = true;
 
 int main()
 {
@@ -138,7 +140,7 @@ int main()
 
     SplineCollDet collDet;
 
-    Line* line = new Line(10000, collDet.r.linePoints);
+    Line* line = new Line(10000, collDet.collisionResults.collisionVectors);
     line->m_vertices.reserve(10000);
 
     VertexArray lightVAO;
@@ -188,10 +190,13 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        Timer collDetTime; 
+        if (hasCollisionDetection)
+            collDet.CollisionCheck(endo, spline);
+        collDetTime.Stop();
+
         view       = camera.GetViewMatrix();
         projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
-
-        collDet.CollisionCheck(endo, spline);
 
         // Draw Light Source
         lightVAO.Bind();
@@ -209,7 +214,6 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-
         line->m_vertices.clear();
         lightSourceShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
 
@@ -224,12 +228,12 @@ int main()
                 line->m_vertices.push_back(copyEndo.controlPoints[i]);
                 line->m_vertices.push_back(copyEndo.controlPoints[i + 1]);
             }
-            for (int i = 0; i < copyEndo.controlRadiiPos.size(); ++i)
+            for (int i = 0; i < copyEndo.controlPointsVectorPos.size(); ++i)
             {
-                for (int j = 0; j < copyEndo.controlRadiiPos[0].size(); ++j)
+                for (int j = 0; j < copyEndo.controlPointsVectorPos[0].size(); ++j)
                 {
                     line->m_vertices.push_back(copyEndo.controlPoints[i]);
-                    line->m_vertices.push_back(copyEndo.controlRadiiPos[i][j]);
+                    line->m_vertices.push_back(copyEndo.controlPointsVectorPos[i][j]);
                 }
             }
             for (int i = 0; i < copyColon.controlPoints.size() - 1; ++i)
@@ -237,12 +241,12 @@ int main()
                 line->m_vertices.push_back(copyColon.controlPoints[i]);
                 line->m_vertices.push_back(copyColon.controlPoints[i + 1]);
             }
-            for (int i = 0; i < copyColon.controlRadiiPos.size(); ++i)
+            for (int i = 0; i < copyColon.controlPointsVectorPos.size(); ++i)
             {
-                for (int j = 0; j < copyColon.controlRadiiPos[0].size(); ++j)
+                for (int j = 0; j < copyColon.controlPointsVectorPos[0].size(); ++j)
                 {
                     line->m_vertices.push_back(copyColon.controlPoints[i]);
-                    line->m_vertices.push_back(copyColon.controlRadiiPos[i][j]);
+                    line->m_vertices.push_back(copyColon.controlPointsVectorPos[i][j]);
                 }
             }
 
@@ -250,12 +254,12 @@ int main()
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
             line->Draw();
         }
-        if (debugCollDet)
+        if (debugCollDet && hasCollisionDetection)
         {
             line->m_vertices.clear();
-            for (int i = 0; i < collDet.r.linePoints.size(); ++i)
+            for (int i = 0; i < collDet.collisionResults.collisionVectors.size(); ++i)
             {
-                line->m_vertices.push_back(collDet.r.linePoints[i]);
+                line->m_vertices.push_back(collDet.collisionResults.collisionVectors[i]);
             }
             line->Buffer();
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
@@ -283,8 +287,11 @@ int main()
         ImGui::Begin("Scene");
         {
             ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            ImGui::Text("Collisions Count %d", collDet.r.linePoints.size());
-            
+
+            ImGui::Checkbox("Turn Collision Detection", &hasCollisionDetection);
+            ImGui::Text("Collisions Count %d", collDet.collisionResults.collisionVectors.size());
+            ImGui::Text("Collisions Time Taken: %f ms", collDetTime.ResultMs());
+
             ImGui::Checkbox("Debug Collision Detection", &debugCollDet);
             ImGui::Checkbox("Debug Control Points", &debugControlPoints);
 
@@ -316,9 +323,9 @@ int main()
                     ImGui::Text((std::to_string(i) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.controlPoints[i].x(), copyEndo.controlPoints[i].y(), copyEndo.controlPoints[i].z());
                     if (ImGui::TreeNode(((std::to_string(i) + ". Endo Vectors Control Points")).c_str()))
                     {
-                        for (int j = 0; j < copyEndo.controlRadiiPos.size(); ++j)
+                        for (int j = 0; j < copyEndo.controlPointsVectorPos.size(); ++j)
                         {
-                            ImGui::Text((std::to_string(j) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.controlRadiiPos[i][j].x(), copyEndo.controlRadiiPos[i][j].y(), copyEndo.controlRadiiPos[i][j].z());
+                            ImGui::Text((std::to_string(j) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.controlPointsVectorPos[i][j].x(), copyEndo.controlPointsVectorPos[i][j].y(), copyEndo.controlPointsVectorPos[i][j].z());
                         }
                         ImGui::TreePop();
                     }
@@ -327,9 +334,9 @@ int main()
             }
             if (ImGui::TreeNode("Collision Points"))
             {
-                for (int i = 0; i < collDet.r.linePoints.size(); ++i)
+                for (int i = 0; i < collDet.collisionResults.collisionVectors.size(); ++i)
                 {
-                    ImGui::Text((std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), collDet.r.linePoints[i].x(), collDet.r.linePoints[i].y(), collDet.r.linePoints[i].z());
+                    ImGui::Text((std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), collDet.collisionResults.collisionVectors[i].x(), collDet.collisionResults.collisionVectors[i].y(), collDet.collisionResults.collisionVectors[i].z());
                 }
                 ImGui::TreePop();
             }
