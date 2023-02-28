@@ -24,6 +24,9 @@ std::vector<Eigen::Vector3f>& CollisionResult::CalcCollisionPointsBilinear()
 
 		// Vetor dos raios do ponto de controle do colon mais proximo do ponto de controle do endoscopio
 		std::vector<std::pair<Eigen::Vector3f,Eigen::Vector3f>>& colonVectorsSplinePoint = colonInterpolatedVectorsSplinePoints[itBroadPhaseCandidates->second.second];
+		// Prevent exception when Interpolated Points >= 12
+		if (colonVectorsSplinePoint.size() < nVectorsPerControlPoint)
+			continue;
 
 		// Itera pelos raios do ponto do colon mais proximo do ponto atual do endoscopio
 		for (unsigned int j = 0; j < nVectorsPerControlPoint; j++)

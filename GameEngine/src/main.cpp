@@ -303,7 +303,7 @@ int main()
             ImGui::Checkbox("Debug Control Points Colon", &debugControlPointsColon);
             ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
 
-            ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 10);
+            ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 20);
 
             OnImGui(spline);
             OnImGui(endo);
