@@ -66,8 +66,10 @@ float lastY = screenHeight / 2;
 
 Camera camera;
 
-bool debugCollDet = false;
-bool debugControlPoints = false;
+bool debugCollDet = true;
+bool debugControlPointsColon = false;
+bool debugControlPointsEndo = false;
+
 bool hasCollisionDetection = true;
 
 int main()
@@ -131,7 +133,7 @@ int main()
 
     SplineModel spline;
     LoadSplineModel("resources/models/cilinder.txt", spline);
-    GenerateSplineMesh(spline, "resources/textures/4x_tex.png", true);
+    GenerateSplineMesh(spline, "resources/textures/4x_tex.png", false);
 
     SplineModel endo;
     // GenerateEndoscope(endo, Eigen::Vector3f(-1.0f, -1.0f, -1.0f), Eigen::Vector3f(1.0f, 1.0f, 1.0f), 10, 32, 1.0f);
@@ -170,9 +172,9 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    /*glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);*/
+    glFrontFace(GL_CCW);
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -221,35 +223,40 @@ int main()
         copyEndo.TransformPoints();
         auto copyColon = spline;
         copyColon.TransformPoints();
-        if (debugControlPoints)
+        if (debugControlPointsColon || debugControlPointsEndo)
         {
-            for (int i = 0; i < copyEndo.controlPoints.size() - 1; ++i)
+            if (debugControlPointsEndo)
             {
-                line->m_vertices.push_back(copyEndo.controlPoints[i]);
-                line->m_vertices.push_back(copyEndo.controlPoints[i + 1]);
-            }
-            for (int i = 0; i < copyEndo.controlPointsVectorPos.size(); ++i)
-            {
-                for (int j = 0; j < copyEndo.controlPointsVectorPos[0].size(); ++j)
+                for (int i = 0; i < copyEndo.controlPoints.size() - 1; ++i)
                 {
                     line->m_vertices.push_back(copyEndo.controlPoints[i]);
-                    line->m_vertices.push_back(copyEndo.controlPointsVectorPos[i][j]);
+                    line->m_vertices.push_back(copyEndo.controlPoints[i + 1]);
+                }
+                for (int i = 0; i < copyEndo.controlPointsVectorPos.size(); ++i)
+                {
+                    for (int j = 0; j < copyEndo.controlPointsVectorPos[0].size(); ++j)
+                    {
+                        line->m_vertices.push_back(copyEndo.controlPoints[i]);
+                        line->m_vertices.push_back(copyEndo.controlPointsVectorPos[i][j]);
+                    }
                 }
             }
-            for (int i = 0; i < copyColon.controlPoints.size() - 1; ++i)
+            if (debugControlPointsColon)
             {
-                line->m_vertices.push_back(copyColon.controlPoints[i]);
-                line->m_vertices.push_back(copyColon.controlPoints[i + 1]);
-            }
-            for (int i = 0; i < copyColon.controlPointsVectorPos.size(); ++i)
-            {
-                for (int j = 0; j < copyColon.controlPointsVectorPos[0].size(); ++j)
+                for (int i = 0; i < copyColon.controlPoints.size() - 1; ++i)
                 {
                     line->m_vertices.push_back(copyColon.controlPoints[i]);
-                    line->m_vertices.push_back(copyColon.controlPointsVectorPos[i][j]);
+                    line->m_vertices.push_back(copyColon.controlPoints[i + 1]);
+                }
+                for (int i = 0; i < copyColon.controlPointsVectorPos.size(); ++i)
+                {
+                    for (int j = 0; j < copyColon.controlPointsVectorPos[0].size(); ++j)
+                    {
+                        line->m_vertices.push_back(copyColon.controlPoints[i]);
+                        line->m_vertices.push_back(copyColon.controlPointsVectorPos[i][j]);
+                    }
                 }
             }
-
             line->Buffer();
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
             line->Draw();
@@ -293,7 +300,10 @@ int main()
             ImGui::Text("Collisions Time Taken: %f ms", collDetTime.ResultMs());
 
             ImGui::Checkbox("Debug Collision Detection", &debugCollDet);
-            ImGui::Checkbox("Debug Control Points", &debugControlPoints);
+            ImGui::Checkbox("Debug Control Points Colon", &debugControlPointsColon);
+            ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
+
+            ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 10);
 
             OnImGui(spline);
             OnImGui(endo);
@@ -421,9 +431,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL) 
-        return;
-
     if (firstMouse)
     {
         lastX = xpos;
@@ -436,6 +443,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     lastX = xpos;
     lastY = ypos;
+    
+    if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL) 
+        return;
 
     camera.ProcessMouseMovement(xOffSet, yOffSet);
 }
