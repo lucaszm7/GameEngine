@@ -85,14 +85,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\core;$(ProjectDir)src\engine;$(ProjectDir)src\vendor</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine;$(ProjectDir)src\vendor</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\core;$(ProjectDir)src\engine;$(ProjectDir)src\vendor</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine;$(ProjectDir)src\vendor</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
@@ -173,11 +173,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\collDet\AccelerationStructures.cpp" />
+    <ClCompile Include="src\collDet\BoundingVolumes.cpp" />
+    <ClCompile Include="src\collDet\CatmullRom.cpp" />
+    <ClCompile Include="src\collDet\SplineCollDet.cpp" />
+    <ClCompile Include="src\collDet\SplineModel.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
     <ClCompile Include="src\core\Texture.cpp" />
     <ClCompile Include="src\core\VertexArray.cpp" />
     <ClCompile Include="src\core\VertexBuffer.cpp" />
+    <ClCompile Include="src\engine\line.cpp" />
+    <ClCompile Include="src\engine\mesh.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vendor\IMGUI\imgui.cpp" />
     <ClCompile Include="src\vendor\IMGUI\imgui_demo.cpp" />
@@ -194,6 +201,10 @@
     <None Include="resources\shaders\vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\collDet\AccelerationStructures.h" />
+    <ClInclude Include="src\collDet\BoundingVolumes.h" />
+    <ClInclude Include="src\collDet\CatmullRom.h" />
+    <ClInclude Include="src\collDet\SplineCollDet.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />
     <ClInclude Include="src\core\Shader.h" />
     <ClInclude Include="src\core\Texture.h" />
@@ -202,9 +213,12 @@
     <ClInclude Include="src\core\VertexBufferLayout.h" />
     <ClInclude Include="src\engine\camera.h" />
     <ClInclude Include="src\engine\light.h" />
+    <ClInclude Include="src\engine\line.h" />
     <ClInclude Include="src\engine\material.h" />
     <ClInclude Include="src\engine\mesh.h" />
     <ClInclude Include="src\engine\model.h" />
+    <ClInclude Include="src\engine\Timer.hpp" />
+    <ClInclude Include="src\collDet\SplineModel.hpp" />
     <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />
