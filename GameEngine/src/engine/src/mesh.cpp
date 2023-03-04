@@ -1,4 +1,4 @@
-#include "engine/mesh.h"
+#include "mesh.h"
 
 Mesh::Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text)
 	: vertices(vert), indices(indi), textures(text)

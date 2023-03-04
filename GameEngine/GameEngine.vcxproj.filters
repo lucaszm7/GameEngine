@@ -54,25 +54,16 @@
     <ClCompile Include="src\vendor\IMGUI\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collDet\AccelerationStructures.cpp">
+    <ClCompile Include="src\engine\src\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collDet\CatmullRom.cpp">
+    <ClCompile Include="src\engine\src\line.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collDet\SplineCollDet.cpp">
+    <ClCompile Include="src\engine\src\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\collDet\SplineModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\line.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\collDet\BoundingVolumes.cpp">
+    <ClCompile Include="src\engine\src\Spline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,7 +92,7 @@
     <ClInclude Include="src\core\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\camera.h">
+    <ClInclude Include="src\engine\include\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vendor\IMGUI\imconfig.h">
@@ -131,37 +122,25 @@
     <ClInclude Include="src\vendor\IMGUI\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\material.h">
+    <ClInclude Include="src\engine\include\material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\light.h">
+    <ClInclude Include="src\engine\include\light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\mesh.h">
+    <ClInclude Include="src\engine\include\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\model.h">
+    <ClInclude Include="src\engine\include\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\collDet\SplineModel.hpp">
+    <ClInclude Include="src\engine\include\line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\collDet\AccelerationStructures.h">
+    <ClInclude Include="src\engine\include\Timer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\collDet\BoundingVolumes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\collDet\CatmullRom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\collDet\SplineCollDet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\line.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\Timer.hpp">
+    <ClInclude Include="src\engine\include\Spline.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
