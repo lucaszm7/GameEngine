@@ -41,21 +41,14 @@ Spline::Spline(const std::string& filePath)
 		}
 
 		file.close();
-		TransformFromGlmToEigen();
+		this->splineModel = std::make_unique<SplineModel>((float*)m_controlPoints.data(), (float*)m_controlPointsVectorDir.data(), 
+																  m_controlPoints.size(), m_controlPointsVectorDir.front().size());
 		std::cout << "INFO: colon spline readed:\n";
 	}
 	else
 	{
 		std::cout << "Error reading control points: " << filePath << std::endl;
 	}
-}
-
-Spline::Spline(const Spline& otherSpline)
-	: m_controlPoints(otherSpline.m_controlPoints), 
-	  m_controlPointsVectorDir(otherSpline.m_controlPointsVectorDir),
-	  m_controlPointsVectorPos(otherSpline.m_controlPointsVectorPos)
-{
-	TransformFromGlmToEigen();
 }
 
 void Spline::Draw(Shader& shader)
@@ -136,8 +129,6 @@ void Spline::GenerateSplineMesh(const std::string& texPath, TriangleOrientation 
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 
-	m_controlPointsVectorPos.clear();
-	m_controlPointsVectorPos.resize(m_controlPoints.size());
 	// Calc all vertices
 	for (unsigned int i = 0; i < numControlPoints; ++i)
 	{
@@ -158,7 +149,6 @@ void Spline::GenerateSplineMesh(const std::string& texPath, TriangleOrientation 
 			v.TexCoord = glm::vec2(duv_x * j, duv_y * i);
 
 			vertices.push_back(v);
-			m_controlPointsVectorPos[i].push_back(v.Position);
 		}
 	}
 
@@ -205,6 +195,27 @@ void Spline::GenerateSplineMesh(const std::string& texPath, TriangleOrientation 
 	Texture tex(texPath, Texture::Type::DIFFUSE, Texture::Parameter::REPEAT);
 	textures.push_back(tex);
 	mesh.SetupMesh(vertices, indices, textures);
+}
+
+std::shared_ptr<SplineModel> Spline::GetSplineModelTransform()
+{
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, transform.position);
+	glm::vec3 temp;
+
+	for (unsigned int i = 0; i < m_controlPoints.size(); ++i)
+	{
+		temp = glm::vec3(model * glm::vec4(m_controlPoints[i], 1.0));
+		splineModel->controlPoints[i] = Eigen::Vector3f(temp.x, temp.y, temp.z);
+
+		for (unsigned int j = 0; j < m_controlPointsVectorPos[i].size(); ++j)
+		{
+			temp = glm::vec3(model * glm::vec4(m_controlPointsVectorPos[i][j], 1.0));
+			splineModel->controlPointsVectorPos[i][j] = Eigen::Vector3f(temp.x, temp.y, temp.z);
+		}
+	}
+
+	return splineModel;
 }
 
 void GenerateSurface(Spline& spline, const std::string& texPath)

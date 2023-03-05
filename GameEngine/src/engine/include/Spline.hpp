@@ -15,13 +15,15 @@ enum class TriangleOrientation
 struct Spline
 {
 	explicit Spline(const std::string& filePath);
-	Spline(const Spline& otherSpline);
+
+	Spline(const Spline&) = delete;
+	Spline& operator= (const Spline&) = delete;
 
 	std::vector<glm::vec3> m_controlPoints;
 	std::vector<std::vector<glm::vec3>> m_controlPointsVectorDir;
 	std::vector<std::vector<glm::vec3>> m_controlPointsVectorPos;
 
-	std::unique_ptr<SplineModel> splineModel;
+	std::shared_ptr<SplineModel> splineModel;
 
 	Mesh mesh;
 	Transform transform;
@@ -31,6 +33,7 @@ struct Spline
 	void TransformPoints();
 	void TransformFromGlmToEigen();
 	void GenerateSplineMesh(const std::string& texPath, TriangleOrientation triangleOrientation);
+	std::shared_ptr<SplineModel> GetSplineModelTransform();
 };
 
 void GenerateSurface(Spline& spline, const std::string& texPath);

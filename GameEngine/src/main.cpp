@@ -135,7 +135,7 @@ int main()
     spline.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
 
     Spline endo("resources/models/littleCilinder.txt");
-    spline.GenerateSplineMesh("resources/textures/wall.jpg", TriangleOrientation::ClockWise);
+    endo.GenerateSplineMesh("resources/textures/wall.jpg", TriangleOrientation::ClockWise);
 
     SplineCollDet collDet;
 
@@ -189,14 +189,12 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        auto copyEndo = endo;
-        copyEndo.TransformPoints();
-        auto copyColon = spline;
-        copyColon.TransformPoints();
+        auto endoSplineModel = endo.GetSplineModelTransform();
+        auto colonSplineModel = spline.GetSplineModelTransform();
 
         Timer collDetTime; 
         if (hasCollisionDetection)
-            collDet.CollisionCheck(*(copyEndo.splineModel.get()), *(copyColon.splineModel.get()));
+            collDet.CollisionCheck(*(endoSplineModel.get()), *(colonSplineModel.get()));
         collDetTime.Stop();
 
         view       = camera.GetViewMatrix();
@@ -225,33 +223,33 @@ int main()
         {
             if (debugControlPointsEndo)
             {
-                for (int i = 0; i < copyEndo.splineModel->controlPoints.size() - 1; ++i)
+                for (int i = 0; i < endoSplineModel->controlPoints.size() - 1; ++i)
                 {
-                    line->m_vertices.push_back(copyEndo.splineModel->controlPoints[i]);
-                    line->m_vertices.push_back(copyEndo.splineModel->controlPoints[i + 1]);
+                    line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
+                    line->m_vertices.push_back(endoSplineModel->controlPoints[i + 1]);
                 }
-                for (int i = 0; i < copyEndo.splineModel->controlPointsVectorPos.size(); ++i)
+                for (int i = 0; i < endoSplineModel->controlPointsVectorPos.size(); ++i)
                 {
-                    for (int j = 0; j < copyEndo.splineModel->controlPointsVectorPos[0].size(); ++j)
+                    for (int j = 0; j < endoSplineModel->controlPointsVectorPos[0].size(); ++j)
                     {
-                        line->m_vertices.push_back(copyEndo.splineModel->controlPoints[i]);
-                        line->m_vertices.push_back(copyEndo.splineModel->controlPointsVectorPos[i][j]);
+                        line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
+                        line->m_vertices.push_back(endoSplineModel->controlPointsVectorPos[i][j]);
                     }
                 }
             }
             if (debugControlPointsColon)
             {
-                for (int i = 0; i < copyColon.splineModel->controlPoints.size() - 1; ++i)
+                for (int i = 0; i < colonSplineModel->controlPoints.size() - 1; ++i)
                 {
-                    line->m_vertices.push_back(copyColon.splineModel->controlPoints[i]);
-                    line->m_vertices.push_back(copyColon.splineModel->controlPoints[i + 1]);
+                    line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
+                    line->m_vertices.push_back(colonSplineModel->controlPoints[i + 1]);
                 }
-                for (int i = 0; i < copyColon.splineModel->controlPointsVectorPos.size(); ++i)
+                for (int i = 0; i < colonSplineModel->controlPointsVectorPos.size(); ++i)
                 {
-                    for (int j = 0; j < copyColon.splineModel->controlPointsVectorPos[0].size(); ++j)
+                    for (int j = 0; j < colonSplineModel->controlPointsVectorPos[0].size(); ++j)
                     {
-                        line->m_vertices.push_back(copyColon.splineModel->controlPoints[i]);
-                        line->m_vertices.push_back(copyColon.splineModel->controlPointsVectorPos[i][j]);
+                        line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
+                        line->m_vertices.push_back(colonSplineModel->controlPointsVectorPos[i][j]);
                     }
                 }
             }
@@ -259,6 +257,7 @@ int main()
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
             line->Draw();
         }
+
         if (debugCollDet && hasCollisionDetection)
         {
             line->m_vertices.clear();
@@ -270,6 +269,8 @@ int main()
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
             line->Draw();
         }
+
+
 
         lightingShader.Bind();
 
@@ -301,7 +302,7 @@ int main()
             ImGui::Checkbox("Debug Control Points Colon", &debugControlPointsColon);
             ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
 
-            ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 100);
+            ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 1000);
 
             OnImGui(spline);
             OnImGui(endo);
@@ -326,14 +327,14 @@ int main()
             }
             if (ImGui::TreeNode("Endo Control Points"))
             {
-                for (int i = 0; i < copyEndo.splineModel->controlPoints.size(); ++i)
+                for (int i = 0; i < endoSplineModel->controlPoints.size(); ++i)
                 {
-                    ImGui::Text((std::to_string(i) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.splineModel->controlPoints[i].x(), copyEndo.splineModel->controlPoints[i].y(), copyEndo.splineModel->controlPoints[i].z());
+                    ImGui::Text((std::to_string(i) + ")  %.3f, %.3f, %.3f").c_str(), endoSplineModel->controlPoints[i].x(), endoSplineModel->controlPoints[i].y(), endoSplineModel->controlPoints[i].z());
                     if (ImGui::TreeNode(((std::to_string(i) + ". Endo Vectors Control Points")).c_str()))
                     {
-                        for (int j = 0; j < copyEndo.splineModel->controlPointsVectorPos.size(); ++j)
+                        for (int j = 0; j < endoSplineModel->controlPointsVectorPos.size(); ++j)
                         {
-                            ImGui::Text((std::to_string(j) + ")  %.3f, %.3f, %.3f").c_str(), copyEndo.splineModel->controlPointsVectorPos[i][j].x(), copyEndo.splineModel->controlPointsVectorPos[i][j].y(), copyEndo.splineModel->controlPointsVectorPos[i][j].z());
+                            ImGui::Text((std::to_string(j) + ")  %.3f, %.3f, %.3f").c_str(), endoSplineModel->controlPointsVectorPos[i][j].x(), endoSplineModel->controlPointsVectorPos[i][j].y(), endoSplineModel->controlPointsVectorPos[i][j].z());
                         }
                         ImGui::TreePop();
                     }
