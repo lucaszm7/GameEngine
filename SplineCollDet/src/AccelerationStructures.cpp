@@ -6,6 +6,9 @@ std::vector<Eigen::Vector3f>& CollisionResult::CalcCollisionPointsBilinear()
 	const float radius2 = endoRadius * endoRadius;
 
 	// Iterador pelos candidatos a colisão dos pontos interpolados do endoscopio
+	if (broadPhaseEndoColonClosestSplinePoints.empty())
+		return collisionVectors;
+
 	auto itBroadPhaseCandidates = broadPhaseEndoColonClosestSplinePoints.begin();
 
 	// Numero de vetores por pontos de controle do colon

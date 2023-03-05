@@ -30,9 +30,6 @@
     <ClInclude Include="include\AccelerationStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="plugin\Plugin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\SplineModel.cpp">
@@ -48,9 +45,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\SplineCollDet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="plugin\Plugin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
