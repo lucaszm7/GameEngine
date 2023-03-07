@@ -41,7 +41,7 @@ Spline::Spline(const std::string& filePath)
 		}
 
 		file.close();
-		this->splineModel = std::make_unique<SplineModel>((float*)m_controlPoints.data(), (float*)m_controlPointsVectorDir.data(), 
+		this->splineModel = std::make_shared<SplineModel>((float*)m_controlPoints.data(), (float*)m_controlPointsVectorDir.data(), 
 																  m_controlPoints.size(), m_controlPointsVectorDir.front().size());
 		std::cout << "INFO: colon spline readed:\n";
 	}
@@ -62,60 +62,6 @@ void Spline::Draw(Shader& shader)
 	shader.SetUniformMatrix4fv("model", model);
 
 	mesh.Draw(shader);
-}
-
-void Spline::TransformPoints()
-{
-	for (auto& controlPoint : m_controlPoints)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, transform.position);
-		controlPoint = glm::vec3(model * glm::vec4(controlPoint, 1.0));
-	}
-	for (auto& controlPointsVectorPos : m_controlPointsVectorPos)
-	{
-		for (auto& pointsVectorPos : controlPointsVectorPos)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, transform.position);
-			pointsVectorPos = glm::vec3(model * glm::vec4(pointsVectorPos, 1.0));
-		}
-	}
-	TransformFromGlmToEigen();
-}
-
-void Spline::TransformFromGlmToEigen()
-{
-	splineModel->controlPoints.clear();
-	splineModel->controlPoints.reserve(m_controlPoints.size());
-	for (const auto& controlPoint : m_controlPoints)
-	{
-		splineModel->controlPoints.emplace_back(controlPoint.x, controlPoint.y, controlPoint.z);
-	}
-
-	splineModel->controlPointsVectorDir.clear();
-	splineModel->controlPointsVectorDir.reserve(m_controlPointsVectorDir.size());
-	for (const auto& vectorDir : m_controlPointsVectorDir)
-	{
-		splineModel->controlPointsVectorDir.emplace_back();
-		splineModel->controlPointsVectorDir.back().reserve(vectorDir.size());
-		for (const auto& vector : vectorDir)
-		{
-			splineModel->controlPointsVectorDir.back().emplace_back(vector.x, vector.y, vector.z);
-		}
-	}
-
-	splineModel->controlPointsVectorPos.clear();
-	splineModel->controlPointsVectorPos.reserve(m_controlPointsVectorPos.size());
-	for (const auto& vectorPos : m_controlPointsVectorPos)
-	{
-		splineModel->controlPointsVectorPos.emplace_back();
-		splineModel->controlPointsVectorPos.back().reserve(vectorPos.size());
-		for (const auto& vector : vectorPos)
-		{
-			splineModel->controlPointsVectorPos.back().emplace_back(vector.x, vector.y, vector.z);
-		}
-	}
 }
 
 void Spline::GenerateSplineMesh(const std::string& texPath, TriangleOrientation triangleOrientation)
@@ -310,30 +256,30 @@ void GenerateSurface(Spline& spline, const std::string& texPath)
 void GenerateEndoscope(Spline& spline, 
 					   Eigen::Vector3f posInit, 
 					   Eigen::Vector3f posEnd, 
-					   const int controlPoints, 
-					   const int vectorsPerControlPoint, 
+					   const int controlPointsCount, 
+					   const int vectorsPerControlPointCount, 
 					   const float radius) 
 {
-	spline.name = "Endoscope " + std::to_string(controlPoints);
+	spline.name = "Endoscope " + std::to_string(controlPointsCount);
 	spline.splineModel->uniformRadius = radius;
 
 	Eigen::Vector3f ptop = posEnd - posInit;
-	Eigen::Vector3f ptopn = ptop / (float)(controlPoints - 1);
-	spline.m_controlPoints.reserve(controlPoints);
-	spline.m_controlPointsVectorDir.resize(controlPoints);
-	spline.m_controlPointsVectorPos.resize(controlPoints);
+	Eigen::Vector3f ptopn = ptop / (float)(controlPointsCount - 1);
+	spline.m_controlPoints.reserve(controlPointsCount);
+	spline.m_controlPointsVectorDir.resize(controlPointsCount);
+	spline.m_controlPointsVectorPos.resize(controlPointsCount);
 	Eigen::Vector3f pci;
 	pci = posInit;
 
-	for (int i = 0; i < controlPoints; ++i)
+	for (int i = 0; i < controlPointsCount; ++i)
 	{
 		auto point = pci + ptopn * (float)i;
 		spline.m_controlPoints.emplace_back(point.x(), point.y(), point.z());
-		spline.m_controlPointsVectorDir[i].reserve(vectorsPerControlPoint);
-		spline.m_controlPointsVectorPos[i].reserve(vectorsPerControlPoint);
+		spline.m_controlPointsVectorDir[i].reserve(vectorsPerControlPointCount);
+		spline.m_controlPointsVectorPos[i].reserve(vectorsPerControlPointCount);
 	}
 
-	for (int i = 0; i < controlPoints; ++i) {
+	for (int i = 0; i < controlPointsCount; ++i) {
 		Eigen::Vector3f w = ptop; // rotation axis
 		w.normalize();
 		Eigen::Vector3f ortho = ptopn;
@@ -343,10 +289,9 @@ void GenerateEndoscope(Spline& spline,
 			ortho = ortho.cross(Eigen::Vector3f::UnitX()).normalized();
 
 		ortho *= radius;
-		constexpr float my_pi = float(3.14159265358979323846);
-		constexpr float degToRad = my_pi / float(180);
-		Eigen::Quaternionf qr(Eigen::AngleAxisf(-2.0f * my_pi / (float)vectorsPerControlPoint, w));
-		for (int j = 0; j < vectorsPerControlPoint; ++j)
+		constexpr float my_pi = std::numbers::pi_v<float>;
+		Eigen::Quaternionf qr(Eigen::AngleAxisf(-2.0f * my_pi / (float)vectorsPerControlPointCount, w));
+		for (int j = 0; j < vectorsPerControlPointCount; ++j)
 		{
 			spline.m_controlPointsVectorDir[i].emplace_back(ortho.x(), ortho.y(), ortho.z());
 			spline.m_controlPointsVectorPos[i].emplace_back(spline.m_controlPoints[i] + spline.m_controlPointsVectorDir[i].back());
@@ -354,7 +299,8 @@ void GenerateEndoscope(Spline& spline,
 		}
 	}
 
-	spline.TransformFromGlmToEigen();
+	spline.splineModel = std::make_shared<SplineModel>((float*)spline.m_controlPoints.data(), (float*)spline.m_controlPointsVectorDir.data(),
+		spline.m_controlPoints.size(), spline.m_controlPointsVectorDir.front().size());
 }
 
 
