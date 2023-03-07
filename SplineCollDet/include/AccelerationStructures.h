@@ -76,7 +76,7 @@ struct SplineCollDet
 
 	void ConstructLeavesBilinearSurfaceV7(SplineModel& splineModel, std::vector<NodeV7>& leaves) const;
 	NodeV7* BottomUpBVTreeV7(const std::vector<NodeV7*>& leaves, std::vector<NodeV7>& nodesCache);
-	void CollisionCheck(SplineModel endo, SplineModel colon);
+	void CollisionCheck(SplineModel& endo, SplineModel& colon);
 };
 
 void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel, const unsigned int startCPIndex,

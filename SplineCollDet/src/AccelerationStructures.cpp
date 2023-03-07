@@ -334,7 +334,7 @@ void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel,
 	vectorsOnP2.emplace_back(colonModel->controlPointsVectorPos[indexP2][0], colonModel->controlPointsVectorPos[indexP2][nVectorsPerControlPoint - 1]);
 }
 
-void SplineCollDet::CollisionCheck(SplineModel endo, SplineModel colon)
+void SplineCollDet::CollisionCheck(SplineModel& endo, SplineModel& colon)
 {
 	collisionResults.collisionVectors.clear();
 	collisionResults.broadPhaseEndoColonClosestSplinePoints.clear();

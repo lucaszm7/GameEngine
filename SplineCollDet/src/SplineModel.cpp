@@ -10,24 +10,20 @@ SplineModel::SplineModel(const float* pControlPoints,
 		if (controlPointsCount == 0 || vectorsPerControlPointsCount == 0)
 			throw std::exception("No Control Points passed to initialize Spline Model");
 
-		controlPoints.reserve(controlPointsCount);
+		controlPoints = { (Eigen::Vector3f*)pControlPoints , (Eigen::Vector3f*)pControlPoints + controlPointsCount };
+
 		controlPointsVectorDir.resize(controlPointsCount);
 		controlPointsVectorPos.resize(controlPointsCount);
 
-		for (unsigned int i = 0; i < controlPointsCount * 3; i += 3)
-		{
-			controlPoints.emplace_back(pControlPoints[i], pControlPoints[i + 1], pControlPoints[i + 2]);
-		}
-
 		for (unsigned int i = 0; i < controlPointsCount; ++i)
 		{
-			controlPointsVectorDir[i].reserve(vectorsPerControlPointsCount);
-			controlPointsVectorPos[i].reserve(vectorsPerControlPointsCount);
+			controlPointsVectorDir.at(i).reserve(vectorsPerControlPointsCount);
+			controlPointsVectorPos.at(i).reserve(vectorsPerControlPointsCount);
 
 			for (unsigned int j = 0; j < vectorsPerControlPointsCount * 3; j += 3)
 			{
-				controlPointsVectorDir[i].emplace_back(pControlPointsVectorDir[j], pControlPointsVectorDir[j + 1], pControlPointsVectorDir[j + 2]);
-				controlPointsVectorPos[i].push_back(this->controlPoints[i] + this->controlPointsVectorDir[i].back());
+				controlPointsVectorDir.at(i).emplace_back(pControlPointsVectorDir[j], pControlPointsVectorDir[j + 1], pControlPointsVectorDir[j + 2]);
+				controlPointsVectorPos.at(i).push_back(this->controlPoints.at(i) + this->controlPointsVectorDir.at(i).back());
 			}
 		}
 	}
