@@ -85,14 +85,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine\include;$(ProjectDir)src\vendor;$(SolutionDir)SplineCollDet\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine\include;$(ProjectDir)src\vendor;$(SolutionDir)SplineCollDet\include;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine\include;$(ProjectDir)src\vendor;$(SolutionDir)SplineCollDet\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine\include;$(ProjectDir)src\vendor;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
@@ -147,8 +147,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;SplineCollDet.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;SplineCollisionDetection.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\$(Platform)\;$(SolutionDir)bin\SplineCollDet\Release\x64\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,9 +168,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;SplineCollDet.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\$(Platform)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;SplineCollisionDetection.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\;$(SolutionDir)bin\SplineCollDet\Release\$(Platform)\;$(SolutionDir)bin\SplineCollDet\Release\x64\</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>..\build.ps1</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\IndexBuffer.cpp" />
