@@ -54,6 +54,10 @@ void InitImGui(GLFWwindow* window);
 void UpdateImGui();
 void OnImGui(Spline& spline);
 void CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor = 0.05);
+void DrawNode(NodeV7* node, Line* lines);
+void DrawAABB(AABB* aabb, Line* lines);
+void EnableCullFace();
+void DisableCullFace();
 
 
 static unsigned int screenWidth = 800;
@@ -71,6 +75,8 @@ bool debugControlPointsColon = false;
 bool debugControlPointsEndo = false;
 
 bool hasCollisionDetection = true;
+bool isDrawingMeshes = true;
+bool drawAABB = false;
 
 int main()
 {
@@ -131,11 +137,11 @@ int main()
 
     // Model backpack("resources/models/backpack/backpack.obj");
 
-    Spline spline("resources/models/cilinder.txt");
+    Spline spline("resources/models/VolumetricSpline.txt");
     spline.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
 
-    Spline endo("resources/models/littleCilinder.txt");
-    endo.GenerateSplineMesh("resources/textures/wall.jpg", TriangleOrientation::ClockWise);
+    Spline endo("resources/models/VolumetricEndoscope.txt");
+    endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::CounterClockWise);
 
     SplineCollDet collDet;
 
@@ -167,11 +173,11 @@ int main()
     InitImGui(window);
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+
+    EnableCullFace();
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -205,16 +211,6 @@ int main()
         lightSourceShader.Bind();
         lightSourceShader.SetUniformMatrix4fv("view", view);
         lightSourceShader.SetUniformMatrix4fv("projection", projection);
-        for (const auto& pointLight : pointLights)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLight.position);
-            model = glm::scale(model, glm::vec3(0.2f));
-            lightSourceShader.SetUniformMatrix4fv("model", model);
-            lightSourceShader.SetUniform3f("lightColor", pointLight.GetLightColor());
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
 
         line->m_vertices.clear();
         lightSourceShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
@@ -223,6 +219,7 @@ int main()
         {
             if (debugControlPointsEndo)
             {
+                line->m_vertices.clear();
                 for (int i = 0; i < endoSplineModel->controlPoints.size() - 1; ++i)
                 {
                     line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
@@ -236,9 +233,13 @@ int main()
                         line->m_vertices.push_back(endoSplineModel->controlPointsVectorPos[i][j]);
                     }
                 }
+                line->Buffer();
+                lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
+                line->Draw();
             }
             if (debugControlPointsColon)
             {
+                line->m_vertices.clear();
                 for (int i = 0; i < colonSplineModel->controlPoints.size() - 1; ++i)
                 {
                     line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
@@ -252,10 +253,10 @@ int main()
                         line->m_vertices.push_back(colonSplineModel->controlPointsVectorPos[i][j]);
                     }
                 }
+                line->Buffer();
+                lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
+                line->Draw();
             }
-            line->Buffer();
-            lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
-            line->Draw();
         }
 
         if (debugCollDet && hasCollisionDetection)
@@ -270,7 +271,20 @@ int main()
             line->Draw();
         }
 
+        if (drawAABB)
+        {
+            line->m_vertices.clear();
+            DrawNode(collDet.rootColon, line);
+            line->Buffer();
+            lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
+            line->Draw();
 
+            line->m_vertices.clear();
+            DrawNode(collDet.rootEndo, line);
+            line->Buffer();
+            lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
+            line->Draw();
+        }
 
         lightingShader.Bind();
 
@@ -287,14 +301,26 @@ int main()
         lightingShader.SetUniformLight(pointLights);
 
         // backpack.Draw(lightingShader);
-        spline.Draw(lightingShader);
-        endo.Draw(lightingShader);
+
+        if (isDrawingMeshes)
+        {
+            spline.Draw(lightingShader);
+            endo.Draw(lightingShader);
+        }
 
         ImGui::Begin("Scene");
         {
             ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
 
             ImGui::Checkbox("Turn Collision Detection", &hasCollisionDetection);
+            ImGui::Checkbox("Draw Meshs", &isDrawingMeshes);
+            ImGui::Checkbox("Draw AABBs", &drawAABB);
+            if (ImGui::Button("Enable Cull Face"))
+                EnableCullFace();
+            ImGui::SameLine();
+            if (ImGui::Button("Disable Cull Face"))
+                DisableCullFace();
+
             ImGui::Text("Collisions Count %d", collDet.collisionResults.collisionVectors.size());
             ImGui::Text("Collisions Time Taken: %f ms", collDetTime.ResultMs());
 
@@ -368,6 +394,72 @@ int main()
     return 0;
 }
 
+void DrawNode(NodeV7* node, Line* lines)
+{
+    DrawAABB(&(node->bv), lines);
+
+    if (node->type != NodeType::LEAF)
+    {
+        if (node->left != nullptr)
+            DrawNode(node->left, lines);
+        if (node->right != nullptr)
+            DrawNode(node->right, lines);
+    }
+}
+
+void EnableCullFace()
+{
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+}
+
+void DisableCullFace()
+{
+    glDisable(GL_CULL_FACE);
+}
+
+void DrawAABB(AABB* aabb, Line* lines)
+{
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->min.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->min.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
+
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
+    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
+
+
+}
+
 void CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor)
 {
     std::ofstream file(filePath);
@@ -419,6 +511,10 @@ void processInputs(GLFWwindow* window, double deltaTime)
         camera.ProcessKeyboard(CamMovement::DOWN, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

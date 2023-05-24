@@ -253,54 +253,6 @@ void GenerateSurface(Spline& spline, const std::string& texPath)
 	spline.mesh.SetupMesh(vertices, indices, textures);
 }
 
-void GenerateEndoscope(Spline& spline, 
-					   Eigen::Vector3f posInit, 
-					   Eigen::Vector3f posEnd, 
-					   const int controlPointsCount, 
-					   const int vectorsPerControlPointCount, 
-					   const float radius) 
-{
-	spline.name = "Endoscope " + std::to_string(controlPointsCount);
-	spline.splineModel->uniformRadius = radius;
 
-	Eigen::Vector3f ptop = posEnd - posInit;
-	Eigen::Vector3f ptopn = ptop / (float)(controlPointsCount - 1);
-	spline.m_controlPoints.reserve(controlPointsCount);
-	spline.m_controlPointsVectorDir.resize(controlPointsCount);
-	spline.m_controlPointsVectorPos.resize(controlPointsCount);
-	Eigen::Vector3f pci;
-	pci = posInit;
-
-	for (int i = 0; i < controlPointsCount; ++i)
-	{
-		auto point = pci + ptopn * (float)i;
-		spline.m_controlPoints.emplace_back(point.x(), point.y(), point.z());
-		spline.m_controlPointsVectorDir[i].reserve(vectorsPerControlPointCount);
-		spline.m_controlPointsVectorPos[i].reserve(vectorsPerControlPointCount);
-	}
-
-	for (int i = 0; i < controlPointsCount; ++i) {
-		Eigen::Vector3f w = ptop; // rotation axis
-		w.normalize();
-		Eigen::Vector3f ortho = ptopn;
-		if (ortho.y() == 0.0f && ortho.z() == 0.0f)
-			ortho = ortho.cross(Eigen::Vector3f::UnitY()).normalized();
-		else
-			ortho = ortho.cross(Eigen::Vector3f::UnitX()).normalized();
-
-		ortho *= radius;
-		constexpr float my_pi = std::numbers::pi_v<float>;
-		Eigen::Quaternionf qr(Eigen::AngleAxisf(-2.0f * my_pi / (float)vectorsPerControlPointCount, w));
-		for (int j = 0; j < vectorsPerControlPointCount; ++j)
-		{
-			spline.m_controlPointsVectorDir[i].emplace_back(ortho.x(), ortho.y(), ortho.z());
-			spline.m_controlPointsVectorPos[i].emplace_back(spline.m_controlPoints[i] + spline.m_controlPointsVectorDir[i].back());
-			ortho = qr * ortho;
-		}
-	}
-
-	spline.splineModel = std::make_shared<SplineModel>((float*)spline.m_controlPoints.data(), (float*)spline.m_controlPointsVectorDir.data(),
-		spline.m_controlPoints.size(), spline.m_controlPointsVectorDir.front().size());
-}
 
 

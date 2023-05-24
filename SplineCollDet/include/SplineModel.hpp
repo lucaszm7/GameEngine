@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <numbers>
 
 #include <GLM/glm.hpp>
 #include <Eigen/Core>
@@ -20,6 +21,12 @@ struct SplineModel
 				const float* controlPointsVectorDir,
 				unsigned int controlPointsCount,
 				unsigned int vectorsPerControlPointsCount);
+
+	SplineModel(Eigen::Vector3f posInit,
+				Eigen::Vector3f posEnd,
+				const int controlPointsCount,
+				const int vectorsPerControlPointCount,
+				const float radius);
 
 	std::vector<Eigen::Vector3f> controlPoints;
 	std::vector<std::vector<Eigen::Vector3f>> controlPointsVectorDir;

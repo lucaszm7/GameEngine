@@ -1,7 +1,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <numbers>
 
 #include "mesh.h"
 #include "SplineModel.hpp"

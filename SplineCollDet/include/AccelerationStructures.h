@@ -67,6 +67,9 @@ struct SplineCollDet
 	std::vector<NodeV7> leavesEndo;
 	std::vector<NodeV7> leavesColon;
 
+	NodeV7* rootEndo = nullptr;
+	NodeV7* rootColon = nullptr;
+
 	std::vector<NodeV7> nodesEndo;
 	std::vector<NodeV7> nodesColon;
 

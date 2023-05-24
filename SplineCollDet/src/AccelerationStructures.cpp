@@ -348,13 +348,13 @@ void SplineCollDet::CollisionCheck(SplineModel& endo, SplineModel& colon)
 	leavesPointer.reserve(leavesEndo.size());	
 	for (NodeV7& pLeaveEndo : leavesEndo)
 		leavesPointer.push_back(&pLeaveEndo);	
-	NodeV7* rootEndo = BottomUpBVTreeV7(leavesPointer, nodesEndo);
+	this->rootEndo = BottomUpBVTreeV7(leavesPointer, nodesEndo);
 
 	leavesPointer.clear();
 	leavesPointer.reserve(leavesColon.size());	
 	for (NodeV7& pLeaveColon : leavesColon)
 		leavesPointer.push_back(&pLeaveColon);	
-	NodeV7* rootColon = BottomUpBVTreeV7(leavesPointer, nodesColon);
+	this->rootColon = BottomUpBVTreeV7(leavesPointer, nodesColon);
 
 	// NARROW PHASE
 	BVHCollisionBilinearSurfaceV7(rootEndo, rootColon, collisionResults);
