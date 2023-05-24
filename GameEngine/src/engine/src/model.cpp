@@ -1,35 +1,4 @@
-#pragma once
-
-#include <string>
-#include <vector>
-
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
-#include "assimp/postprocess.h"
-
-#include "shader.h"
-#include "mesh.h"
-
-struct Model
-{
-public:
-	Model(const std::string& path)
-	{
-		loadModel(path);
-	}
-	void Draw(Shader& shader);
-	void OnImGui();
-	std::vector<Mesh> meshes;
-	std::string directory;
-	std::vector<Texture> textures_loaded;
-
-	Transform transform;
-private:
-	void loadModel(const std::string& path);
-	void processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMaterialTexture(aiMaterial* material, aiTextureType type, Texture::Type textureType);
-};
+#include "model.h"
 
 void Model::Draw(Shader& shader)
 {
@@ -97,7 +66,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		Vertex vertex;
 		vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 
-		if(mesh->HasNormals())
+		if (mesh->HasNormals())
 			vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
 
 		if (mesh->mTextureCoords[0]) // Has texture coords
@@ -158,4 +127,3 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 	}
 	return textures;
 }
-

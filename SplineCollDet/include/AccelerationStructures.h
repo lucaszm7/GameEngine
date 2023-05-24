@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BoundingVolumes.h"
-#include "collDet/SplineModel.hpp"
+#include "SplineModel.hpp"
 #include "CatmullRom.h"
 #include "SplineCollDet.h"
 
@@ -14,7 +14,7 @@
 
 constexpr auto EPSILON = 0.000001;
 
-enum class TYPE
+enum class NodeType
 {
 	NODE, 
 	LEAF
@@ -22,7 +22,7 @@ enum class TYPE
 
 struct NodeV7
 {
-	TYPE type;
+	NodeType type;
 	NodeV7* left;
 	NodeV7* right;
 	AABB bv;
@@ -76,7 +76,7 @@ struct SplineCollDet
 
 	void ConstructLeavesBilinearSurfaceV7(SplineModel& splineModel, std::vector<NodeV7>& leaves) const;
 	NodeV7* BottomUpBVTreeV7(const std::vector<NodeV7*>& leaves, std::vector<NodeV7>& nodesCache);
-	void CollisionCheck(SplineModel endo, SplineModel colon);
+	void CollisionCheck(SplineModel& endo, SplineModel& colon);
 };
 
 void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel, const unsigned int startCPIndex,

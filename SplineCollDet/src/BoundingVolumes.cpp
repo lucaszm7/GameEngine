@@ -1,4 +1,4 @@
-#include "collDet/BoundingVolumes.h"
+#include "BoundingVolumes.h"
 
 int TestAABBs(const AABB& a, const AABB& b)
 {

@@ -83,16 +83,16 @@
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine;$(ProjectDir)src\vendor</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine\include;$(ProjectDir)src\vendor;$(SolutionDir)SplineCollDet\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine;$(ProjectDir)src\vendor</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src;$(ProjectDir)src\core;$(ProjectDir)src\engine\include;$(ProjectDir)src\vendor;$(SolutionDir)SplineCollDet\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
@@ -147,8 +147,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;SplineCollDet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\$(Platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,23 +168,20 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;kernel32.lib;user32.lib;SplineCollDet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\$(Platform)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\collDet\AccelerationStructures.cpp" />
-    <ClCompile Include="src\collDet\BoundingVolumes.cpp" />
-    <ClCompile Include="src\collDet\CatmullRom.cpp" />
-    <ClCompile Include="src\collDet\SplineCollDet.cpp" />
-    <ClCompile Include="src\collDet\SplineModel.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
     <ClCompile Include="src\core\Texture.cpp" />
     <ClCompile Include="src\core\VertexArray.cpp" />
     <ClCompile Include="src\core\VertexBuffer.cpp" />
-    <ClCompile Include="src\engine\line.cpp" />
-    <ClCompile Include="src\engine\mesh.cpp" />
+    <ClCompile Include="src\engine\src\line.cpp" />
+    <ClCompile Include="src\engine\src\mesh.cpp" />
+    <ClCompile Include="src\engine\src\model.cpp" />
+    <ClCompile Include="src\engine\src\Spline.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vendor\IMGUI\imgui.cpp" />
     <ClCompile Include="src\vendor\IMGUI\imgui_demo.cpp" />
@@ -201,24 +198,20 @@
     <None Include="resources\shaders\vertex.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\collDet\AccelerationStructures.h" />
-    <ClInclude Include="src\collDet\BoundingVolumes.h" />
-    <ClInclude Include="src\collDet\CatmullRom.h" />
-    <ClInclude Include="src\collDet\SplineCollDet.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />
     <ClInclude Include="src\core\Shader.h" />
     <ClInclude Include="src\core\Texture.h" />
     <ClInclude Include="src\core\VertexArray.h" />
     <ClInclude Include="src\core\VertexBuffer.h" />
     <ClInclude Include="src\core\VertexBufferLayout.h" />
-    <ClInclude Include="src\engine\camera.h" />
-    <ClInclude Include="src\engine\light.h" />
-    <ClInclude Include="src\engine\line.h" />
-    <ClInclude Include="src\engine\material.h" />
-    <ClInclude Include="src\engine\mesh.h" />
-    <ClInclude Include="src\engine\model.h" />
-    <ClInclude Include="src\engine\Timer.hpp" />
-    <ClInclude Include="src\collDet\SplineModel.hpp" />
+    <ClInclude Include="src\engine\include\camera.h" />
+    <ClInclude Include="src\engine\include\light.h" />
+    <ClInclude Include="src\engine\include\line.h" />
+    <ClInclude Include="src\engine\include\material.h" />
+    <ClInclude Include="src\engine\include\mesh.h" />
+    <ClInclude Include="src\engine\include\model.h" />
+    <ClInclude Include="src\engine\include\Spline.hpp" />
+    <ClInclude Include="src\engine\include\Timer.hpp" />
     <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />

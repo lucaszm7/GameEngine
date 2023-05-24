@@ -1,12 +1,14 @@
 #include "AccelerationStructures.h"
 #include <iostream>
-#include "engine/Timer.hpp"
 
 std::vector<Eigen::Vector3f>& CollisionResult::CalcCollisionPointsBilinear()
 {	
 	const float radius2 = endoRadius * endoRadius;
 
 	// Iterador pelos candidatos a colisão dos pontos interpolados do endoscopio
+	if (broadPhaseEndoColonClosestSplinePoints.empty())
+		return collisionVectors;
+
 	auto itBroadPhaseCandidates = broadPhaseEndoColonClosestSplinePoints.begin();
 
 	// Numero de vetores por pontos de controle do colon
@@ -122,7 +124,7 @@ NodeV7* SplineCollDet::BottomUpBVTreeV7(const std::vector<NodeV7*>& leavesPointe
 			if (i + 1 < oldLayer->size())
 			{
 				NodeV7& newPair = nodesCache[nodeCounter++];
-				newPair.type = TYPE::NODE;
+				newPair.type = NodeType::NODE;
 				newPair.left = (*oldLayer)[i];
 				newPair.right = (*oldLayer)[i+1];
 				AABBEnclosingAABBs((*oldLayer)[i]->bv, (*oldLayer)[i+1]->bv, newPair.bv);
@@ -165,7 +167,7 @@ void SplineCollDet::ConstructLeavesBilinearSurfaceV7(SplineModel& splineModel, s
 		leaves[i].controlPoints.push_back(p3);
 		leaves[i].radiusRod = splineModel.uniformRadius;
 
-		leaves[i].type = TYPE::LEAF;
+		leaves[i].type = NodeType::LEAF;
 		leaves[i].left = nullptr;
 		leaves[i].right = nullptr;
 
@@ -185,7 +187,7 @@ void BVHCollisionBilinearSurfaceV7(NodeV7* endoNode, NodeV7* colonNode, Collisio
 	if (!TestAABBs(endoNode->bv,colonNode->bv))
 		return;
 
-	if (endoNode->type == TYPE::LEAF && colonNode->type == TYPE::LEAF)
+	if (endoNode->type == NodeType::LEAF && colonNode->type == NodeType::LEAF)
 	{
 		if (endoNode->splinePoints.empty())
 			CatmullRom::Evaluate(endoNode->controlPoints, endoNode->splinePoints, collResult.nInterpolatedControlPoints, 1.0);
@@ -198,7 +200,7 @@ void BVHCollisionBilinearSurfaceV7(NodeV7* endoNode, NodeV7* colonNode, Collisio
 	}
 	else
 	{
-		if (endoNode->type == TYPE::LEAF)
+		if (endoNode->type == NodeType::LEAF)
 		{
 			BVHCollisionBilinearSurfaceV7(endoNode, colonNode->left, collResult);
 			BVHCollisionBilinearSurfaceV7(endoNode, colonNode->right, collResult);
@@ -215,7 +217,7 @@ void BVHCollisionBilinearSurfaceParallelV7(NodeV7* a, NodeV7* b, CollisionResult
 {
 	if (!TestAABBs(a->bv,b->bv))
 		return;
-	if (a->type == TYPE::LEAF && b->type == TYPE::LEAF)
+	if (a->type == NodeType::LEAF && b->type == NodeType::LEAF)
 	{
 		if (a->splinePoints.empty())
 			CatmullRom::Evaluate(a->controlPoints, a->splinePoints, 10, 1.0);
@@ -228,7 +230,7 @@ void BVHCollisionBilinearSurfaceParallelV7(NodeV7* a, NodeV7* b, CollisionResult
 	}
 	else
 	{
-		if (a->type == TYPE::LEAF)
+		if (a->type == NodeType::LEAF)
 		{
 			//if (b->left != nullptr)
 				BVHCollisionBilinearSurfaceParallelV7(a, b->left, result);
@@ -250,20 +252,20 @@ void BVHCollisionBilinearSurfaceParallelV7(NodeV7* a, NodeV7* b, CollisionResult
 // Onde botar o resultado, hash table controlRadiiMap Vector3 - pair(Vector3, Vector3)
 // Pontos de interpolação da folha
 // nSegments = {5} ??? Não sei pq
-
+// 
 // Esta criando os vetores por pontos de controle para os pontos interpolados
 // Passa por os pontos interpolados de [1 a 5] (4), calculando a interpolação dos raios por cada ponto de interpolação
 // gerando um par associado do raio com o raio anterior
-
+// 
 // No final o controlRadiiMap tem um mapeamento de ponteiros de cada ponto da interpoalção
 // com um vetor de pares de raios (raio anterior e atual)
-
+// 
 // Depois ele só vai colocando no mapeamento P1 e P2 que já eram conhecidos
-
+// 
 // |  | | | |  |
 // p1 - - - - p2
 // |  | | | |  |
-void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel, 
+void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel,
 									   const unsigned int startCPIndex,
 									   std::unordered_map<Eigen::Vector3f*, std::vector<std::pair<Eigen::Vector3f,Eigen::Vector3f>>>& colonRadiiMap,
 	                                   std::vector<Eigen::Vector3f>& splinePoints, 
@@ -332,11 +334,8 @@ void LinearInterpolateRadiusBilinearV6(const SplineModel* colonModel,
 	vectorsOnP2.emplace_back(colonModel->controlPointsVectorPos[indexP2][0], colonModel->controlPointsVectorPos[indexP2][nVectorsPerControlPoint - 1]);
 }
 
-void SplineCollDet::CollisionCheck(SplineModel endo, SplineModel colon)
+void SplineCollDet::CollisionCheck(SplineModel& endo, SplineModel& colon)
 {
-	endo.TransformPoints();
-	colon.TransformPoints();
-
 	collisionResults.collisionVectors.clear();
 	collisionResults.broadPhaseEndoColonClosestSplinePoints.clear();
 	collisionResults.colonInterpolatedVectorsSplinePoints.clear();

@@ -1,4 +1,4 @@
-#include "engine/line.h"
+#include "line.h"
 
 Line::Line(int maxVertices, std::vector<Eigen::Vector3f> vertices) :
 	m_maxVertices(maxVertices), m_vertices(vertices), m_primitiveMode(GL_LINES)
@@ -26,7 +26,7 @@ Line::Line(int maxVertices, std::vector<Eigen::Vector3f> vertices) :
 void Line::Buffer()
 {
 	unsigned int vertexBufferSize = m_vertices.size() * sizeof(Eigen::Vector3f);
-	if (vertexBufferSize <= m_vertexBufferSize)
+	if (vertexBufferSize <= m_vertexBufferSize && vertexBufferSize > 0)
 	{
 		// Can use same buffer
 		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
@@ -56,7 +56,8 @@ void Line::CreateBuffer()
 	glBindVertexArray(m_VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, m_vertices[0].data(), GL_DYNAMIC_DRAW);
+	if(vertexBufferSize > 0)
+		glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, m_vertices[0].data(), GL_DYNAMIC_DRAW);
 	// vertex position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Eigen::Vector3f), (GLvoid*)0);
