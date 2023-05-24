@@ -9,7 +9,19 @@ param (
 Write-Host "[LOG] Building Game Engine and its dependencies..." -f Blue;
 Write-Host "[LOG] Building Dependencie: Spline Collision Detection..." -f Blue;
 
-cd splinecollisiondetection;
+if (Test-Path "splinecollisiondetection")
+{
+    cd splinecollisiondetection;
+}
+else
+{
+    Write-Host "[ERROR] Has not downloaded submodule Spline Collision Detection" -f Red;
+    Write-Host "[LOG] Downloading submodule..." -f Blue;
+    git submodule init;
+    git submodule update;
+    cd splinecollisiondetection;
+    Write-Host "[LOG] Download Sucess!" -f Green;
+}
 .\build.ps1 $False;
 if ($?)
 {
