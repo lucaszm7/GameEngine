@@ -1,0 +1,3 @@
+[submodule "splinecollisiondetection"]
+	path = splinecollisiondetection
+	url = https://gitlab.com/ufrgs-sim/splinecollisiondetection
