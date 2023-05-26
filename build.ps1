@@ -1,9 +1,8 @@
 # Install Dependencies
 [CmdletBinding()]
 param (
-    [Parameter()]
-    [Boolean] 
-    $installDependencies=$true
+    [Parameter()] [Boolean] $debug=$false
+    [Parameter()] [Boolean] $installDependencies=$true
 )
 
 Write-Host "[LOG] Building Game Engine and its dependencies..." -f Blue;

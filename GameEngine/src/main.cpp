@@ -141,7 +141,7 @@ int main()
     spline.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
 
     Spline endo("resources/models/VolumetricEndoscope.txt");
-    endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::CounterClockWise);
+    endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::ClockWise);
 
     SplineCollDet collDet;
 
@@ -274,13 +274,13 @@ int main()
         if (drawAABB)
         {
             line->m_vertices.clear();
-            DrawNode(collDet.rootColon, line);
+            // DrawNode(collDet.rootColon, line);
             line->Buffer();
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
             line->Draw();
 
             line->m_vertices.clear();
-            DrawNode(collDet.rootEndo, line);
+            // DrawNode(collDet.rootEndo, line);
             line->Buffer();
             lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
             line->Draw();
