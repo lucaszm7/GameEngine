@@ -40,7 +40,7 @@ if ($?)
     }
     else
     {
-        makdir "bin/SplineCollDet/Release/x64";
+        mkdir "bin/SplineCollDet/Release/x64";
         Copy-Item splinecollisiondetection\bin\Rel_LIB\x64\SplineCollisionDetection.lib bin\SplineCollDet\Release\x64\;
     }
     if($?)

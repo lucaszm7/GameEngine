@@ -20,6 +20,12 @@ Spline::Spline(const std::string& filePath)
 		this->m_controlPointsVectorDir.resize(controlPoints);
 		this->m_controlPointsVectorPos.resize(controlPoints);
 
+		std::vector<float> pControlPoints;
+		std::vector<float> pControlPointsVecDir;
+
+		pControlPoints.reserve(controlPoints);
+		pControlPointsVecDir.reserve(controlPoints * (vectorsPerControlPoint + 1));
+
 		for (unsigned int i = 0; i < controlPoints; ++i)
 		{
 			float x, y, z;
@@ -30,6 +36,10 @@ Spline::Spline(const std::string& filePath)
 			this->m_controlPointsVectorDir[i].reserve(vectorsPerControlPoint + 1);
 			this->m_controlPointsVectorPos[i].reserve(vectorsPerControlPoint + 1);
 
+			pControlPoints.emplace_back(x * scalerFactor);
+			pControlPoints.emplace_back(y * scalerFactor);
+			pControlPoints.emplace_back(z * scalerFactor);
+
 			for (unsigned int j = 0; j < vectorsPerControlPoint; ++j)
 			{
 				std::getline(file, line);
@@ -37,12 +47,18 @@ Spline::Spline(const std::string& filePath)
 				issControlRadii >> x >> y >> z;
 				this->m_controlPointsVectorDir[i].emplace_back(x * scalerFactor, z * scalerFactor, y * scalerFactor);
 				this->m_controlPointsVectorPos[i].push_back(this->m_controlPoints.back() + this->m_controlPointsVectorDir[i].back());
+			
+				pControlPointsVecDir.emplace_back(x * scalerFactor);
+				pControlPointsVecDir.emplace_back(y * scalerFactor);
+				pControlPointsVecDir.emplace_back(z * scalerFactor);
 			}
 		}
 
 		file.close();
-		this->splineModel = std::make_shared<SplineModel>((float*)m_controlPoints.data(), (float*)m_controlPointsVectorDir.data(), 
-																  m_controlPoints.size(), m_controlPointsVectorDir.front().size());
+		unsigned int nControlPointsCount = m_controlPoints.size();
+		unsigned int nVectorsPerControlPointCount = m_controlPointsVectorDir.front().size();
+		this->splineModel = std::make_shared<SplineModel>((float*)pControlPoints.data(), (float*)pControlPointsVecDir.data(),
+														  nControlPointsCount, nVectorsPerControlPointCount);
 		std::cout << "INFO: colon spline readed:\n";
 	}
 	else

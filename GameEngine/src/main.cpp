@@ -137,8 +137,8 @@ int main()
 
     // Model backpack("resources/models/backpack/backpack.obj");
 
-    Spline spline("resources/models/VolumetricSpline.txt");
-    spline.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
+    Spline colon("resources/models/VolumetricSpline.txt");
+    colon.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
 
     Spline endo("resources/models/VolumetricEndoscope.txt");
     endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::ClockWise);
@@ -196,7 +196,7 @@ int main()
         lastFrame = currentFrame;
 
         auto endoSplineModel = endo.GetSplineModelTransform();
-        auto colonSplineModel = spline.GetSplineModelTransform();
+        auto colonSplineModel = colon.GetSplineModelTransform();
 
         Timer collDetTime; 
         if (hasCollisionDetection)
@@ -304,14 +304,14 @@ int main()
 
         if (isDrawingMeshes)
         {
-            spline.Draw(lightingShader);
+            colon.Draw(lightingShader);
             endo.Draw(lightingShader);
         }
 
         ImGui::Begin("Scene");
         {
             ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
-
+            ImGui::Text("Radius: %.2f", endoSplineModel->uniformRadius);
             ImGui::Checkbox("Turn Collision Detection", &hasCollisionDetection);
             ImGui::Checkbox("Draw Meshs", &isDrawingMeshes);
             ImGui::Checkbox("Draw AABBs", &drawAABB);
@@ -330,7 +330,7 @@ int main()
 
             ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 1000);
 
-            OnImGui(spline);
+            OnImGui(colon);
             OnImGui(endo);
 
             if (ImGui::TreeNode("Lights"))
