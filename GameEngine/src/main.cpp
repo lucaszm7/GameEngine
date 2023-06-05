@@ -52,10 +52,10 @@ void InitImGui(GLFWwindow* window);
 void UpdateImGui();
 
 
-static std::shared_ptr<unsigned int> pScreenWidth;
-static std::shared_ptr<unsigned int> pScreenHeight;
+std::shared_ptr<unsigned int> pScreenWidth;
+std::shared_ptr<unsigned int> pScreenHeight;
 
-static std::shared_ptr<Camera> pCamera;
+std::shared_ptr<Camera> pCamera;
 
 static bool firstMouse = true;
 static float lastX = 0.0f;
@@ -97,6 +97,8 @@ int main()
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
 
+    try
+    {
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -115,7 +117,10 @@ int main()
         ImGui::Begin(m_MainMenu->c_SceneName.c_str());
         
         bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
+            ImGui::Separator();
         ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
+            ImGui::Separator();
+
         if (ResetToMainMenu)
         {
             delete m_CurrentScene;
@@ -132,6 +137,11 @@ int main()
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+    }
+    }
+    catch (std::exception e)
+    {
+        std::cout << e.what() << std::endl;
     }
 
     // Cleanup
