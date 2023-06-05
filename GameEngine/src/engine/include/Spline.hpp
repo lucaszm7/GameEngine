@@ -33,7 +33,3 @@ struct Spline
 	void GenerateSplineMesh(const std::string& texPath, TriangleOrientation triangleOrientation);
 	std::shared_ptr<SplineModel> GetSplineModelTransform();
 };
-
-void GenerateSurface(Spline& spline, const std::string& texPath);
-void GenerateEndoscope(Spline& splineModel, Eigen::Vector3f posInit, Eigen::Vector3f posEnd,
-	const int controlPoints, const int vectorsPerControlPoint, const float radius);
