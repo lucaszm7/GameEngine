@@ -191,6 +191,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\scenes\SceneAssigment1.cpp" />
     <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
@@ -217,6 +218,7 @@
     <None Include="resources\shaders\vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\scenes\SceneAssigment1.h" />
     <ClInclude Include="src\engine\include\scene.h" />
     <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />

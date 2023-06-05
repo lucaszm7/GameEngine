@@ -37,6 +37,7 @@
 
 // Scenes
 #include "scenes/SceneSplineCollisionDetection.h"
+#include "scenes/SceneAssigment1.h"
 
 
 void processInputs(GLFWwindow* window, double deltaTime);
@@ -93,51 +94,52 @@ int main()
     m_MainMenu->pCamera = pCamera;
 
     m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
+    m_MainMenu->RegisterApp<SceneAssigment1>("POS CG - Assingment 1");
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
 
     try
     {
-    while (!glfwWindowShouldClose(window))
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        processInputs(window, deltaTime);
-
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        double currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
-
-        ImGui::Begin(m_MainMenu->c_SceneName.c_str());
-        
-        bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
-            ImGui::Separator();
-        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            ImGui::Separator();
-
-        if (ResetToMainMenu)
+        while (!glfwWindowShouldClose(window))
         {
-            delete m_CurrentScene;
-            m_CurrentScene = m_MainMenu;
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            processInputs(window, deltaTime);
+
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            double currentFrame = glfwGetTime();
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
+
+
+            ImGui::Begin(m_MainMenu->c_SceneName.c_str());
+
+            bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
+            ImGui::Separator();
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
+            ImGui::Separator();
+
+            if (ResetToMainMenu)
+            {
+                delete m_CurrentScene;
+                m_CurrentScene = m_MainMenu;
+                glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+                glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
+            }
+
+            m_CurrentScene->OnUpdate(deltaTime);
+            m_CurrentScene->OnImGuiRender();
+
+            ImGui::End();
+            UpdateImGui();
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
         }
-        
-        m_CurrentScene->OnUpdate(deltaTime);
-        m_CurrentScene->OnImGuiRender();
-
-        ImGui::End();
-        UpdateImGui();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
     }
     catch (std::exception e)
     {
@@ -153,7 +155,6 @@ int main()
     glfwTerminate();
     return 0;
 }
-
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
