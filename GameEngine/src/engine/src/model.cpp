@@ -27,7 +27,173 @@ void Model::OnImGui()
 	}
 }
 
-void Model::loadModel(const std::string& path)
+void Model::LoadCustomModel(const std::string& path)
+{
+	std::ifstream stream(path);
+	if (!stream)
+		throw new std::exception(std::string("Could not open file: " + path).c_str());
+
+	std::stringstream ss;
+	std::string line;
+
+	unsigned int nTriangles;
+	unsigned int nMaterials;
+
+	float r, g, b;
+
+	float shine;
+	std::string sHasText;
+	bool hasTexture;
+
+	std::getline(stream, line);
+	ss << line;
+	ss >> line >> line >> line >> directory;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> line >> nTriangles;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> line >> nMaterials;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> r >> g >> b;
+	glm::vec4 ambientColor(r, g, b, 1.0f);
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> r >> g >> b;
+	glm::vec4 diffuseColor(r, g, b, 1.0f);
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> r >> g >> b;
+	glm::vec4 specularColor(r, g, b, 1.0f);
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> shine;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> sHasText;
+
+	hasTexture = sHasText == "YES";
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+
+	int colorIndex;
+	float x, y, z;
+	float i, j, k;
+	float u = 0, v = 0;
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	std::vector<Texture> textures;
+
+	vertices.reserve(nTriangles * 3);
+	indices.reserve(nTriangles * 3);
+
+	unsigned int counter = 0;
+
+	for(int triCounter = 0; triCounter < nTriangles; ++triCounter)
+	{
+		Vertex v0;
+		Vertex v1;
+		Vertex v2;
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+		ss << line;
+		if (hasTexture)
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex >> u >> v;
+		}
+		else
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex;
+			u = 0.0f;
+			v = 0.0f;
+		}
+		v0.Position = { x, y, z };
+		v0.Normal = { i, j, k };
+		v0.TexCoord = { u, v };
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+		ss << line;
+		if (hasTexture)
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex >> u >> v;
+		}
+		else
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex;
+			u = 1.0f;
+			v = 0.0f;
+		}
+		v1.Position = { x, y, z };
+		v1.Normal = { i, j, k };
+		v1.TexCoord = { u, v };
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+		ss << line;
+		if (hasTexture)
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex >> u >> v;
+		}
+		else
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex;
+			u = 0.0f;
+			v = 1.0f;
+		}
+		v2.Position = { x, y, z };
+		v2.Normal = { i, j, k };
+		v2.TexCoord = { u, v };
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+
+		vertices.push_back(v0);
+		vertices.push_back(v1);
+		vertices.push_back(v2);
+
+		indices.push_back(counter++);
+		indices.push_back(counter++);
+		indices.push_back(counter++);
+	}
+
+	Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
+	textures.push_back(tex);
+
+	meshes.emplace_back(vertices, indices, textures);
+}
+
+void Model::LoadClassicModel(const std::string& path)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
