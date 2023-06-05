@@ -4,6 +4,7 @@
 
 #include "mesh.h"
 #include "SplineModel.hpp"
+#include <IMGUI/imgui.h>
 
 enum class TriangleOrientation
 {
@@ -30,6 +31,7 @@ struct Spline
 	std::string name;
 
 	void Draw(Shader& shader);
+	void OnImGui();
 	void GenerateSplineMesh(const std::string& texPath, TriangleOrientation triangleOrientation);
 	std::shared_ptr<SplineModel> GetSplineModelTransform();
 };

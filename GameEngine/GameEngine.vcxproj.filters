@@ -66,6 +66,9 @@
     <ClCompile Include="src\engine\src\Spline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
@@ -141,6 +144,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\include\Spline.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\include\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

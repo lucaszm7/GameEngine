@@ -16,7 +16,6 @@
 #include <GLM/glm.hpp>                  // GLM (Math Library)
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
-#include <assimp/Importer.hpp>
 
 // Core
 //#include "core/Shader.h"
@@ -27,6 +26,7 @@
 //#include "core/Texture.h"
 
 // Engine
+#include "scene.h"
 #include "camera.h"
 #include "light.h"
 // #include "material.h"
@@ -35,10 +35,8 @@
 #include "model.h"
 #include "Timer.hpp"
 
-// Spline Coll Det
-#include "Spline.hpp"
-// #include "spline/SplineModel.hpp"
-#include "AccelerationStructures.h"
+// Scenes
+#include "scenes/SceneSplineCollisionDetection.h"
 
 
 void processInputs(GLFWwindow* window, double deltaTime);
@@ -52,31 +50,17 @@ GLFWwindow* InitGLFW();
 void InitGLEW();
 void InitImGui(GLFWwindow* window);
 void UpdateImGui();
-void OnImGui(Spline& spline);
-void CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor = 0.05);
-void DrawNode(NodeV7* node, Line* lines);
-void DrawAABB(AABB* aabb, Line* lines);
-void EnableCullFace();
-void DisableCullFace();
 
 
-static unsigned int screenWidth = 800;
-static unsigned int screenHeight = 600;
+static std::shared_ptr<unsigned int> pScreenWidth;
+static std::shared_ptr<unsigned int> pScreenHeight;
 
-bool firstMouse = true;
+static std::shared_ptr<Camera> pCamera;
 
-float lastX = screenWidth / 2;
-float lastY = screenHeight / 2;
+static bool firstMouse = true;
+static float lastX = 0.0f;
+static float lastY = 0.0f;
 
-Camera camera;
-
-bool debugCollDet = true;
-bool debugControlPointsColon = false;
-bool debugControlPointsEndo = false;
-
-bool hasCollisionDetection = true;
-bool isDrawingMeshes = true;
-bool drawAABB = false;
 
 int main()
 {
@@ -86,101 +70,33 @@ int main()
     GLFWwindow* window = InitGLFW();
     InitGLEW();
     
-    Shader lightingShader    ("resources/shaders/vertex.shader",      "resources/shaders/fragment.shader");
-    Shader lightSourceShader ("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
-
-    std::vector<float> cubeVertices =
-    {
-        // positions
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
-
-    // Model backpack("resources/models/backpack/backpack.obj");
-
-    Spline colon("resources/models/VolumetricSpline.txt");
-    colon.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
-
-    Spline endo("resources/models/VolumetricEndoscope.txt");
-    endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::ClockWise);
-
-    SplineCollDet collDet;
-
-    Line* line = new Line(10000, collDet.collisionResults.collisionVectors);
-    line->m_vertices.reserve(10000);
-
-    VertexArray lightVAO;
-    lightVAO.Bind();
-    VertexBuffer lightVBO(&cubeVertices[0], static_cast<unsigned int>(cubeVertices.size() * sizeof(float)), GL_STATIC_DRAW);
-    VertexBufferLayout lightVBL;
-    lightVBL.Push<float>(3); // positions
-    lightVAO.AddBuffer(lightVBO, lightVBL);
-
-    glm::mat4 view;
-    glm::mat4 projection;
-
-    DirectionalLight dirLight( {1.0f, 1.0f, 1.0f}, { -0.2f, -1.0f, -0.3f });
-
-    std::vector<PointLight> pointLights =
-    {
-        { {0.3f, 0.3f, 0.3f}, { 0.7f,  0.2f,  2.0f}},
-        { {0.3f, 0.3f, 0.3f}, { 2.3f, -3.3f, -4.0f}},
-        { {0.3f, 0.3f, 0.3f}, {-4.0f,  2.0f, -12.0f}},
-        { {0.3f, 0.3f, 0.3f}, { 0.0f,  0.0f, -3.0f}}
-    };
-
-    SpotLight spotlight({1.0f, 1.0f, 1.0f}, camera.Position, camera.Front);
-
     InitImGui(window);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
-    EnableCullFace();
+    pScreenWidth = std::make_shared<unsigned int>(800);
+    pScreenHeight = std::make_shared<unsigned int>(600);
+
+    pCamera = std::make_shared<Camera>();
+
+    Scene_t* m_CurrentScene = nullptr;
+    Menu* m_MainMenu = new Menu(m_CurrentScene);
+    m_CurrentScene = m_MainMenu;
+
+    m_MainMenu->pScreenWidth = pScreenWidth;
+    m_MainMenu->pScreenHeight = pScreenHeight;
+    m_MainMenu->pCamera = pCamera;
+
+    m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
+
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -195,189 +111,23 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        auto endoSplineModel = endo.GetSplineModelTransform();
-        auto colonSplineModel = colon.GetSplineModelTransform();
 
-        Timer collDetTime; 
-        if (hasCollisionDetection)
-            collDet.CollisionCheck(*(endoSplineModel.get()), *(colonSplineModel.get()));
-        collDetTime.Stop();
-
-        view       = camera.GetViewMatrix();
-        projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
-
-        // Draw Light Source
-        lightVAO.Bind();
-        lightSourceShader.Bind();
-        lightSourceShader.SetUniformMatrix4fv("view", view);
-        lightSourceShader.SetUniformMatrix4fv("projection", projection);
-
-        line->m_vertices.clear();
-        lightSourceShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
-
-        if (debugControlPointsColon || debugControlPointsEndo)
+        ImGui::Begin(m_MainMenu->c_SceneName.c_str());
+        
+        bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
+        if (ResetToMainMenu)
         {
-            if (debugControlPointsEndo)
-            {
-                line->m_vertices.clear();
-                for (int i = 0; i < endoSplineModel->controlPoints.size() - 1; ++i)
-                {
-                    line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
-                    line->m_vertices.push_back(endoSplineModel->controlPoints[i + 1]);
-                }
-                for (int i = 0; i < endoSplineModel->controlPointsVectorPos.size(); ++i)
-                {
-                    for (int j = 0; j < endoSplineModel->controlPointsVectorPos[0].size(); ++j)
-                    {
-                        line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
-                        line->m_vertices.push_back(endoSplineModel->controlPointsVectorPos[i][j]);
-                    }
-                }
-                line->Buffer();
-                lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
-                line->Draw();
-            }
-            if (debugControlPointsColon)
-            {
-                line->m_vertices.clear();
-                for (int i = 0; i < colonSplineModel->controlPoints.size() - 1; ++i)
-                {
-                    line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
-                    line->m_vertices.push_back(colonSplineModel->controlPoints[i + 1]);
-                }
-                for (int i = 0; i < colonSplineModel->controlPointsVectorPos.size(); ++i)
-                {
-                    for (int j = 0; j < colonSplineModel->controlPointsVectorPos[0].size(); ++j)
-                    {
-                        line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
-                        line->m_vertices.push_back(colonSplineModel->controlPointsVectorPos[i][j]);
-                    }
-                }
-                line->Buffer();
-                lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
-                line->Draw();
-            }
+            delete m_CurrentScene;
+            m_CurrentScene = m_MainMenu;
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
         }
+        
+        m_CurrentScene->OnUpdate(deltaTime);
+        m_CurrentScene->OnImGuiRender();
 
-        if (debugCollDet && hasCollisionDetection)
-        {
-            line->m_vertices.clear();
-            for (int i = 0; i < collDet.collisionResults.collisionVectors.size(); ++i)
-            {
-                line->m_vertices.push_back(collDet.collisionResults.collisionVectors[i]);
-            }
-            line->Buffer();
-            lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
-            line->Draw();
-        }
-
-        if (drawAABB)
-        {
-            line->m_vertices.clear();
-            // DrawNode(collDet.rootColon, line);
-            line->Buffer();
-            lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
-            line->Draw();
-
-            line->m_vertices.clear();
-            // DrawNode(collDet.rootEndo, line);
-            line->Buffer();
-            lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
-            line->Draw();
-        }
-
-        lightingShader.Bind();
-
-        lightingShader.SetUniformMatrix4fv("view", view);
-        lightingShader.SetUniformMatrix4fv("projection", projection);
-
-        lightingShader.SetUniform3f("viewPos", camera.Position);
-
-        // Lights Sources
-        lightingShader.SetUniformLight(dirLight);
-        spotlight.position = camera.Position;
-        spotlight.direction = camera.Front;
-        lightingShader.SetUniformLight(spotlight);
-        lightingShader.SetUniformLight(pointLights);
-
-        // backpack.Draw(lightingShader);
-
-        if (isDrawingMeshes)
-        {
-            colon.Draw(lightingShader);
-            endo.Draw(lightingShader);
-        }
-
-        ImGui::Begin("Scene");
-        {
-            ImGui::Text("FPS: %.2f - Elapsed Time %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            ImGui::Text("Radius: %.2f", endoSplineModel->uniformRadius);
-            ImGui::Checkbox("Turn Collision Detection", &hasCollisionDetection);
-            ImGui::Checkbox("Draw Meshs", &isDrawingMeshes);
-            ImGui::Checkbox("Draw AABBs", &drawAABB);
-            if (ImGui::Button("Enable Cull Face"))
-                EnableCullFace();
-            ImGui::SameLine();
-            if (ImGui::Button("Disable Cull Face"))
-                DisableCullFace();
-
-            ImGui::Text("Collisions Count %d", collDet.collisionResults.collisionVectors.size());
-            ImGui::Text("Collisions Time Taken: %f ms", collDetTime.ResultMs());
-
-            ImGui::Checkbox("Debug Collision Detection", &debugCollDet);
-            ImGui::Checkbox("Debug Control Points Colon", &debugControlPointsColon);
-            ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
-
-            ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 1000);
-
-            OnImGui(colon);
-            OnImGui(endo);
-
-            if (ImGui::TreeNode("Lights"))
-            {
-                ImGui::ColorEdit3("Dir Light", (float*)&dirLight.lightColor);
-                dirLight.SetLightColor();
-                ImGui::DragFloat3("Dir Light", (float*)&dirLight.direction, 1.0f, -10.0f, 10.0f);
-
-                ImGui::ColorEdit3("Spotlight", (float*)&spotlight.lightColor);
-                spotlight.SetLightColor();
-                ImGui::DragFloat3("Spotlight", (float*)&spotlight.direction, 1.0f, -10.0f, 10.0f);
-
-                for (int i = 0; i < pointLights.size(); ++i)
-                {
-                    ImGui::ColorEdit3(std::to_string(i).c_str(), (float*)&pointLights[i].lightColor);
-                    pointLights[i].SetLightColor();
-                    ImGui::DragFloat3(std::to_string(i).c_str(), (float*)&pointLights[i].position, 1.0f, -10.0f, 10.0f);
-                }
-                ImGui::TreePop();
-            }
-            if (ImGui::TreeNode("Endo Control Points"))
-            {
-                for (int i = 0; i < endoSplineModel->controlPoints.size(); ++i)
-                {
-                    ImGui::Text((std::to_string(i) + ")  %.3f, %.3f, %.3f").c_str(), endoSplineModel->controlPoints[i].x(), endoSplineModel->controlPoints[i].y(), endoSplineModel->controlPoints[i].z());
-                    if (ImGui::TreeNode(((std::to_string(i) + ". Endo Vectors Control Points")).c_str()))
-                    {
-                        for (int j = 0; j < endoSplineModel->controlPointsVectorPos.size(); ++j)
-                        {
-                            ImGui::Text((std::to_string(j) + ")  %.3f, %.3f, %.3f").c_str(), endoSplineModel->controlPointsVectorPos[i][j].x(), endoSplineModel->controlPointsVectorPos[i][j].y(), endoSplineModel->controlPointsVectorPos[i][j].z());
-                        }
-                        ImGui::TreePop();
-                    }
-                }
-                ImGui::TreePop();
-            }
-            if (ImGui::TreeNode("Collision Points"))
-            {
-                for (int i = 0; i < collDet.collisionResults.collisionVectors.size(); ++i)
-                {
-                    ImGui::Text((std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), collDet.collisionResults.collisionVectors[i].x(), collDet.collisionResults.collisionVectors[i].y(), collDet.collisionResults.collisionVectors[i].z());
-                }
-                ImGui::TreePop();
-            }
-        }
         ImGui::End();
-
         UpdateImGui();
 
         glfwSwapBuffers(window);
@@ -394,119 +144,29 @@ int main()
     return 0;
 }
 
-void DrawNode(NodeV7* node, Line* lines)
-{
-    DrawAABB(&(node->bv), lines);
 
-    if (node->type != NodeType::LEAF)
-    {
-        if (node->left != nullptr)
-            DrawNode(node->left, lines);
-        if (node->right != nullptr)
-            DrawNode(node->right, lines);
-    }
-}
-
-void EnableCullFace()
-{
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-}
-
-void DisableCullFace()
-{
-    glDisable(GL_CULL_FACE);
-}
-
-void DrawAABB(AABB* aabb, Line* lines)
-{
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->min.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
-
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
-}
-
-void CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor)
-{
-    std::ofstream file(filePath);
-    file << nControlPoints << " " << nVectorsPerControlPoints << std::endl;
-    for (int x = -(nControlPoints / 2); x < (nControlPoints / 2); ++x)
-    {
-        file << (x * CorrectionFactor) << " " << 0 << " " << 0 << std::endl;
-        for (int j = 0; j < nVectorsPerControlPoints; ++j)
-        {
-            double z = -cos(((j * 360) / (nVectorsPerControlPoints - 1)) * (glm::pi<double>() / 180));
-            double y =  sin(((j * 360) / (nVectorsPerControlPoints - 1)) * (glm::pi<double>() / 180));
-            file << 0 << " " << (y * CorrectionFactor) << " " << (z * CorrectionFactor) << std::endl;
-        }
-    }
-    file.close();
-}
-
-void OnImGui(Spline& spline)
-{
-    if (ImGui::TreeNode(("Transform" + spline.name).c_str()))
-    {
-        ImGui::DragFloat3("Position:", &spline.transform.position[0], 0.1f, -100.0f, 100.0f);
-        ImGui::DragFloat3("Rotation:", &spline.transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
-        ImGui::DragFloat3("Scale:", &spline.transform.scale[0], 0.01f, -10.0f, 10.0f);
-        ImGui::TreePop();
-    }
-}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    screenHeight = height;
-    screenWidth = width;
+    *pScreenHeight = height;
+    *pScreenWidth = width;
     glViewport(0, 0, width, height);
 }
 
 void processInputs(GLFWwindow* window, double deltaTime)
 {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(CamMovement::FORWARD, deltaTime);
+        pCamera->ProcessKeyboard(CamMovement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(CamMovement::BACKWARD, deltaTime);
+        pCamera->ProcessKeyboard(CamMovement::BACKWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(CamMovement::LEFT, deltaTime);
+        pCamera->ProcessKeyboard(CamMovement::LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(CamMovement::RIGHT, deltaTime);
+        pCamera->ProcessKeyboard(CamMovement::RIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        camera.ProcessKeyboard(CamMovement::UP, deltaTime);
+        pCamera->ProcessKeyboard(CamMovement::UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        camera.ProcessKeyboard(CamMovement::DOWN, deltaTime);
+        pCamera->ProcessKeyboard(CamMovement::DOWN, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -540,12 +200,12 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL) 
         return;
 
-    camera.ProcessMouseMovement(xOffSet, yOffSet);
+    pCamera->ProcessMouseMovement(xOffSet, yOffSet);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll((float)yoffset);
+    pCamera->ProcessMouseScroll((float)yoffset);
 }
 
 GLFWwindow* InitGLFW()

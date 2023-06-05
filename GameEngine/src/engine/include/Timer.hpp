@@ -36,8 +36,8 @@ struct Timer
 
 	void Reset()
 	{
-		start = Clock::now();
 		duration = std::chrono::duration<double>();
+		start = Clock::now();
 	}
 };
 	

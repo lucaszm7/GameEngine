@@ -80,6 +80,17 @@ void Spline::Draw(Shader& shader)
 	mesh.Draw(shader);
 }
 
+void Spline::OnImGui()
+{
+	if (ImGui::TreeNode(("Transform" + name).c_str()))
+	{
+		ImGui::DragFloat3("Position:", &transform.position[0], 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3("Rotation:", &transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
+		ImGui::DragFloat3("Scale:", &transform.scale[0], 0.01f, -10.0f, 10.0f);
+		ImGui::TreePop();
+	}
+}
+
 void Spline::GenerateSplineMesh(const std::string& texPath, TriangleOrientation triangleOrientation)
 {
 	const unsigned int numControlPoints = m_controlPoints.size();
