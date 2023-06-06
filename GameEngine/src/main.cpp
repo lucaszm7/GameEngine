@@ -51,6 +51,7 @@ GLFWwindow* InitGLFW();
 void InitGLEW();
 void InitImGui(GLFWwindow* window);
 void UpdateImGui();
+void ResetEngine();
 
 
 std::shared_ptr<unsigned int> pScreenWidth;
@@ -65,20 +66,11 @@ static float lastY = 0.0f;
 
 int main()
 {
-    // CreateCilinderSpline("resources/models/cilinder.txt", 10, 32, 0.05);
-    // CreateCilinderSpline("resources/models/littleCilinder.txt", 10, 32, 0.01);
-
     GLFWwindow* window = InitGLFW();
     InitGLEW();
-    
     InitImGui(window);
 
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    ResetEngine();
 
     pScreenWidth = std::make_shared<unsigned int>(800);
     pScreenHeight = std::make_shared<unsigned int>(600);
@@ -115,20 +107,21 @@ int main()
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
-
             ImGui::Begin(m_MainMenu->c_SceneName.c_str());
 
             bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
             ImGui::Separator();
             ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
+            pCamera->OnImGui();
             ImGui::Separator();
 
             if (ResetToMainMenu)
             {
                 delete m_CurrentScene;
                 m_CurrentScene = m_MainMenu;
-                glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
                 glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
+                ResetEngine();
+                pCamera->Reset();
             }
 
             m_CurrentScene->OnUpdate(deltaTime);
@@ -156,6 +149,15 @@ int main()
     return 0;
 }
 
+void ResetEngine()
+{
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
