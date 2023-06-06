@@ -37,6 +37,7 @@
 
 // Scenes
 #include "scenes/SceneSplineCollisionDetection.h"
+#include "scenes/SceneAssigment1.h"
 
 
 void processInputs(GLFWwindow* window, double deltaTime);
@@ -50,6 +51,7 @@ GLFWwindow* InitGLFW();
 void InitGLEW();
 void InitImGui(GLFWwindow* window);
 void UpdateImGui();
+void ResetEngine();
 
 
 std::shared_ptr<unsigned int> pScreenWidth;
@@ -64,20 +66,11 @@ static float lastY = 0.0f;
 
 int main()
 {
-    // CreateCilinderSpline("resources/models/cilinder.txt", 10, 32, 0.05);
-    // CreateCilinderSpline("resources/models/littleCilinder.txt", 10, 32, 0.01);
-
     GLFWwindow* window = InitGLFW();
     InitGLEW();
-    
     InitImGui(window);
 
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    ResetEngine();
 
     pScreenWidth = std::make_shared<unsigned int>(800);
     pScreenHeight = std::make_shared<unsigned int>(600);
@@ -93,51 +86,53 @@ int main()
     m_MainMenu->pCamera = pCamera;
 
     m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
+    m_MainMenu->RegisterApp<SceneAssigment1>("POS CG - Assingment 1");
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
 
     try
     {
-    while (!glfwWindowShouldClose(window))
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        processInputs(window, deltaTime);
-
-        // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        double currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
-
-        ImGui::Begin(m_MainMenu->c_SceneName.c_str());
-        
-        bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
-            ImGui::Separator();
-        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            ImGui::Separator();
-
-        if (ResetToMainMenu)
+        while (!glfwWindowShouldClose(window))
         {
-            delete m_CurrentScene;
-            m_CurrentScene = m_MainMenu;
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            processInputs(window, deltaTime);
+
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            double currentFrame = glfwGetTime();
+            deltaTime = currentFrame - lastFrame;
+            lastFrame = currentFrame;
+
+            ImGui::Begin(m_MainMenu->c_SceneName.c_str());
+
+            bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
+            ImGui::Separator();
+            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
+            pCamera->OnImGui();
+            ImGui::Separator();
+
+            if (ResetToMainMenu)
+            {
+                delete m_CurrentScene;
+                m_CurrentScene = m_MainMenu;
+                glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
+                ResetEngine();
+                pCamera->Reset();
+            }
+
+            m_CurrentScene->OnUpdate(deltaTime);
+            m_CurrentScene->OnImGuiRender();
+
+            ImGui::End();
+            UpdateImGui();
+
+            glfwSwapBuffers(window);
+            glfwPollEvents();
         }
-        
-        m_CurrentScene->OnUpdate(deltaTime);
-        m_CurrentScene->OnImGuiRender();
-
-        ImGui::End();
-        UpdateImGui();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
     }
     catch (std::exception e)
     {
@@ -154,7 +149,15 @@ int main()
     return 0;
 }
 
+void ResetEngine()
+{
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+}
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {

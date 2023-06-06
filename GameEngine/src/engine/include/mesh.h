@@ -13,6 +13,12 @@
 #include "VertexBufferLayout.h"
 #include "Texture.h"
 
+enum class TriangleOrientation
+{
+	ClockWise = 0,
+	CounterClockWise = 1
+};
+
 struct Vertex
 {
 	glm::vec3 Position;
@@ -36,7 +42,7 @@ public:
 
 	Mesh() = default;
 	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
-	void Draw(Shader& shader);
+	void Draw(Shader& shader) const;
 	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
 
 private:

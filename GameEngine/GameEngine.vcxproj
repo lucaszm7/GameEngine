@@ -191,6 +191,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\scenes\SceneAssigment1.cpp" />
     <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
@@ -211,12 +212,15 @@
     <ClCompile Include="src\vendor\IMGUI\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\assignament1_fragment.shader" />
+    <None Include="resources\shaders\assignament1_vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
     <None Include="resources\shaders\light_fragment.shader" />
     <None Include="resources\shaders\light_vertex.shader" />
     <None Include="resources\shaders\vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\scenes\SceneAssigment1.h" />
     <ClInclude Include="src\engine\include\scene.h" />
     <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />

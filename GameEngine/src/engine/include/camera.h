@@ -70,10 +70,47 @@ public:
         updateCameraVectors();
     }
 
-    // returns the view matrix calculated using Euler Angles and the LookAt Matrix
-    glm::mat4 GetViewMatrix() const
+    void OnImGui()
     {
-        return glm::lookAt(Position, Position + Front, Up);
+        if (ImGui::TreeNode("Camera Config"))
+        {
+            if (ImGui::Button("Reset"))
+                this->Reset();
+
+            ImGui::DragFloat3("Position:", &Position[0], 0.1f, -100.0f, 100.0f);
+            ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -glm::pi<float>(), glm::pi<float>());
+            ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -glm::pi<float>(), glm::pi<float>());
+            ImGui::DragFloat("Near Plane:", &Near, 0.1f, -1000.0f, 1000.0f);
+            ImGui::DragFloat("Far Plane:",  &Far, 0.1f, -1000.0f, 1000.0f);
+            ImGui::DragFloat("Movement Speed:", &MovementSpeed, 0.1f, -1000.0f, 1000.0f);
+            ImGui::TreePop();
+        }
+    }
+
+    void Reset()
+    {
+        Front = glm::vec3(0.0f, 0.0f, -1.0f); 
+        MovementSpeed = SPEED; 
+        MouseSensitivity = SENSITIVITY;
+        Zoom = ZOOM;
+
+        Far = 1000.0f;
+        Near = 0.1f;
+
+        Position = glm::vec3(0.0f, 0.0f, 0.0f);
+        WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+        Yaw = YAW;
+        Pitch = PITCH;
+        updateCameraVectors();
+    }
+
+    // returns the view matrix calculated using Euler Angles and the LookAt Matrix
+    glm::mat4 GetViewMatrix(glm::vec3* lookAt = nullptr) const
+    {
+        if(!lookAt)
+            return glm::lookAt(Position, Position + Front, Up);
+        else
+            return glm::lookAt(Position, *lookAt, Up);
     }
 
     glm::mat4 GetProjectionMatrix(float aspectRatio) const
@@ -81,7 +118,8 @@ public:
         return glm::perspective(glm::radians(Zoom), aspectRatio, Near, Far);
     }
 
-    // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
+    // processes input received from any keyboard-like input system. 
+    // Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void ProcessKeyboard(CamMovement direction, double deltaTime)
     {
         float velocity = MovementSpeed * (float)deltaTime;
@@ -99,7 +137,8 @@ public:
             Position -= Up * velocity;
     }
 
-    // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
+    // processes input received from a mouse input system. 
+    // Expects the offset value in both the x and y direction.
     void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
     {
         xoffset *= MouseSensitivity;

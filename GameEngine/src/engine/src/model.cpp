@@ -1,6 +1,6 @@
 #include "model.h"
 
-void Model::Draw(Shader& shader)
+void Model::Draw(Shader& shader) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -16,18 +16,193 @@ void Model::Draw(Shader& shader)
 	}
 }
 
-void Model::OnImGui()
+void Model::OnImGui() const
 {
-	if (ImGui::TreeNode("Transform"))
+	if (ImGui::TreeNode(std::string("Transform " + name).c_str()))
 	{
-		ImGui::DragFloat3("Colon Position:", &transform.position[0], 0.1f, -100.0f, 100.0f);
-		ImGui::DragFloat3("Colon Rotation:", &transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
-		ImGui::DragFloat3("Colon Scale:", &transform.scale[0], 0.01f, -10.0f, 10.0f);
+		ImGui::DragFloat3("Position:", (float*)&transform.position[0], 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3("Rotation:", (float*)&transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
+		ImGui::DragFloat3("Scale:",    (float*)&transform.scale[0], 0.01f, -10.0f, 10.0f);
 		ImGui::TreePop();
 	}
 }
 
-void Model::loadModel(const std::string& path)
+void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrientation)
+{
+	std::ifstream stream(path);
+	if (!stream)
+		throw new std::exception(std::string("Could not open file: " + path).c_str());
+
+	std::stringstream ss;
+	std::string line;
+
+	unsigned int nTriangles;
+	unsigned int nMaterials;
+
+	float r, g, b;
+
+	float shine;
+	std::string sHasText;
+	bool hasTexture;
+
+	std::getline(stream, line);
+	ss << line;
+	ss >> line >> line >> line >> name;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> line >> nTriangles;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> line >> nMaterials;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> r >> g >> b;
+	glm::vec4 ambientColor(r, g, b, 1.0f);
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> r >> g >> b;
+	glm::vec4 diffuseColor(r, g, b, 1.0f);
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> r >> g >> b;
+	glm::vec4 specularColor(r, g, b, 1.0f);
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> shine;
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+	ss << line;
+	ss >> line >> line >> sHasText;
+
+	hasTexture = sHasText == "YES";
+
+	std::getline(stream, line);
+	ss.str(std::string());
+	ss.clear();
+
+	int colorIndex;
+	float x, y, z;
+	float i, j, k;
+	float u = 0, v = 0;
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	std::vector<Texture> textures;
+
+	vertices.reserve(nTriangles * 3);
+	indices.reserve(nTriangles * 3);
+
+	unsigned int counter = 0;
+
+	for(int triCounter = 0; triCounter < nTriangles; ++triCounter)
+	{
+		Vertex v0;
+		Vertex v1;
+		Vertex v2;
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+		ss << line;
+		if (hasTexture)
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex >> u >> v;
+		}
+		else
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex;
+			u = 0.0f;
+			v = 0.0f;
+		}
+		v0.Position = { x, y, z };
+		v0.Normal = { i, j, k };
+		v0.TexCoord = { u, v };
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+		ss << line;
+		if (hasTexture)
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex >> u >> v;
+		}
+		else
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex;
+			u = 1.0f;
+			v = 0.0f;
+		}
+		v1.Position = { x, y, z };
+		v1.Normal = { i, j, k };
+		v1.TexCoord = { u, v };
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+		ss << line;
+		if (hasTexture)
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex >> u >> v;
+		}
+		else
+		{
+			ss >> line >> x >> y >> z >> i >> j >> k >> colorIndex;
+			u = 0.0f;
+			v = 1.0f;
+		}
+		v2.Position = { x, y, z };
+		v2.Normal = { i, j, k };
+		v2.TexCoord = { u, v };
+
+		std::getline(stream, line);
+		ss.str(std::string());
+		ss.clear();
+
+		if (triOrientation == TriangleOrientation::CounterClockWise)
+		{
+			vertices.push_back(v0);
+			vertices.push_back(v1);
+			vertices.push_back(v2);
+		}
+		else
+		{
+			vertices.push_back(v0);
+			vertices.push_back(v2);
+			vertices.push_back(v1);
+		}
+
+		indices.push_back(counter++);
+		indices.push_back(counter++);
+		indices.push_back(counter++);
+	}
+
+	Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
+	textures.push_back(tex);
+
+	meshes.emplace_back(vertices, indices, textures);
+}
+
+void Model::LoadClassicModel(const std::string& path)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -37,7 +212,7 @@ void Model::loadModel(const std::string& path)
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	directory = path.substr(0, path.find_last_of('/'));
+	name = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 }
 
@@ -120,7 +295,7 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		}
 		if (!skip)
 		{
-			Texture texture(directory + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
+			Texture texture(name + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}

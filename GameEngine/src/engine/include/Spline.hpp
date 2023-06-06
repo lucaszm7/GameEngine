@@ -6,11 +6,7 @@
 #include "SplineModel.hpp"
 #include <IMGUI/imgui.h>
 
-enum class TriangleOrientation
-{
-	ClockWise,
-	CounterClockWise
-};
+
 
 // Layer of abstraction of SplineModel to Demo
 struct Spline
