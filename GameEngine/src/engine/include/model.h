@@ -12,34 +12,27 @@
 #include "shader.h"
 #include "mesh.h"
 
-enum ModelType
-{
-	CLASSIC,
-	CUSTOM
-};
-
 struct Model
 {
 public:
-	Model(const std::string& path, ModelType modelType = ModelType::CLASSIC)
+	Model(const std::string& path, TriangleOrientation triOrientation = TriangleOrientation::CounterClockWise)
 	{
-		if (modelType == ModelType::CLASSIC)
-			LoadClassicModel(path);
-		else if (modelType == ModelType::CUSTOM)
-			LoadCustomModel(path);
+		if (path.substr(path.find_last_of('.') + 1) == "in")
+			LoadCustomModel(path, triOrientation);
 		else
-			throw new std::exception("Model Type not Supported.");
+			LoadClassicModel(path);
 	}
-	void Draw(Shader& shader);
-	void OnImGui();
+
+	void Draw(Shader& shader) const;
+	void OnImGui() const;
 	std::vector<Mesh> meshes;
-	std::string directory;
+	std::string name;
 	std::vector<Texture> textures_loaded;
 
 	Transform transform;
 private:
 	void LoadClassicModel(const std::string& path);
-	void LoadCustomModel(const std::string& path);
+	void LoadCustomModel(const std::string& path, TriangleOrientation triOrientation);
 
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);

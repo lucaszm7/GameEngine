@@ -33,7 +33,7 @@ void Mesh::setupBuffers()
 }
 
 
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(Shader& shader) const
 {
 	for (int i = 0; i < textures.size(); ++i)
 	{

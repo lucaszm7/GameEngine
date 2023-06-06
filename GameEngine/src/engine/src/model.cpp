@@ -1,6 +1,6 @@
 #include "model.h"
 
-void Model::Draw(Shader& shader)
+void Model::Draw(Shader& shader) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -16,18 +16,18 @@ void Model::Draw(Shader& shader)
 	}
 }
 
-void Model::OnImGui()
+void Model::OnImGui() const
 {
-	if (ImGui::TreeNode("Transform"))
+	if (ImGui::TreeNode(std::string("Transform " + name).c_str()))
 	{
-		ImGui::DragFloat3("Colon Position:", &transform.position[0], 0.1f, -100.0f, 100.0f);
-		ImGui::DragFloat3("Colon Rotation:", &transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
-		ImGui::DragFloat3("Colon Scale:", &transform.scale[0], 0.01f, -10.0f, 10.0f);
+		ImGui::DragFloat3("Position:", (float*)&transform.position[0], 0.1f, -100.0f, 100.0f);
+		ImGui::DragFloat3("Rotation:", (float*)&transform.rotation[0], 0.1f, -glm::pi<float>(), glm::pi<float>());
+		ImGui::DragFloat3("Scale:",    (float*)&transform.scale[0], 0.01f, -10.0f, 10.0f);
 		ImGui::TreePop();
 	}
 }
 
-void Model::LoadCustomModel(const std::string& path)
+void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrientation)
 {
 	std::ifstream stream(path);
 	if (!stream)
@@ -47,7 +47,7 @@ void Model::LoadCustomModel(const std::string& path)
 
 	std::getline(stream, line);
 	ss << line;
-	ss >> line >> line >> line >> directory;
+	ss >> line >> line >> line >> name;
 
 	std::getline(stream, line);
 	ss.str(std::string());
@@ -178,9 +178,18 @@ void Model::LoadCustomModel(const std::string& path)
 		ss.str(std::string());
 		ss.clear();
 
-		vertices.push_back(v0);
-		vertices.push_back(v1);
-		vertices.push_back(v2);
+		if (triOrientation == TriangleOrientation::CounterClockWise)
+		{
+			vertices.push_back(v0);
+			vertices.push_back(v1);
+			vertices.push_back(v2);
+		}
+		else
+		{
+			vertices.push_back(v0);
+			vertices.push_back(v2);
+			vertices.push_back(v1);
+		}
 
 		indices.push_back(counter++);
 		indices.push_back(counter++);
@@ -203,7 +212,7 @@ void Model::LoadClassicModel(const std::string& path)
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	directory = path.substr(0, path.find_last_of('/'));
+	name = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 }
 
@@ -286,7 +295,7 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		}
 		if (!skip)
 		{
-			Texture texture(directory + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
+			Texture texture(name + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}
