@@ -69,12 +69,17 @@
     <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\SceneAssigment1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
     <None Include="resources\shaders\light_vertex.shader" />
     <None Include="resources\shaders\light_fragment.shader" />
+    <None Include="resources\shaders\assignament1_fragment.shader" />
+    <None Include="resources\shaders\assignament1_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">
@@ -150,6 +155,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\include\scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scenes\SceneAssigment1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

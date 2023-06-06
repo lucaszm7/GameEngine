@@ -212,6 +212,8 @@
     <ClCompile Include="src\vendor\IMGUI\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\assignament1_fragment.shader" />
+    <None Include="resources\shaders\assignament1_vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
     <None Include="resources\shaders\light_fragment.shader" />
     <None Include="resources\shaders\light_vertex.shader" />
