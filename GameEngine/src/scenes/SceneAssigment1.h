@@ -13,7 +13,7 @@ public:
 	void OnImGuiRender();
 
 private:
-	Model m;
+	Model cubeModel;
 	Shader lightingShader;
 
 	glm::mat4 view;
@@ -26,6 +26,19 @@ private:
 	std::vector<PointLight> pointLights;
 	SpotLight spotlight;
 
+	std::vector<Model*> objects;
+	std::vector<glm::vec3> colors;
+
+	bool isLookAt = false;
+	int selectedLookAt = 0;
+	std::vector<std::string> lookAtObjects;
+
+	int selectedObjectToAdd = 0;
+	int selectedTriOrientation = 1;
+
+	void AddObject(std::string label);
+	void EnableCullFace();
+	void DisableCullFace();
 
 };
 

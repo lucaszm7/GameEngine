@@ -165,13 +165,13 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
     if (drawAABB)
     {
         line->m_vertices.clear();
-        // DrawNode(collDet.rootColon, line);
+        DrawNode(collDet.rootColon, line);
         line->Buffer();
         lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
         line->Draw();
 
         line->m_vertices.clear();
-        // DrawNode(collDet.rootEndo, line);
+        DrawNode(collDet.rootEndo, line);
         line->Buffer();
         lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
         line->Draw();
