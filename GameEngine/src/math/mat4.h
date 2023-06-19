@@ -31,6 +31,7 @@ namespace cgl
 		mat4  operator - () const;
 		mat4  operator + (const mat4& m4) const;
 		mat4  operator * (const mat4& m4) const;
+		vec4  operator * (const vec4& v4) const;
 
 		vec4 get_line(int i) const;
 		vec4 get_collum(int i) const;
@@ -41,7 +42,6 @@ namespace cgl
 		mat4 adjoint() const;
 		static mat4 identity();
 
-		std::array<double, 4> operator [] (int i) const { return mat[i]; }
-		std::array<double, 4>& operator [] (int i) { return mat[i]; }
+		vec4 operator [] (int i) const { return vec4(mat[i]); }
 	};
 }

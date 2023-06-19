@@ -58,6 +58,11 @@ namespace cgl
 		return mat4();
 	}
 
+	mat4 mat4::identity()
+	{
+		return mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
+	}
+
 	mat4 mat4::operator-() const
 	{
 		mat4 r;
@@ -93,6 +98,15 @@ namespace cgl
 			{
 				r[i][j] = this->get_line(i).dot(m4.get_collum(j));
 			}
+		}
+		return r;
+	}
+	vec4 mat4::operator*(const vec4& v4) const
+	{
+		vec4 r;
+		for (int i = 0; i < 4; ++i)
+		{
+			r[i] = vec4(mat[i]).dot(v4);
 		}
 		return r;
 	}
