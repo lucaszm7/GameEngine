@@ -10,7 +10,7 @@
 #include <random>
 
 #include "math_utils.h"
-#include <vec4.h>
+#include "vec4.h"
 
 using std::sqrt;
 
@@ -27,6 +27,11 @@ namespace c2gl
 
 		mat4(const vec4& l0, const vec4& l1, const vec4& l2, const vec4& l3);
 
+		mat4& operator = (const mat4& m4) = default;
+		mat4  operator - () const;
+		mat4  operator + (const mat4& m4) const;
+		mat4  operator * (const mat4& m4) const;
+
 		vec4 get_line(int i) const;
 		vec4 get_collum(int i) const;
 
@@ -35,11 +40,6 @@ namespace c2gl
 		double determinant() const;
 		mat4 adjoint() const;
 		static mat4 identity();
-
-		mat4& operator = (const mat4& m4) = default;
-		mat4  operator - () const;
-		mat4  operator + (const mat4& m4) const;
-		mat4  operator * (const mat4& m4) const;
 
 		std::array<double, 4> operator [] (int i) const { return mat[i]; }
 		std::array<double, 4>& operator [] (int i) { return mat[i]; }

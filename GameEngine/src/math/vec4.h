@@ -11,13 +11,12 @@
 #include <initializer_list>
 
 #include "math_utils.h"
-#include <vec3.h>
+#include "vec3.h"
 
 using std::sqrt;
 
 namespace c2gl
 {
-
 	struct vec4
 	{
 	private:
