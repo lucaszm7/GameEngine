@@ -12,8 +12,8 @@
 class Scene_t
 {
 public:
-	Scene_t() {}
-	virtual ~Scene_t() {}
+	Scene_t() = default;
+	virtual ~Scene_t() = default;
 
 	virtual void OnUpdate(float deltaTime) {}
 	virtual void OnImGuiRender() {}
@@ -26,22 +26,21 @@ public:
 
 class Menu : public Scene_t
 {
-public:
-	std::string c_SceneName = "Main Menu";
 private:
 	Scene_t*& m_CurrentScene;
 	std::vector< std::pair< std::string, std::function<Scene_t* ()>>> m_Scenes;
-private:
+
 	friend class Application;
+
 public:
-	Menu(Scene_t*& currentTestPointer)
-		:m_CurrentScene(currentTestPointer)
-	{
-	}
+	std::string c_SceneName = "Main Menu";
+	
+	explicit Menu(Scene_t*& currentTestPointer)
+		:m_CurrentScene(currentTestPointer) {}
 
 	void OnImGuiRender() override
 	{
-		for (auto& scene : m_Scenes)
+		for (auto const& scene : m_Scenes)
 		{
 			if (ImGui::Button(scene.first.c_str()))
 			{
