@@ -1,6 +1,6 @@
 #include "mat4.h"
 
-namespace c2gl
+namespace cgl
 {
 	inline std::ostream& operator << (std::ostream& out, const mat4& m)
 	{

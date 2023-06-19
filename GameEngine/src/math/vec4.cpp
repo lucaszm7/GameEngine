@@ -1,6 +1,6 @@
 #include "vec4.h"
 
-namespace c2gl
+namespace cgl
 {
 	vec4::vec4(std::initializer_list<double> args)
 	{

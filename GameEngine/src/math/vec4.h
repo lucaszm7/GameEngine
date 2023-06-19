@@ -15,7 +15,7 @@
 
 using std::sqrt;
 
-namespace c2gl
+namespace cgl
 {
 	struct vec4
 	{

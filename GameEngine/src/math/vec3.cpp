@@ -1,6 +1,6 @@
 #include "vec3.h"
 
-namespace c2gl
+namespace cgl
 {
 	inline vec3::vec3(std::initializer_list<double> args)
 	{

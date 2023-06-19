@@ -1,6 +1,6 @@
 #include "SceneClose2GL.h"
 
-using namespace c2gl;
+using namespace cgl;
 
 SceneClose2GL::SceneClose2GL()
     :cubeModel("resources/models/cube_text.in"),
