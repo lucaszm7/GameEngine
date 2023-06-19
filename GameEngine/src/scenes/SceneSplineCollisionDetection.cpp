@@ -221,6 +221,7 @@ void SceneSplineCollisionDetection::OnImGuiRender()
     ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
 
     ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 1000);
+    ImGui::Checkbox("Is Detection Outside Collisions", &collDet.collisionResults.isDetectingOutsideCollisions);
 
     colon.OnImGui();
     endo.OnImGui();

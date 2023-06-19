@@ -38,6 +38,7 @@
 // Scenes
 #include "scenes/SceneSplineCollisionDetection.h"
 #include "scenes/SceneAssigment1.h"
+#include "scenes/SceneClose2GL.h"
 
 
 void processInputs(GLFWwindow* window, double deltaTime);
@@ -81,12 +82,13 @@ int main()
     Menu* m_MainMenu = new Menu(m_CurrentScene);
     m_CurrentScene = m_MainMenu;
 
-    m_MainMenu->pScreenWidth = pScreenWidth;
-    m_MainMenu->pScreenHeight = pScreenHeight;
-    m_MainMenu->pCamera = pCamera;
+    Scene_t::pScreenWidth = pScreenWidth;
+    Scene_t::pScreenHeight = pScreenHeight;
+    Scene_t::pCamera = pCamera;
 
     m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
     m_MainMenu->RegisterApp<SceneAssigment1>("POS CG - Assingment 1");
+    m_MainMenu->RegisterApp<SceneClose2GL>("Close 2 GL");
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
