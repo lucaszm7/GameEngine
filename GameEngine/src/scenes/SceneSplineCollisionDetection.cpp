@@ -80,9 +80,7 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     };
 }
 
-SceneSplineCollisionDetection::~SceneSplineCollisionDetection()
-{
-}
+SceneSplineCollisionDetection::~SceneSplineCollisionDetection() = default;
 
 void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
 {
