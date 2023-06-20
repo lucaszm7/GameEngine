@@ -56,6 +56,11 @@ namespace cgl
 		return *this / this->lenght();
 	}
 
+	vec3 vec3::normalized() const
+	{
+		return *this / this->lenght();
+	}
+
 	bool vec3::operator==(const vec3& other)
 	{
 		return e[0] == other.e[0] && e[1] == other.e[1] && e[2] == other.e[2] && e[3] == other.e[3];
@@ -76,6 +81,15 @@ namespace cgl
 		this->e[1] += v.e[1];
 		this->e[2] += v.e[2];
 		this->e[3] += v.e[3];
+		return *this;
+	}
+
+	vec3& vec3::operator-=(const vec3& v)
+	{
+		this->e[0] -= v.e[0];
+		this->e[1] -= v.e[1];
+		this->e[2] -= v.e[2];
+		this->e[3] -= v.e[3];
 		return *this;
 	}
 
