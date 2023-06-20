@@ -21,7 +21,7 @@ public:
 	inline static std::shared_ptr<unsigned int> pScreenWidth;
 	inline static std::shared_ptr<unsigned int> pScreenHeight;
 
-	inline static std::shared_ptr<Camera> pCamera;
+	inline static std::shared_ptr<BaseCam> pCamera;
 };
 
 class Menu : public Scene_t
