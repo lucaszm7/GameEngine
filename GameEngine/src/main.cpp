@@ -58,7 +58,7 @@ void ResetEngine();
 std::shared_ptr<unsigned int> pScreenWidth;
 std::shared_ptr<unsigned int> pScreenHeight;
 
-std::shared_ptr<Camera> pCamera;
+BaseCam*& pCamera;
 
 static bool firstMouse = true;
 static float lastX = 0.0f;
@@ -76,15 +76,15 @@ int main()
     pScreenWidth = std::make_shared<unsigned int>(800);
     pScreenHeight = std::make_shared<unsigned int>(600);
 
-    pCamera = std::make_shared<Camera>();
-
     Scene_t* m_CurrentScene = nullptr;
     Menu* m_MainMenu = new Menu(m_CurrentScene);
     m_CurrentScene = m_MainMenu;
 
+    m_CurrentScene->pCamera = new ogl::Camera();
+    pCamera = m_CurrentScene->pCamera;
+
     Scene_t::pScreenWidth = pScreenWidth;
     Scene_t::pScreenHeight = pScreenHeight;
-    Scene_t::pCamera = pCamera;
 
     m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
     m_MainMenu->RegisterApp<SceneAssigment1>("POS CG - Assingment 1");
@@ -109,12 +109,15 @@ int main()
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
+            pCamera = m_CurrentScene->pCamera;
+            if (!pCamera)
+                pCamera = m_MainMenu->pCamera;
+
             ImGui::Begin(m_MainMenu->c_SceneName.c_str());
 
             bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
             ImGui::Separator();
             ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            pCamera->OnImGui();
             ImGui::Separator();
 
             if (ResetToMainMenu)
@@ -123,11 +126,12 @@ int main()
                 m_CurrentScene = m_MainMenu;
                 glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
                 ResetEngine();
-                pCamera->Reset();
             }
 
+            pCamera->OnImGui();
             m_CurrentScene->OnUpdate(deltaTime);
             m_CurrentScene->OnImGuiRender();
+            pCamera = m_CurrentScene->pCamera;
 
             ImGui::End();
             UpdateImGui();

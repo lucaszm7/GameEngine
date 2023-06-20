@@ -32,6 +32,7 @@ public:
     virtual void Reset() = 0;
     virtual void ProcessKeyboard(CamMovement direction, double deltaTime) = 0;
     virtual void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) = 0;
+    virtual void ProcessMouseScroll(float yoffset) = 0;
 
     // euler Angles
     float Yaw;
