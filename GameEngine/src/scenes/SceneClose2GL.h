@@ -1,7 +1,5 @@
 #pragma once
 
-// #define CGL
-
 // Engine
 #include "scene.h"
 #include "camera.h"
@@ -21,14 +19,15 @@ public:
 
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
-	BaseCam* GetCamera() override { return &pCamera; }
+	BaseCam* GetCamera() override { return &oglCamera; }
 
 
 private:
 	Model cubeModel;
 	Shader lightingShader;
 
-	cgl::Camera pCamera;
+	cgl::Camera cglCamera;
+	ogl::Camera oglCamera;
 
 	cgl::mat4 view;
 	cgl::mat4 projection;
@@ -53,6 +52,8 @@ private:
 	void AddObject(std::string label);
 	void EnableCullFace();
 	void DisableCullFace();
+
+	bool showDefaultCamera = false;
 };
 
 

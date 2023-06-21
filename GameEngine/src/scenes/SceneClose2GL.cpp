@@ -5,9 +5,10 @@ SceneClose2GL::SceneClose2GL()
     lightingShader("resources/shaders/assignament1_vertex.shader", "resources/shaders/assignament1_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
-    spotlight({ 1.0f, 1.0f, 1.0f }, 
-        glm::vec3(pCamera.Position.x, pCamera.Position.y, pCamera.Position.z), 
-        glm::vec3(pCamera.Front.x, pCamera.Front.y, pCamera.Front.z))
+    spotlight(
+        { 1.0f, 1.0f, 1.0f }, 
+        oglCamera.Position, 
+        oglCamera.Right)
 {
     pointLights =
     {
@@ -25,20 +26,29 @@ SceneClose2GL::~SceneClose2GL() = default;
 
 void SceneClose2GL::OnUpdate(float deltaTime)
 {
-    view = isLookAt ? pCamera.GetViewMatrix(&cgl::vec3(objects[selectedLookAt]->transform.position)) : pCamera.GetViewMatrix();
-    projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    oglCamera = cglCamera;
 
+    if (showDefaultCamera)
+    {
+        view = isLookAt ? oglCamera.GetViewMatrix(&objects[selectedLookAt]->transform.position) : oglCamera.GetViewMatrix();
+        projection = oglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    }
+    else
+    {
+        view = isLookAt ? cglCamera.GetViewMatrix(&cgl::vec3(objects[selectedLookAt]->transform.position)) : cglCamera.GetViewMatrix();
+        projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    }
     lightingShader.Bind();
 
     lightingShader.SetUniformMatrix4fv("view", view);
     lightingShader.SetUniformMatrix4fv("projection", projection);
 
-    lightingShader.SetUniform3f("viewPos", pCamera.Position);
+    lightingShader.SetUniform3f("viewPos", cglCamera.Position);
 
     // Lights Sources
     lightingShader.SetUniformLight(dirLight);
-    spotlight.position = glm::vec3(pCamera.Position.x, pCamera.Position.y, pCamera.Position.z);
-    spotlight.direction = glm::vec3(pCamera.Front.x, pCamera.Front.y, pCamera.Front.z);
+    spotlight.position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
+    spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
     lightingShader.SetUniformLight(spotlight);
     lightingShader.SetUniformLight(pointLights);
 
@@ -51,6 +61,8 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
 void SceneClose2GL::OnImGuiRender()
 {
+    ImGui::Checkbox("Show OpenGL Camera", &showDefaultCamera);
+
     const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK" };
     if (ImGui::Button("Add Object"))
         AddObject(possibleObjects[selectedObjectToAdd]);

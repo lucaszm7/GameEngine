@@ -47,7 +47,6 @@ private:
 	bool isDrawingMeshes = true;
 	bool drawAABB = false;
 
-
 	Spline colon;
 	Spline endo;
 
@@ -63,7 +62,6 @@ private:
 	void DrawAABB(AABB* aabb, Line* lines);
 	void CreateCilinderSpline(const std::string& filePath, 
 		int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor);
-
 
 public:
 	SceneSplineCollisionDetection();
