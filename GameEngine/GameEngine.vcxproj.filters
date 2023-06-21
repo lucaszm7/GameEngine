@@ -84,6 +84,9 @@
     <ClCompile Include="src\math\vec4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\math\vec2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
@@ -185,6 +188,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math\vec4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\vec2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
