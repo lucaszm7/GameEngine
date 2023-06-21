@@ -2,13 +2,13 @@
 
 namespace cgl
 {
-	vec3::vec3(double v)
+	vec3::vec3(float v)
 		:e{v,v,v} {}
 
 	vec3::vec3(const glm::vec3& v)
 		:e{v.x,v.y,v.z} {}
 
-	vec3::vec3(std::initializer_list<double> args)
+	vec3::vec3(std::initializer_list<float> args)
 	{
 		unsigned int count = 0;
 		for (auto arg : args)
@@ -18,7 +18,7 @@ namespace cgl
 		}
 	}
 
-	inline vec3 operator - (vec3 u, vec3 v)
+	vec3 operator - (vec3 u, vec3 v)
 	{
 		return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
 	}
@@ -28,22 +28,22 @@ namespace cgl
 		return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 	}
 
-	vec3 operator * (double t, const vec3& v)
+	vec3 operator * (float t, const vec3& v)
 	{
 		return vec3(v.e[0] * t, v.e[1] * t, v.e[2] * t);
 	}
 
-	vec3 operator * (const vec3& v, double t)
+	vec3 operator * (const vec3& v, float t)
 	{
 		return t * v;
 	}
 
-	inline vec3 operator / (vec3 v, double t)
+	inline vec3 operator / (vec3 v, float t)
 	{
 		return (1 / t) * v;
 	}
 
-	inline double vec3::dot(const vec3& v) const
+	inline float vec3::dot(const vec3& v) const
 	{
 		return this->e[0] * v.e[0] +
 			   this->e[1] * v.e[1] +
@@ -65,6 +65,11 @@ namespace cgl
 	vec3 vec3::normalized() const
 	{
 		return *this / this->lenght();
+	}
+
+	void vec3::normalize()
+	{
+		*this /= this->lenght();
 	}
 
 	bool vec3::operator==(const vec3& other)
@@ -97,7 +102,7 @@ namespace cgl
 		return *this;
 	}
 
-	vec3& vec3::operator*=(const double& f)
+	vec3& vec3::operator*=(const float& f)
 	{
 		e[0] *= f;
 		e[1] *= f;
@@ -105,17 +110,17 @@ namespace cgl
 		return *this;
 	}
 
-	vec3& vec3::operator/=(const double t)
+	vec3& vec3::operator/=(const float t)
 	{
 		return *this *= 1 / t;
 	}
 
-	double vec3::lenght_squared() const
+	float vec3::lenght_squared() const
 	{
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
 
-	double vec3::lenght() const
+	float vec3::lenght() const
 	{
 		return sqrt(lenght_squared());
 	}

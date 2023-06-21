@@ -16,6 +16,17 @@ namespace cgl
 		mat[3] = l3.get_array();
 	}
 
+	mat4::mat4(const glm::mat4& glmMat4)
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			for (int j = 0; j < 4; ++j)
+			{
+				(*this)[i][j] = glmMat4[i][j];
+			}
+		}
+	}
+
 	vec4 mat4::get_line(int i) const
 	{
 		return vec4(mat[i]);
@@ -36,11 +47,11 @@ namespace cgl
 		);
 	}
 
-	double mat4::determinant() const
+	float mat4::determinant() const
 	{
-		double c;
-		double r = 1;
-		std::array <std::array<double, 4>,4> matCopy(mat);
+		float c;
+		float r = 1;
+		std::array <std::array<float, 4>,4> matCopy(mat);
 		for (int i = 0; i < 4; i++) {
 			for (int k = i + 1; k < 4; k++) {
 				c = matCopy[k][i] / matCopy[i][i];

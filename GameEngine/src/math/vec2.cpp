@@ -2,10 +2,10 @@
 
 namespace cgl
 {
-	vec2::vec2(double v)
+	vec2::vec2(float v)
 		:e{ v,v } {}
 
-	inline vec2::vec2(std::initializer_list<double> args)
+	inline vec2::vec2(std::initializer_list<float> args)
 	{
 		unsigned int count = 0;
 		for (auto arg : args)
@@ -25,22 +25,22 @@ namespace cgl
 		return vec2(u.e[0] * v.e[0], u.e[1] * v.e[1]);
 	}
 
-	inline vec2 operator * (double t, const vec2& v)
+	inline vec2 operator * (float t, const vec2& v)
 	{
 		return vec2(v.e[0] * t, v.e[1] * t);
 	}
 
-	inline vec2 operator * (const vec2& v, double t)
+	inline vec2 operator * (const vec2& v, float t)
 	{
 		return t * v;
 	}
 
-	inline vec2 operator / (vec2 v, double t)
+	inline vec2 operator / (vec2 v, float t)
 	{
 		return (1 / t) * v;
 	}
 
-	inline double vec2::dot(const vec2& v) const
+	inline float vec2::dot(const vec2& v) const
 	{
 		return (this->e[0] * v.e[0]) + (this->e[1] * v.e[1]);
 	}
@@ -83,24 +83,24 @@ namespace cgl
 		return *this;
 	}
 
-	vec2& vec2::operator*=(const double& f)
+	vec2& vec2::operator*=(const float& f)
 	{
 		e[0] *= f;
 		e[1] *= f;
 		return *this;
 	}
 
-	vec2& vec2::operator/=(const double t)
+	vec2& vec2::operator/=(const float t)
 	{
 		return *this *= 1 / t;
 	}
 
-	double vec2::lenght_squared() const
+	float vec2::lenght_squared() const
 	{
 		return e[0] * e[0] + e[1] * e[1];
 	}
 
-	double vec2::lenght() const
+	float vec2::lenght() const
 	{
 		return sqrt(lenght_squared());
 	}

@@ -23,24 +23,24 @@ namespace cgl
 		{
 			struct
 			{
-				double x;
-				double y;
+				float x;
+				float y;
 			};
-			std::array<double, 2> e{0, 0};
+			std::array<float, 2> e{0, 0};
 		};
 
 		vec2() = default;
-		vec2(double v);
+		vec2(float v);
 
 		vec2(const vec2& v) = default;
 
-		vec2(double e0, double e1) : e{ e0, e1 } {}
-		vec2(std::initializer_list<double> args);
+		vec2(float e0, float e1) : e{ e0, e1 } {}
+		vec2(std::initializer_list<float> args);
 
-		vec2(const std::array<double, 2>& v) : e(v) {};
+		vec2(const std::array<float, 2>& v) : e(v) {};
 
-		inline double operator [] (int i) const { return e[i]; }
-		inline double& operator [] (int i) { return e[i]; }
+		inline float operator [] (int i) const { return e[i]; }
+		inline float& operator [] (int i) { return e[i]; }
 
 		vec2& operator=(const vec2& v) = default;
 		bool operator == (const vec2& other);
@@ -48,22 +48,22 @@ namespace cgl
 		vec2 operator - () const;
 		vec2& operator += (const vec2& v);
 		vec2& operator -= (const vec2& v);
-		vec2& operator *= (const double& f);
-		vec2& operator /= (const double t);
+		vec2& operator *= (const float& f);
+		vec2& operator /= (const float t);
 
 		friend vec2 operator - (vec2 u, vec2 v);
 		friend vec2 operator * (const vec2& u, const vec2& v);
-		friend vec2 operator * (double t, const vec2& v);
-		friend vec2 operator * (const vec2& v, double t);
+		friend vec2 operator * (float t, const vec2& v);
+		friend vec2 operator * (const vec2& v, float t);
 
-		inline std::array<double, 2> get_array() const { return e; }
-		double lenght_squared() const;
-		double lenght() const;
+		inline std::array<float, 2> get_array() const { return e; }
+		float lenght_squared() const;
+		float lenght() const;
 
 		vec2 unit_vector() const;
 		vec2 normalized() const;
 
-		double dot(const vec2& v) const;
+		float dot(const vec2& v) const;
 		friend inline std::ostream& operator << (std::ostream& out, const vec2& v);
 	};
 
