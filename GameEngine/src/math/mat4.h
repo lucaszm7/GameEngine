@@ -18,10 +18,8 @@ namespace cgl
 {
 	struct mat4
 	{
-	private:
 		std::array<std::array<double, 4>, 4> mat{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-	public:
 		mat4() = default;
 		mat4(const mat4&) = default;
 
@@ -42,6 +40,9 @@ namespace cgl
 		mat4 adjoint() const;
 		static mat4 identity();
 
-		vec4 operator [] (int i) const { return vec4(mat[i]); }
+		inline double* get_pointer() const { return (double*)&(mat[0][0]); }
+		inline vec4 operator [] (int i) const { return vec4(mat[i]); }
+
+		inline std::array<double, 4>& operator [] (int i) { return mat[i]; }
 	};
 }

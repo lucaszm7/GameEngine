@@ -2,6 +2,12 @@
 
 namespace cgl
 {
+	vec4::vec4(double v)
+		:e{v,v,v,v} {}
+
+	vec4::vec4(const glm::vec4 v)
+		:e{ v.x,v.y,v.z,v.w } {}
+
 	vec4::vec4(std::initializer_list<double> args)
 	{
 		unsigned int count = 0;

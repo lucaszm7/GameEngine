@@ -10,6 +10,8 @@
 #include <random>
 #include <initializer_list>
 
+#include <GLM/glm.hpp>
+
 #include "math_utils.h"
 #include "vec3.h"
 
@@ -19,26 +21,31 @@ namespace cgl
 {
 	struct vec4
 	{
-	private:
-		std::array<double, 4> e{0, 0, 0, 0};
+		union
+		{
+			struct
+			{
+				double x;
+				double y;
+				double z;
+				double w;
+			};
+			std::array<double, 4> e{0, 0, 0, 0};
+		};
 
-	public:
 		vec4() = default;
+		vec4(double v);
 		vec4(const vec4& v) = default;
+		vec4(const glm::vec4 v);
 
 		vec4(double e0, double e1, double e2, double e3) : e{ e0, e1, e2, e3 } {}
-		explicit vec4(std::initializer_list<double> args);
+		vec4(std::initializer_list<double> args);
 
-		explicit vec4(const std::array<double, 4>&v) : e(v) {};
-		explicit vec4(const vec3& v3);
+		vec4(const std::array<double, 4>&v) : e(v) {};
+		vec4(const vec3& v3);
 		vec4(const vec3& v3, double w);
 
 		vec4& operator=(const vec4& v) = default;
-
-		inline double x() const { return e[0]; }
-		inline double y() const { return e[1]; }
-		inline double z() const { return e[2]; }
-		inline double w() const { return e[3]; }
 
 		inline double operator [] (int i) const { return e[i]; }
 		inline double& operator [] (int i) { return e[i]; }

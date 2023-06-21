@@ -10,6 +10,8 @@
 #include <random>
 #include <initializer_list>
 
+#include <GLM/glm.hpp>
+
 #include "math_utils.h"
 
 using std::sqrt;
@@ -31,12 +33,15 @@ namespace cgl
 		};
 
 		vec3() = default;
+		vec3(double v);
+
 		vec3(const vec3& v) = default;
+		vec3(const glm::vec3& v);
 
 		vec3(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
-		explicit vec3(std::initializer_list<double> args);
+		vec3(std::initializer_list<double> args);
 
-		explicit vec3(const std::array<double, 3>& v) : e(v) {};
+		vec3(const std::array<double, 3>& v) : e(v) {};
 
 		inline double operator [] (int i) const { return e[i]; }
 		inline double& operator [] (int i) { return e[i]; }
