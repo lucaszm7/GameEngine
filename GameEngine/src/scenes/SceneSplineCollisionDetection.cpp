@@ -9,7 +9,7 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     lightingShader("resources/shaders/vertex.shader", "resources/shaders/fragment.shader"),
     lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader"),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
-    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera->Position, pCamera->Front)
+    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera.Position, pCamera.Front)
 {
     std::vector<float> cubeVertices =
     {
@@ -92,8 +92,8 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
         collDet.CollisionCheck(*(endoSplineModel.get()), *(colonSplineModel.get()));
     collDetTimer.Stop();
 
-    view = pCamera->GetViewMatrix();
-    projection = pCamera->GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    view = pCamera.GetViewMatrix();
+    projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
     // Draw Light Source
     lightVAO.Bind();
@@ -180,12 +180,12 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
     lightingShader.SetUniformMatrix4fv("view", view);
     lightingShader.SetUniformMatrix4fv("projection", projection);
 
-    lightingShader.SetUniform3f("viewPos", pCamera->Position);
+    lightingShader.SetUniform3f("viewPos", pCamera.Position);
 
     // Lights Sources
     lightingShader.SetUniformLight(dirLight);
-    spotlight.position = pCamera->Position;
-    spotlight.direction = pCamera->Front;
+    spotlight.position = pCamera.Position;
+    spotlight.direction = pCamera.Front;
     lightingShader.SetUniformLight(spotlight);
     lightingShader.SetUniformLight(pointLights);
 

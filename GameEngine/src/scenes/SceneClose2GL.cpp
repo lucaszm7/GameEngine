@@ -1,13 +1,13 @@
 #include "SceneClose2GL.h"
 
-using namespace cgl;
-
 SceneClose2GL::SceneClose2GL()
     :cubeModel("resources/models/cube_text.in"),
     lightingShader("resources/shaders/assignament1_vertex.shader", "resources/shaders/assignament1_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
-    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera->Position, pCamera->Front)
+    spotlight({ 1.0f, 1.0f, 1.0f }, 
+        glm::vec3(pCamera.Position.x, pCamera.Position.y, pCamera.Position.z), 
+        glm::vec3(pCamera.Front.x, pCamera.Front.y, pCamera.Front.z))
 {
     pointLights =
     {
@@ -25,20 +25,20 @@ SceneClose2GL::~SceneClose2GL() = default;
 
 void SceneClose2GL::OnUpdate(float deltaTime)
 {
-    view = isLookAt ? pCamera->GetViewMatrix(&objects[selectedLookAt]->transform.position) : pCamera->GetViewMatrix();
-    projection = pCamera->GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    view = isLookAt ? pCamera.GetViewMatrix(&cgl::vec3(objects[selectedLookAt]->transform.position)) : pCamera.GetViewMatrix();
+    projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
     lightingShader.Bind();
 
     lightingShader.SetUniformMatrix4fv("view", view);
     lightingShader.SetUniformMatrix4fv("projection", projection);
 
-    lightingShader.SetUniform3f("viewPos", pCamera->Position);
+    lightingShader.SetUniform3f("viewPos", pCamera.Position);
 
     // Lights Sources
     lightingShader.SetUniformLight(dirLight);
-    spotlight.position = pCamera->Position;
-    spotlight.direction = pCamera->Front;
+    spotlight.position = glm::vec3(pCamera.Position.x, pCamera.Position.y, pCamera.Position.z);
+    spotlight.direction = glm::vec3(pCamera.Front.x, pCamera.Front.y, pCamera.Front.z);
     lightingShader.SetUniformLight(spotlight);
     lightingShader.SetUniformLight(pointLights);
 
@@ -135,5 +135,3 @@ void SceneClose2GL::DisableCullFace()
 {
     glDisable(GL_CULL_FACE);
 }
-
-

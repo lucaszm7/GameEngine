@@ -24,6 +24,8 @@ private:
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;
 
+	ogl::Camera pCamera;
+
 	glm::mat4 view;
 	glm::mat4 projection;
 
@@ -68,5 +70,7 @@ public:
 	~SceneSplineCollisionDetection();
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
+	BaseCam* GetCamera() override { return &pCamera; }
+
 };
 

@@ -1,5 +1,7 @@
 #pragma once
 
+// #define CGL
+
 // Engine
 #include "scene.h"
 #include "camera.h"
@@ -17,15 +19,19 @@ public:
 	SceneClose2GL();
 	~SceneClose2GL() final;
 
-	void OnUpdate(float deltaTime) final;
-	void OnImGuiRender() final;
+	void OnUpdate(float deltaTime) override;
+	void OnImGuiRender() override;
+	BaseCam* GetCamera() override { return &pCamera; }
+
 
 private:
 	Model cubeModel;
 	Shader lightingShader;
 
-	glm::mat4 view;
-	glm::mat4 projection;
+	cgl::Camera pCamera;
+
+	cgl::mat4 view;
+	cgl::mat4 projection;
 
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;
@@ -47,7 +53,6 @@ private:
 	void AddObject(std::string label);
 	void EnableCullFace();
 	void DisableCullFace();
-
 };
 
 

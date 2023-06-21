@@ -11,10 +11,13 @@ public:
 
 	void OnUpdate(float deltaTime);
 	void OnImGuiRender();
+	BaseCam* GetCamera() override { return &pCamera; }
 
 private:
 	Model cubeModel;
 	Shader lightingShader;
+
+	ogl::Camera pCamera;
 
 	glm::mat4 view;
 	glm::mat4 projection;
@@ -39,6 +42,8 @@ private:
 	void AddObject(std::string label);
 	void EnableCullFace();
 	void DisableCullFace();
+
+
 
 };
 
