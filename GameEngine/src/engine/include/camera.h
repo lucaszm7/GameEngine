@@ -5,7 +5,10 @@
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include <vector>
-#include "math/vec3.h"
+
+#include <mat4.h>
+#include <vec4.h>
+#include <vec3.h>
 
 // Defines several possible options for camera movement. Used as abstraction to stay away from window-system specific input methods
 enum class CamMovement 
@@ -105,7 +108,7 @@ namespace cgl
                 if (ImGui::Button("Reset"))
                     this->Reset();
 
-                ImGui::DragFloat3("Position:", &(std::static_cast<float>(Position[0])), 0.1f, -100.0f, 100.0f);
+                ImGui::DragFloat3("Position:", (float*)&(Position[0]), 0.1f, -100.0f, 100.0f);
                 ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -glm::pi<float>(), glm::pi<float>());
                 ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -glm::pi<float>(), glm::pi<float>());
                 ImGui::DragFloat("Near Plane:", &Near, 0.1f, -1000.0f, 1000.0f);
@@ -135,15 +138,17 @@ namespace cgl
         // returns the view matrix calculated using Euler Angles and the LookAt Matrix
         cgl::mat4 GetViewMatrix(cgl::vec3* lookAt = nullptr) const
         {
-            if (!lookAt)
+            return cgl::mat4::identity();
+            /*if (!lookAt)
                 return cgl::lookAt(Position, Position + Front, Up);
             else
-                return cgl::lookAt(Position, *lookAt, Up);
+                return cgl::lookAt(Position, *lookAt, Up);*/
         }
 
         cgl::mat4 GetProjectionMatrix(float aspectRatio) const
         {
-            return cgl::perspective(cgl::radians(Zoom), aspectRatio, Near, Far);
+            return mat4::identity();
+            //return cgl::perspective(cgl::radians(Zoom), aspectRatio, Near, Far);
         }
 
         // processes input received from any keyboard-like input system. 
