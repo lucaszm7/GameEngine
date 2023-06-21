@@ -101,7 +101,7 @@ namespace cgl
             updateCameraVectors();
         }
 
-        void OnImGui()
+        void OnImGui() override
         {
             if (ImGui::TreeNode("Camera Config"))
             {
@@ -118,7 +118,7 @@ namespace cgl
             }
         }
 
-        void Reset()
+        void Reset() override
         {
             Front = cgl::vec3(0.0f, 0.0f, -1.0f);
             MovementSpeed = SPEED;
@@ -138,22 +138,20 @@ namespace cgl
         // returns the view matrix calculated using Euler Angles and the LookAt Matrix
         cgl::mat4 GetViewMatrix(cgl::vec3* lookAt = nullptr) const
         {
-            return cgl::mat4::identity();
-            /*if (!lookAt)
-                return cgl::lookAt(Position, Position + Front, Up);
+            if (!lookAt)
+                return this->lookAt(Position, Position + Front, Up);
             else
-                return cgl::lookAt(Position, *lookAt, Up);*/
+                return this->lookAt(Position, *lookAt, Up);
         }
 
         cgl::mat4 GetProjectionMatrix(float aspectRatio) const
         {
-            return mat4::identity();
-            //return cgl::perspective(cgl::radians(Zoom), aspectRatio, Near, Far);
+            return cgl::mat4(glm::perspective(glm::radians(Zoom), aspectRatio, Near, Far));
         }
 
         // processes input received from any keyboard-like input system. 
         // Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-        void ProcessKeyboard(CamMovement direction, double deltaTime)
+        void ProcessKeyboard(CamMovement direction, double deltaTime) override
         {
             double velocity = MovementSpeed * deltaTime;
             if (direction == CamMovement::FORWARD)
@@ -172,7 +170,7 @@ namespace cgl
 
         // processes input received from a mouse input system. 
         // Expects the offset value in both the x and y direction.
-        void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+        void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) override
         {
             xoffset *= MouseSensitivity;
             yoffset *= MouseSensitivity;
@@ -194,7 +192,7 @@ namespace cgl
         }
 
         // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-        void ProcessMouseScroll(float yoffset)
+        void ProcessMouseScroll(float yoffset) override
         {
             Zoom -= yoffset;
             if (Zoom < 1.0f)
@@ -204,8 +202,31 @@ namespace cgl
         }
 
     private:
+
+        cgl::mat4 lookAt(cgl::vec3 eye, cgl::vec3 dir, cgl::vec3 up) const
+        {
+            //     right-hand coordinate system
+            cgl::vec3 n = (eye - dir).normalized();
+            up.normalize();
+            cgl::vec3 u = up.cross(n);
+            cgl::vec3 v = n.cross(u);
+
+            mat4 viewMatrix;
+
+            viewMatrix[0] = vec4(v).get_array();
+            viewMatrix[1] = vec4(u).get_array();
+            viewMatrix[2] = vec4(n).get_array();
+
+            viewMatrix.mat[0][3] = -eye.x;
+            viewMatrix.mat[1][3] = -eye.y;
+            viewMatrix.mat[2][3] = -eye.z;
+            viewMatrix.mat[3][3] = 1;
+
+            return viewMatrix;
+        }
+
         // calculates the front vector from the Camera's (updated) Euler Angles
-        void updateCameraVectors()
+        void updateCameraVectors() override
         {
             // calculate the new Front vector
             cgl::vec3 front;
@@ -268,7 +289,28 @@ namespace ogl
             updateCameraVectors();
         }
 
-        void OnImGui()
+        Camera(const cgl::Camera& cglCam)
+        {
+            Position = glm::vec3(cglCam.Position.x, cglCam.Position.y, cglCam.Position.z);
+            Front    = glm::vec3(cglCam.Position.x, cglCam.Position.y, cglCam.Position.z);
+            Up       = glm::vec3(cglCam.Position.x, cglCam.Position.y, cglCam.Position.z);
+            Right    = glm::vec3(cglCam.Position.x, cglCam.Position.y, cglCam.Position.z);
+            WorldUp  = glm::vec3(cglCam.Position.x, cglCam.Position.y, cglCam.Position.z);
+
+            Yaw = cglCam.Yaw;
+            Pitch = cglCam.Pitch;
+
+            MovementSpeed = cglCam.MovementSpeed;
+            MouseSensitivity = cglCam.MouseSensitivity;
+            Zoom = cglCam.Zoom;
+
+            Near = cglCam.Near;
+            Far = cglCam.Far;
+
+            updateCameraVectors();
+        }
+
+        void OnImGui() override
         {
             if (ImGui::TreeNode("Camera Config"))
             {
@@ -285,7 +327,7 @@ namespace ogl
             }
         }
 
-        void Reset()
+        void Reset() override
         {
             Front = glm::vec3(0.0f, 0.0f, -1.0f);
             MovementSpeed = SPEED;
@@ -318,7 +360,7 @@ namespace ogl
 
         // processes input received from any keyboard-like input system. 
         // Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-        void ProcessKeyboard(CamMovement direction, double deltaTime)
+        void ProcessKeyboard(CamMovement direction, double deltaTime) override
         {
             float velocity = MovementSpeed * (float)deltaTime;
             if (direction == CamMovement::FORWARD)
@@ -337,7 +379,7 @@ namespace ogl
 
         // processes input received from a mouse input system. 
         // Expects the offset value in both the x and y direction.
-        void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
+        void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) override
         {
             xoffset *= MouseSensitivity;
             yoffset *= MouseSensitivity;
@@ -359,7 +401,7 @@ namespace ogl
         }
 
         // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
-        void ProcessMouseScroll(float yoffset)
+        void ProcessMouseScroll(float yoffset) override
         {
             Zoom -= yoffset;
             if (Zoom < 1.0f)
@@ -370,7 +412,7 @@ namespace ogl
 
     private:
         // calculates the front vector from the Camera's (updated) Euler Angles
-        void updateCameraVectors()
+        void updateCameraVectors() override
         {
             // calculate the new Front vector
             glm::vec3 front;
