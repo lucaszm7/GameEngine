@@ -26,7 +26,8 @@ namespace cgl
 		mat4(const mat4&) = default;
 		mat4(const glm::mat4& glmMat4);
 		mat4(const vec4& l0, const vec4& l1, const vec4& l2, const vec4& l3);
-
+		
+		bool operator == (const mat4& m4) const;
 		mat4& operator = (const mat4& m4) = default;
 		mat4  operator - () const;
 		mat4  operator + (const mat4& m4) const;

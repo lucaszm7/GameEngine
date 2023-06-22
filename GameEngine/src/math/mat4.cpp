@@ -16,6 +16,19 @@ namespace cgl
 		mat[3] = l3.get_array();
 	}
 
+	bool mat4::operator==(const mat4& m4) const
+	{
+		bool isEqual = true;;
+		for (int i = 0; i < 4; ++i)
+		{
+			for (int j = 0; j < 4; ++j)
+			{
+				isEqual &= (mat[i][j] == m4[i][j]);
+			}
+		}
+		return isEqual;
+	}
+
 	mat4::mat4(const glm::mat4& glmMat4)
 	{
 		for (int i = 0; i < 4; ++i)
