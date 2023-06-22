@@ -19,7 +19,7 @@ public:
 
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
-	BaseCam* GetCamera() override { return &oglCamera; }
+	BaseCam* GetCamera() override { return showDefaultCamera ? (BaseCam*)&oglCamera : (BaseCam*)&cglCamera; }
 
 
 private:

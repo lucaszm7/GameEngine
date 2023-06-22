@@ -108,7 +108,7 @@ namespace cgl
                 if (ImGui::Button("Reset"))
                     this->Reset();
 
-                ImGui::DragFloat3("Position:", (float*)&(Position[0]), 0.1f, -100.0f, 100.0f);
+                ImGui::DragFloat3("Position:", &(Position[0]), 0.1f, -1000.0f, 1000.0f);
                 ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -glm::pi<float>(), glm::pi<float>());
                 ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -glm::pi<float>(), glm::pi<float>());
                 ImGui::DragFloat("Near Plane:", &Near, 0.1f, -1000.0f, 1000.0f);
@@ -211,18 +211,20 @@ namespace cgl
             cgl::vec3 u = up.cross(n);
             cgl::vec3 v = n.cross(u);
 
-            mat4 viewMatrix;
+            mat4 cameraBasis;
 
-            viewMatrix[0] = vec4(v).get_array();
-            viewMatrix[1] = vec4(u).get_array();
-            viewMatrix[2] = vec4(n).get_array();
+            cameraBasis[0] = vec4(u).get_array();
+            cameraBasis[1] = vec4(v).get_array();
+            cameraBasis[2] = vec4(n).get_array();
+            cameraBasis.mat[3][3] = 1;
 
-            viewMatrix.mat[0][3] = -eye.x;
-            viewMatrix.mat[1][3] = -eye.y;
-            viewMatrix.mat[2][3] = -eye.z;
-            viewMatrix.mat[3][3] = 1;
+            mat4 cameraTranslation = mat4::identity();
 
-            return viewMatrix;
+            cameraTranslation.mat[0][3] = -(eye.x);
+            cameraTranslation.mat[1][3] = -(eye.y);
+            cameraTranslation.mat[2][3] = -(eye.z);
+
+            return (cameraBasis * cameraTranslation).transpose();
         }
 
         // calculates the front vector from the Camera's (updated) Euler Angles
@@ -235,8 +237,10 @@ namespace cgl
             front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
             Front = front.normalized();
             // also re-calculate the Right and Up vector
-            Right = Front.cross(WorldUp).normalized(); // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-            Up = Right.cross(Front).normalized();
+            cgl::vec3 right = Front.cross(WorldUp);
+            Right = right.normalized(); // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+            cgl::vec3 up = Right.cross(Front);
+            Up = up.normalized();
         }
     };
 }

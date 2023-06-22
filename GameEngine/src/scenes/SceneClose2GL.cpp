@@ -26,18 +26,24 @@ SceneClose2GL::~SceneClose2GL() = default;
 
 void SceneClose2GL::OnUpdate(float deltaTime)
 {
-    oglCamera = cglCamera;
+    cgl::mat4 view2, proj2;
+    bool eq0 = false, eq1 = false;
 
     if (showDefaultCamera)
     {
-        view = isLookAt ? oglCamera.GetViewMatrix(&objects[selectedLookAt]->transform.position) : oglCamera.GetViewMatrix();
-        projection = oglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+        view = oglCamera.GetViewMatrix();
+        projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
     }
     else
     {
-        view = isLookAt ? cglCamera.GetViewMatrix(&cgl::vec3(objects[selectedLookAt]->transform.position)) : cglCamera.GetViewMatrix();
+        view = cglCamera.GetViewMatrix();
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
     }
+
+
+    if (view == view2)
+        eq0 = true;
+
     lightingShader.Bind();
 
     lightingShader.SetUniformMatrix4fv("view", view);
