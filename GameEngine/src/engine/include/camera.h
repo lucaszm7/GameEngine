@@ -146,14 +146,41 @@ namespace cgl
 
         cgl::mat4 GetProjectionMatrix(float aspectRatio) const
         {
-            return cgl::mat4(glm::perspective(glm::radians(Zoom), aspectRatio, Near, Far));
+            float top = Near * (- glm::tan(Zoom / 2));
+            float bottom = -top;
+            float right = aspectRatio * top;
+            float left = -right;
+
+            float depth = Far - Near;
+            float width = right - left;
+            float height = top - bottom;
+            
+            cgl::mat4 H = cgl::mat4::identity();
+            H[0][2] = (left + right) / (2 * Near);
+            H[1][2] = (top + bottom) / (2 * Near);
+
+            cgl::mat4 S = cgl::mat4::identity();
+            float yScale = 1.0f / glm::tan(glm::radians(Zoom));
+            float xScale = yScale / aspectRatio;
+            S[0][0] = xScale;
+            S[1][1] = yScale;
+
+            cgl::mat4 PI = cgl::mat4::identity();
+            PI[3][3] = 0;
+            PI[2][2] = -(Far + Near) / depth;
+            PI[2][3] = -(2 * Near * Far) / depth;
+            PI[3][2] = -1;
+
+            cgl::mat4 perspectiveProjection = PI * S * H;
+
+            return perspectiveProjection.transpose();
         }
 
         // processes input received from any keyboard-like input system. 
         // Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
         void ProcessKeyboard(CamMovement direction, double deltaTime) override
         {
-            double velocity = MovementSpeed * deltaTime;
+            float velocity = MovementSpeed * (float)deltaTime;
             if (direction == CamMovement::FORWARD)
                 Position += Front * velocity;
             if (direction == CamMovement::BACKWARD)
