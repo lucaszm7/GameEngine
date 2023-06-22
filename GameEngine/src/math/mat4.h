@@ -37,10 +37,8 @@ namespace cgl
 		vec4 get_line(int i) const;
 		vec4 get_collum(int i) const;
 
-		mat4 inverse() const;
 		mat4 transpose() const;
 		float determinant() const;
-		mat4 adjoint() const;
 		static mat4 identity();
 
 		float* get_pointer() const { return (float*)(&(mat[0][0])); };

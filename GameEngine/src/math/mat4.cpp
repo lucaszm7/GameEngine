@@ -77,11 +77,6 @@ namespace cgl
 		return r;
 	}
 
-	mat4 mat4::adjoint() const
-	{
-		return mat4();
-	}
-
 	mat4 mat4::identity()
 	{
 		return mat4(vec4(1,0,0,0),vec4(0,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1));
