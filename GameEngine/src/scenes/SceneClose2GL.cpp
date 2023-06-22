@@ -32,17 +32,13 @@ void SceneClose2GL::OnUpdate(float deltaTime)
     if (showDefaultCamera)
     {
         view = oglCamera.GetViewMatrix();
-        projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+        projection = oglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
     }
     else
     {
         view = cglCamera.GetViewMatrix();
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
     }
-
-
-    if (view == view2)
-        eq0 = true;
 
     lightingShader.Bind();
 

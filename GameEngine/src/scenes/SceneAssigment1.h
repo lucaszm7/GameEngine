@@ -9,8 +9,8 @@ public:
 	SceneAssigment1();
 	~SceneAssigment1();
 
-	void OnUpdate(float deltaTime);
-	void OnImGuiRender();
+	void OnUpdate(float deltaTime) override;
+	void OnImGuiRender() override;
 	BaseCam* GetCamera() override { return &pCamera; }
 
 private:
@@ -42,8 +42,5 @@ private:
 	void AddObject(std::string label);
 	void EnableCullFace();
 	void DisableCullFace();
-
-
-
 };
 
