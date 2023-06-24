@@ -160,7 +160,7 @@ namespace cgl
             H[1][2] = (top + bottom) / (2 * Near);
 
             cgl::mat4 S = cgl::mat4::identity();
-            float yScale = 1.0f / glm::tan(glm::radians(Zoom));
+            float yScale = 1.0f / glm::tan(glm::radians(Zoom) / 2);
             float xScale = yScale / aspectRatio;
             S[0][0] = xScale;
             S[1][1] = yScale;
@@ -227,8 +227,6 @@ namespace cgl
             if (Zoom > 45.0f)
                 Zoom = 45.0f;
         }
-
-    private:
 
         cgl::mat4 lookAt(cgl::vec3 eye, cgl::vec3 dir, cgl::vec3 up) const
         {
@@ -441,7 +439,6 @@ namespace ogl
                 Zoom = 45.0f;
         }
 
-    private:
         // calculates the front vector from the Camera's (updated) Euler Angles
         void updateCameraVectors() override
         {

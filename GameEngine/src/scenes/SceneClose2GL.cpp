@@ -26,9 +26,6 @@ SceneClose2GL::~SceneClose2GL() = default;
 
 void SceneClose2GL::OnUpdate(float deltaTime)
 {
-    cgl::mat4 view2, proj2;
-    bool eq0 = false, eq1 = false;
-
     if (showDefaultCamera)
     {
         view = oglCamera.GetViewMatrix();
@@ -63,7 +60,13 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
 void SceneClose2GL::OnImGuiRender()
 {
-    ImGui::Checkbox("Show OpenGL Camera", &showDefaultCamera);
+    if (ImGui::Checkbox("Show OpenGL Camera", &showDefaultCamera))
+    {
+        oglCamera.Position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
+        oglCamera.Yaw = cglCamera.Yaw;
+        oglCamera.Pitch = cglCamera.Pitch;
+        oglCamera.updateCameraVectors();
+    }
 
     const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK" };
     if (ImGui::Button("Add Object"))
