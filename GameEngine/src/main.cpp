@@ -129,7 +129,6 @@ int main()
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            processInputs(window, deltaTime);
 
             // Start the Dear ImGui frame
             ImGui_ImplOpenGL3_NewFrame();
@@ -236,7 +235,6 @@ void ImGuiViewportInit(unsigned int width, unsigned int height)
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    *pScreenHeight = height;
     *pScreenWidth = width;
     *pScreenHeight = height;
     glViewport(0, 0, width, height);
@@ -299,7 +297,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     pCamera->ProcessMouseScroll((float)yoffset);
 }
 
-GLFWwindow* InitGLFW()
+GLFWwindow* InitGLFW(const char* name, unsigned int width, unsigned int height)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -307,7 +305,7 @@ GLFWwindow* InitGLFW()
     // Tells OpenGL we want the core-profile (the good one, with just the newer stuff)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "GameEngine", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(width, height, name, nullptr, nullptr);
     if (!window)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
