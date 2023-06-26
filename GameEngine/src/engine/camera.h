@@ -152,8 +152,6 @@ namespace cgl
             float left = -right;
 
             float depth = Far - Near;
-            float width = right - left;
-            float height = top - bottom;
             
             cgl::mat4 H = cgl::mat4::identity();
             H[0][2] = (left + right) / (2 * Near);
@@ -166,10 +164,10 @@ namespace cgl
             S[1][1] = yScale;
 
             cgl::mat4 PI = cgl::mat4::identity();
-            PI[3][3] = 0;
             PI[2][2] = -(Far + Near) / depth;
             PI[2][3] = -(2 * Near * Far) / depth;
             PI[3][2] = -1;
+            PI[3][3] = 0;
 
             cgl::mat4 perspectiveProjection = PI * S * H;
 

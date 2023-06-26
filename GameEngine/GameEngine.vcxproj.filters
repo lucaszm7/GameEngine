@@ -54,16 +54,16 @@
     <ClCompile Include="src\vendor\IMGUI\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\src\mesh.cpp">
+    <ClCompile Include="src\engine\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\src\line.cpp">
+    <ClCompile Include="src\engine\line.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\src\model.cpp">
+    <ClCompile Include="src\engine\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\src\Spline.cpp">
+    <ClCompile Include="src\engine\Spline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp">
@@ -95,6 +95,8 @@
     <None Include="resources\shaders\light_fragment.shader" />
     <None Include="resources\shaders\assignament1_fragment.shader" />
     <None Include="resources\shaders\assignament1_vertex.shader" />
+    <None Include="resources\shaders\viewport_vertex.shader" />
+    <None Include="resources\shaders\viewport_fragment.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">
@@ -115,7 +117,7 @@
     <ClInclude Include="src\core\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\camera.h">
+    <ClInclude Include="src\engine\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vendor\IMGUI\imconfig.h">
@@ -145,31 +147,31 @@
     <ClInclude Include="src\vendor\IMGUI\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\material.h">
+    <ClInclude Include="src\engine\material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\light.h">
+    <ClInclude Include="src\engine\light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\mesh.h">
+    <ClInclude Include="src\engine\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\model.h">
+    <ClInclude Include="src\engine\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\line.h">
+    <ClInclude Include="src\engine\line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\Timer.hpp">
+    <ClInclude Include="src\engine\Timer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\Spline.hpp">
+    <ClInclude Include="src\engine\Spline.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\include\scene.h">
+    <ClInclude Include="src\engine\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scenes\SceneAssigment1.h">
