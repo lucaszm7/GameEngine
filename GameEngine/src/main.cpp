@@ -312,6 +312,11 @@ void ImGuiDockSpace()
     //     }
 
     static bool dockingSpaceOpen = true;
+    static bool showDemoWindow = false;
+
+    if (showDemoWindow)
+        ImGui::ShowDemoWindow();
+
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
@@ -361,7 +366,10 @@ void ImGuiDockSpace()
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("EXIT", ""))
+            if (ImGui::MenuItem("Show Demo Window"))
+                showDemoWindow = !showDemoWindow; 
+
+            if (ImGui::MenuItem("EXIT"))
                 glfwSetWindowShouldClose(pWindow, 1);
 
             ImGui::Separator();
