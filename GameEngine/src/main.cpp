@@ -121,36 +121,39 @@ int main()
             pCamera = m_CurrentScene->GetCamera();
 
             ImGuiDockSpace();
-            pViewport->OnImGuiRender();
 
             ImGui::Begin(std::string(m_MainMenu->c_SceneName + " | Scene").c_str());
-            bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            ImGui::Separator();
-            pCamera->OnImGui();
-            ImGui::Separator();
-
-            if (ResetToMainMenu)
             {
-                delete m_CurrentScene;
-                m_CurrentScene = m_MainMenu;
-                glfwSetWindowTitle(pWindow, m_MainMenu->c_SceneName.c_str());
-                ResetEngine();
-            }
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.1f, 0.1f, 1.0f)); // Menu bar background color
+                bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
+                ImGui::PopStyleColor(1);
 
-            m_CurrentScene->OnUpdate(deltaTime);
-            m_CurrentScene->OnImGuiRender();
+                ImGui::Separator();
+                ImGui::TextColored(ImVec4(0.51f, 0.82f, 0.345f, 1.0f), "FPS: %.2f\nTake %.2f ms", 1 / deltaTime, deltaTime * 1000);
+                ImGui::Separator();
+                pCamera->OnImGui();
+                ImGui::Separator();
+
+                if (ResetToMainMenu)
+                {
+                    delete m_CurrentScene;
+                    m_CurrentScene = m_MainMenu;
+                    glfwSetWindowTitle(pWindow, m_MainMenu->c_SceneName.c_str());
+                    ResetEngine();
+                }
+
+                m_CurrentScene->OnUpdate(deltaTime);
+                m_CurrentScene->OnImGuiRender();
+            }
+            ImGui::End();
 
             pViewport->OnRender();
+            pViewport->OnImGuiRender();
 
-            ImGui::End();
             UpdateImGui();
 
             glfwSwapBuffers(pWindow);
             glfwPollEvents();
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
     catch (std::exception e)
@@ -309,29 +312,20 @@ void ImGuiDockSpace()
     //     }
 
     static bool dockingSpaceOpen = true;
-
-    static bool opt_fullscreen = true;
-    static bool opt_padding = false;
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
     // because it would be confusing to have two docking targets within each others.
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-    if (opt_fullscreen)
-    {
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->WorkPos);
-        ImGui::SetNextWindowSize(viewport->WorkSize);
-        ImGui::SetNextWindowViewport(viewport->ID);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-        window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    }
-    else
-    {
-        dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
-    }
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
 
     // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
     // and handle the pass-thru hole, so we ask Begin() to not render a background.
@@ -343,14 +337,11 @@ void ImGuiDockSpace()
     // all active windows docked into it will lose their parent and become undocked.
     // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
     // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-    if (!opt_padding)
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("DockSpace Demo", &dockingSpaceOpen, window_flags);
-    if (!opt_padding)
-        ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
 
-    if (opt_fullscreen)
-        ImGui::PopStyleVar(2);
+    ImGui::PopStyleVar(2);
 
     // Submit the DockSpace
     ImGuiIO& io = ImGui::GetIO();
@@ -362,23 +353,19 @@ void ImGuiDockSpace()
 
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::BeginMenu("Options"))
+        if (ImGui::BeginMenu("Menu"))
         {
             // Disabling fullscreen would allow the window to be moved to the front of other windows,
             // which we can't undo at the moment without finer window depth/z control.
-            ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen);
-            ImGui::MenuItem("Padding", NULL, &opt_padding);
+            ImGui::MenuItem("Print Screen", NULL);
+
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Flag: NoSplit", "", (dockspace_flags & ImGuiDockNodeFlags_NoSplit) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoSplit; }
-            if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
-            if (ImGui::MenuItem("Flag: NoDockingInCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_NoDockingInCentralNode) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoDockingInCentralNode; }
-            if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
-            if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }
+            if (ImGui::MenuItem("EXIT", ""))
+                glfwSetWindowShouldClose(pWindow, 1);
+
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Close", NULL, false))
-                dockingSpaceOpen = false;
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
