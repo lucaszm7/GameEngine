@@ -34,6 +34,7 @@
 // #include "engine/mesh.h"
 #include "model.h"
 #include "Timer.hpp"
+#include "ViewPort.hpp"
 
 // Scenes
 #include "scenes/SceneSplineCollisionDetection.h"
@@ -53,8 +54,6 @@ void InitGLEW();
 void InitImGui(GLFWwindow* window);
 void UpdateImGui();
 void ImGuiDockSpace();
-void ImGuiViewPortUpdate();
-void ImGuiViewportInit(unsigned int width, unsigned int height);
 void ResetEngine();
 void ShowExampleAppDockSpace(bool* p_open);
 
@@ -63,11 +62,9 @@ GLFWwindow* pWindow;
 std::shared_ptr<unsigned int> pScreenWidth;
 std::shared_ptr<unsigned int> pScreenHeight;
 
-std::unique_ptr<Shader> viewportShader;
-
-unsigned int framebuffer, textureColorbuffer;
-
 BaseCam* pCamera;
+
+std::unique_ptr<ViewPort> pViewport;
 
 static bool firstMouse = true;
 static float lastX = 0.0f;
@@ -86,8 +83,7 @@ int main()
 
     ResetEngine();
 
-    viewportShader = std::make_unique<Shader>("resources/shaders/viewport_vertex.shader", "resources/shaders/viewport_fragment.shader");
-    ImGuiViewportInit(*pScreenWidth, *pScreenHeight);
+    pViewport = std::make_unique<ViewPort>(pScreenWidth, pScreenHeight);
 
     Scene_t* m_CurrentScene = nullptr;
     Menu* m_MainMenu = new Menu(m_CurrentScene);
@@ -103,33 +99,16 @@ int main()
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
 
-    float quadVertices[] = {
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-    VertexArray quadVAO;
-    VertexBuffer quadVBO(quadVertices, sizeof(float) * 4, GL_STATIC_DRAW);
-    VertexBufferLayout quadVBL;
-    quadVBL.Push<float>(2);
-    quadVBL.Push<float>(2);
-    quadVAO.AddBuffer(quadVBO, quadVBL);
-
     try
     {
         while (!glfwWindowShouldClose(pWindow))
         {
             processInputs(pWindow, deltaTime);
 
-            glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+            pViewport->Bind();
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+            
             // Start the Dear ImGui frame
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -142,7 +121,7 @@ int main()
             pCamera = m_CurrentScene->GetCamera();
 
             ImGuiDockSpace();
-            ImGuiViewPortUpdate();
+            pViewport->OnImGuiRender();
 
             ImGui::Begin(std::string(m_MainMenu->c_SceneName + " | Scene").c_str());
             bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
@@ -163,14 +142,7 @@ int main()
             m_CurrentScene->OnUpdate(deltaTime);
             m_CurrentScene->OnImGuiRender();
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-            glClear(GL_COLOR_BUFFER_BIT);
-            viewportShader->Bind();
-            quadVAO.Bind();
-            glDisable(GL_DEPTH_TEST);
-            glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            quadVAO.Unbind();
+            pViewport->OnRender();
 
             ImGui::End();
             UpdateImGui();
@@ -206,40 +178,12 @@ void ResetEngine()
     glFrontFace(GL_CCW);
 }
 
-void ImGuiViewportInit(unsigned int width, unsigned int height)
-{
-    // framebuffer configuration
-    // -------------------------
-    framebuffer = 0;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-    // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // use a single renderbuffer object for both a depth AND stencil buffer.
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-
-    // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     *pScreenWidth = width;
     *pScreenHeight = height;
     glViewport(0, 0, width, height);
-    glDeleteFramebuffers(1, &framebuffer);
-    ImGuiViewportInit(width, height);
+    pViewport->Reset();
 }
 
 void processInputs(GLFWwindow* window, double deltaTime)
@@ -440,21 +384,6 @@ void ImGuiDockSpace()
         ImGui::EndMenuBar();
     }
 
-    ImGui::End();
-}
-
-void ImGuiViewPortUpdate()
-{
-    static bool show = false;
-    ImGui::Begin("Viewport", &show, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-    ImVec2 wsize = ImGui::GetWindowSize();
-    // Because I use the texture from OpenGL, I need to invert the V from the UV.
-    ImGui::Image((ImTextureID)textureColorbuffer, wsize, ImVec2(0, 1), ImVec2(1, 0));
-
-    if ((float)*pScreenWidth != ImGui::GetWindowWidth() || (float)*pScreenHeight != ImGui::GetWindowHeight())
-        framebuffer_size_callback(pWindow, (int)ImGui::GetWindowWidth(), (int)ImGui::GetWindowHeight());
-    
     ImGui::End();
 }
 
