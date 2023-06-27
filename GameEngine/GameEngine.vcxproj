@@ -225,6 +225,7 @@
     <None Include="resources\shaders\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\Line.hpp" />
     <ClInclude Include="src\engine\ViewPort.hpp" />
     <ClInclude Include="src\math\mat4.h" />
     <ClInclude Include="src\math\math_utils.h" />
