@@ -11,6 +11,9 @@
 #include "material.h"
 #include "light.h"
 
+#include <vec3.h>
+#include <mat4.h>
+
 class Shader
 {
 private:
@@ -30,9 +33,11 @@ public:
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 	void SetUniform3f(const std::string& name, float v0, float v1, float v2);
 	void SetUniform3f(const std::string& name, const glm::vec3& v);
+	void SetUniform3f(const std::string& name, const cgl::vec3& v);
 	void SetUniform1i(const std::string& name, int v0);
 	void SetUniform1f(const std::string& name, float v0);
 	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4);
+	void SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4);
 	
 	void SetUniformMaterial(const Material& mat);
 	void SetUniformLight(const DirectionalLight& light);

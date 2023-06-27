@@ -24,6 +24,8 @@ private:
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;
 
+	ogl::Camera pCamera;
+
 	glm::mat4 view;
 	glm::mat4 projection;
 
@@ -45,7 +47,6 @@ private:
 	bool isDrawingMeshes = true;
 	bool drawAABB = false;
 
-
 	Spline colon;
 	Spline endo;
 
@@ -62,11 +63,12 @@ private:
 	void CreateCilinderSpline(const std::string& filePath, 
 		int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor);
 
-
 public:
 	SceneSplineCollisionDetection();
 	~SceneSplineCollisionDetection();
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
+	BaseCam* GetCamera() override { return &pCamera; }
+
 };
 

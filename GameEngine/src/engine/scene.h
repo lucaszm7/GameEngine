@@ -12,36 +12,34 @@
 class Scene_t
 {
 public:
-	Scene_t() {}
-	virtual ~Scene_t() {}
+	Scene_t() = default;
+	virtual ~Scene_t() = default;
 
-	virtual void OnUpdate(float deltaTime) {}
-	virtual void OnImGuiRender() {}
+	virtual void OnUpdate(float deltaTime) = 0;
+	virtual void OnImGuiRender() = 0;
+	virtual BaseCam* GetCamera() = 0;
 
 	inline static std::shared_ptr<unsigned int> pScreenWidth;
 	inline static std::shared_ptr<unsigned int> pScreenHeight;
-
-	inline static std::shared_ptr<Camera> pCamera;
 };
 
 class Menu : public Scene_t
 {
-public:
-	std::string c_SceneName = "Main Menu";
 private:
 	Scene_t*& m_CurrentScene;
 	std::vector< std::pair< std::string, std::function<Scene_t* ()>>> m_Scenes;
-private:
-	friend class Application;
+
+	ogl::Camera pCamera;
+
 public:
-	Menu(Scene_t*& currentTestPointer)
-		:m_CurrentScene(currentTestPointer)
-	{
-	}
+	std::string c_SceneName = "Main Menu";
+	
+	explicit Menu(Scene_t*& currentTestPointer)
+		:m_CurrentScene(currentTestPointer) {}
 
 	void OnImGuiRender() override
 	{
-		for (auto& scene : m_Scenes)
+		for (auto const& scene : m_Scenes)
 		{
 			if (ImGui::Button(scene.first.c_str()))
 			{
@@ -50,6 +48,10 @@ public:
 			}
 		}
 	}
+
+	void OnUpdate(float deltaTime) override {}
+
+	BaseCam* GetCamera() override { return &pCamera; }
 
 	template <typename T>
 	void RegisterApp(const std::string& name)

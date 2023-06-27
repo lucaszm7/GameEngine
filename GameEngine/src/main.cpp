@@ -34,10 +34,12 @@
 // #include "engine/mesh.h"
 #include "model.h"
 #include "Timer.hpp"
+#include "ViewPort.hpp"
 
 // Scenes
 #include "scenes/SceneSplineCollisionDetection.h"
 #include "scenes/SceneAssigment1.h"
+#include "scenes/SceneClose2GL.h"
 
 
 void processInputs(GLFWwindow* window, double deltaTime);
@@ -47,17 +49,22 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void APIENTRY DebugCallBack(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam);
-GLFWwindow* InitGLFW();
+GLFWwindow* InitGLFW(const char* name, unsigned int width, unsigned int height);
 void InitGLEW();
 void InitImGui(GLFWwindow* window);
 void UpdateImGui();
+void ImGuiDockSpace();
 void ResetEngine();
+void ShowExampleAppDockSpace(bool* p_open);
 
+GLFWwindow* pWindow;
 
 std::shared_ptr<unsigned int> pScreenWidth;
 std::shared_ptr<unsigned int> pScreenHeight;
 
-std::shared_ptr<Camera> pCamera;
+BaseCam* pCamera;
+
+std::unique_ptr<ViewPort> pViewport;
 
 static bool firstMouse = true;
 static float lastX = 0.0f;
@@ -66,38 +73,42 @@ static float lastY = 0.0f;
 
 int main()
 {
-    GLFWwindow* window = InitGLFW();
+    pScreenWidth = std::make_shared<unsigned int>(1280);
+    pScreenHeight = std::make_shared<unsigned int>(720);
+
+    pWindow = InitGLFW("Game Engine", *pScreenWidth, *pScreenHeight);
+
     InitGLEW();
-    InitImGui(window);
+    InitImGui(pWindow);
 
     ResetEngine();
 
-    pScreenWidth = std::make_shared<unsigned int>(800);
-    pScreenHeight = std::make_shared<unsigned int>(600);
-
-    pCamera = std::make_shared<Camera>();
+    pViewport = std::make_unique<ViewPort>(pScreenWidth, pScreenHeight);
 
     Scene_t* m_CurrentScene = nullptr;
     Menu* m_MainMenu = new Menu(m_CurrentScene);
     m_CurrentScene = m_MainMenu;
 
-    m_MainMenu->pScreenWidth = pScreenWidth;
-    m_MainMenu->pScreenHeight = pScreenHeight;
-    m_MainMenu->pCamera = pCamera;
+    Scene_t::pScreenWidth = pScreenWidth;
+    Scene_t::pScreenHeight = pScreenHeight;
 
     m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
     m_MainMenu->RegisterApp<SceneAssigment1>("POS CG - Assingment 1");
+    m_MainMenu->RegisterApp<SceneClose2GL>("Close 2 GL");
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
 
     try
     {
-        while (!glfwWindowShouldClose(window))
+        while (!glfwWindowShouldClose(pWindow))
         {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            processInputs(window, deltaTime);
+            processInputs(pWindow, deltaTime);
 
+            pViewport->Bind();
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            
             // Start the Dear ImGui frame
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -107,30 +118,41 @@ int main()
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
-            ImGui::Begin(m_MainMenu->c_SceneName.c_str());
+            pCamera = m_CurrentScene->GetCamera();
 
-            bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
-            ImGui::Separator();
-            ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.0f, 1.0f), "FPS: %.2f - Take %.2f ms", 1 / deltaTime, deltaTime * 1000);
-            pCamera->OnImGui();
-            ImGui::Separator();
+            ImGuiDockSpace();
 
-            if (ResetToMainMenu)
+            ImGui::Begin(std::string(m_MainMenu->c_SceneName + " | Scene").c_str());
             {
-                delete m_CurrentScene;
-                m_CurrentScene = m_MainMenu;
-                glfwSetWindowTitle(window, m_MainMenu->c_SceneName.c_str());
-                ResetEngine();
-                pCamera->Reset();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.1f, 0.1f, 1.0f)); // Menu bar background color
+                bool ResetToMainMenu = m_CurrentScene != m_MainMenu && ImGui::Button("<- Main Menu");
+                ImGui::PopStyleColor(1);
+
+                ImGui::Separator();
+                ImGui::TextColored(ImVec4(0.51f, 0.82f, 0.345f, 1.0f), "FPS: %.2f\nTake %.2f ms", 1 / deltaTime, deltaTime * 1000);
+                ImGui::Separator();
+                pCamera->OnImGui();
+                ImGui::Separator();
+
+                if (ResetToMainMenu)
+                {
+                    delete m_CurrentScene;
+                    m_CurrentScene = m_MainMenu;
+                    glfwSetWindowTitle(pWindow, m_MainMenu->c_SceneName.c_str());
+                    ResetEngine();
+                }
+
+                m_CurrentScene->OnUpdate(deltaTime);
+                m_CurrentScene->OnImGuiRender();
             }
-
-            m_CurrentScene->OnUpdate(deltaTime);
-            m_CurrentScene->OnImGuiRender();
-
             ImGui::End();
+
+            pViewport->OnRender();
+            pViewport->OnImGuiRender();
+
             UpdateImGui();
 
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(pWindow);
             glfwPollEvents();
         }
     }
@@ -144,7 +166,7 @@ int main()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(pWindow);
     glfwTerminate();
     return 0;
 }
@@ -161,9 +183,10 @@ void ResetEngine()
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    *pScreenHeight = height;
     *pScreenWidth = width;
+    *pScreenHeight = height;
     glViewport(0, 0, width, height);
+    pViewport->Reset();
 }
 
 void processInputs(GLFWwindow* window, double deltaTime)
@@ -221,7 +244,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     pCamera->ProcessMouseScroll((float)yoffset);
 }
 
-GLFWwindow* InitGLFW()
+GLFWwindow* InitGLFW(const char* name, unsigned int width, unsigned int height)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -229,7 +252,7 @@ GLFWwindow* InitGLFW()
     // Tells OpenGL we want the core-profile (the good one, with just the newer stuff)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "GameEngine", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(width, height, name, nullptr, nullptr);
     if (!window)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -273,11 +296,101 @@ void InitImGui(GLFWwindow* window)
     ImGui::StyleColorsDark();
 }
 
+void ImGuiDockSpace()
+{
+    // If you strip some features of, this demo is pretty much equivalent to calling DockSpaceOverViewport()!
+    // In most cases you should be able to just call DockSpaceOverViewport() and ignore all the code below!
+    // In this specific demo, we are not using DockSpaceOverViewport() because:
+    // - we allow the host window to be floating/moveable instead of filling the viewport (when opt_fullscreen == false)
+    // - we allow the host window to have padding (when opt_padding == true)
+    // - we have a local menu bar in the host window (vs. you could use BeginMainMenuBar() + DockSpaceOverViewport() in your code!)
+    // TL;DR; this demo is more complicated than what you would normally use.
+    // If we removed all the options we are showcasing, this demo would become:
+    //     void ShowExampleAppDockSpace()
+    //     {
+    //         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+    //     }
+
+    static bool dockingSpaceOpen = true;
+    static bool showDemoWindow = false;
+
+    if (showDemoWindow)
+        ImGui::ShowDemoWindow();
+
+    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+    // because it would be confusing to have two docking targets within each others.
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->WorkPos);
+    ImGui::SetNextWindowSize(viewport->WorkSize);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+
+    // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
+    // and handle the pass-thru hole, so we ask Begin() to not render a background.
+    if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+        window_flags |= ImGuiWindowFlags_NoBackground;
+
+    // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+    // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+    // all active windows docked into it will lose their parent and become undocked.
+    // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+    // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("DockSpace Demo", &dockingSpaceOpen, window_flags);
+    ImGui::PopStyleVar();
+
+    ImGui::PopStyleVar(2);
+
+    // Submit the DockSpace
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+    {
+        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    }
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::BeginMenu("Menu"))
+        {
+            // Disabling fullscreen would allow the window to be moved to the front of other windows,
+            // which we can't undo at the moment without finer window depth/z control.
+            ImGui::MenuItem("Print Screen", NULL);
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("Show Demo Window"))
+                showDemoWindow = !showDemoWindow; 
+
+            if (ImGui::MenuItem("EXIT"))
+                glfwSetWindowShouldClose(pWindow, 1);
+
+            ImGui::Separator();
+
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+
+    ImGui::End();
+}
+
 void UpdateImGui()
 {
     const ImGuiIO& io = ImGui::GetIO(); (void)io;
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         GLFWwindow* backup_current_context = glfwGetCurrentContext();

@@ -5,7 +5,7 @@ SceneAssigment1::SceneAssigment1()
 	lightingShader("resources/shaders/assignament1_vertex.shader", "resources/shaders/assignament1_fragment.shader"),
 	screenWidth(pScreenWidth), screenHeight(pScreenHeight),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
-    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera->Position, pCamera->Front)
+    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera.Position, pCamera.Front)
 {
     pointLights =
     {
@@ -26,20 +26,20 @@ SceneAssigment1::~SceneAssigment1()
 
 void SceneAssigment1::OnUpdate(float deltaTime)
 {
-	view = isLookAt ? pCamera->GetViewMatrix(&objects[selectedLookAt]->transform.position) : pCamera->GetViewMatrix();
-	projection = pCamera->GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+	view = isLookAt ? pCamera.GetViewMatrix(&objects[selectedLookAt]->transform.position) : pCamera.GetViewMatrix();
+	projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
     lightingShader.Bind();
 
     lightingShader.SetUniformMatrix4fv("view", view);
     lightingShader.SetUniformMatrix4fv("projection", projection);
 
-    lightingShader.SetUniform3f("viewPos", pCamera->Position);
+    lightingShader.SetUniform3f("viewPos", pCamera.Position);
 
     // Lights Sources
     lightingShader.SetUniformLight(dirLight);
-    spotlight.position = pCamera->Position;
-    spotlight.direction = pCamera->Front;
+    spotlight.position = pCamera.Position;
+    spotlight.direction = pCamera.Front;
     lightingShader.SetUniformLight(spotlight);
     lightingShader.SetUniformLight(pointLights);
 

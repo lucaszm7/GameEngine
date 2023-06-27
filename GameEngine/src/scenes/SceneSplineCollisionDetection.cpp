@@ -9,7 +9,7 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     lightingShader("resources/shaders/vertex.shader", "resources/shaders/fragment.shader"),
     lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader"),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
-    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera->Position, pCamera->Front)
+    spotlight({ 1.0f, 1.0f, 1.0f }, pCamera.Position, pCamera.Front)
 {
     std::vector<float> cubeVertices =
     {
@@ -80,9 +80,7 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     };
 }
 
-SceneSplineCollisionDetection::~SceneSplineCollisionDetection()
-{
-}
+SceneSplineCollisionDetection::~SceneSplineCollisionDetection() = default;
 
 void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
 {
@@ -94,8 +92,8 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
         collDet.CollisionCheck(*(endoSplineModel.get()), *(colonSplineModel.get()));
     collDetTimer.Stop();
 
-    view = pCamera->GetViewMatrix();
-    projection = pCamera->GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    view = pCamera.GetViewMatrix();
+    projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
     // Draw Light Source
     lightVAO.Bind();
@@ -182,12 +180,12 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
     lightingShader.SetUniformMatrix4fv("view", view);
     lightingShader.SetUniformMatrix4fv("projection", projection);
 
-    lightingShader.SetUniform3f("viewPos", pCamera->Position);
+    lightingShader.SetUniform3f("viewPos", pCamera.Position);
 
     // Lights Sources
     lightingShader.SetUniformLight(dirLight);
-    spotlight.position = pCamera->Position;
-    spotlight.direction = pCamera->Front;
+    spotlight.position = pCamera.Position;
+    spotlight.direction = pCamera.Front;
     lightingShader.SetUniformLight(spotlight);
     lightingShader.SetUniformLight(pointLights);
 
@@ -221,6 +219,7 @@ void SceneSplineCollisionDetection::OnImGuiRender()
     ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
 
     ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 1000);
+    ImGui::Checkbox("Is Detection Outside Collisions", &collDet.collisionResults.isDetectingOutsideCollisions);
 
     colon.OnImGui();
     endo.OnImGui();
