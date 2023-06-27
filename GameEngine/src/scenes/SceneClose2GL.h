@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 // Engine
 #include "scene.h"
 #include "camera.h"
@@ -10,6 +12,7 @@
 
 #include <mat4.h>
 #include <vec4.h>
+#include "Line.hpp"
 
 class SceneClose2GL : public Scene_t
 {
@@ -19,7 +22,7 @@ public:
 
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
-	BaseCam* GetCamera() override { return showDefaultCamera ? (BaseCam*)&oglCamera : (BaseCam*)&cglCamera; }
+	BaseCam* GetCamera() override { return isOpenGLRendered ? (BaseCam*)&oglCamera : (BaseCam*)&cglCamera; }
 
 
 private:
@@ -35,25 +38,31 @@ private:
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;
 
+	cgl::Line lines;
+
 	DirectionalLight dirLight;
-	std::vector<PointLight> pointLights;
 	SpotLight spotlight;
 
 	std::vector<Model*> objects;
 	std::vector<glm::vec3> colors;
 
-	bool isLookAt = false;
-	int selectedLookAt = 0;
 	std::vector<std::string> lookAtObjects;
 
 	int selectedObjectToAdd = 0;
 	int selectedTriOrientation = 1;
 
-	void AddObject(std::string label);
+	void AddObject(std::string_view label);
 	void EnableCullFace();
 	void DisableCullFace();
 
-	bool showDefaultCamera = false;
+	bool isOpenGLRendered = false;
+	bool isEnableCullFace = true;
+
+	bool isCullingClockWise = false;
+	bool isLoadingClockWise = false;
+
+	bool isLookAt = false;
+	unsigned int selectedLookAt = 0;
 };
 
 
