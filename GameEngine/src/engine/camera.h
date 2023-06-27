@@ -77,7 +77,7 @@ namespace cgl
         float Zoom;
 
         float Near = 0.1f;
-        float Far = 1000.0f;
+        float Far = 5000.0f;
 
         // constructor with vectors
         Camera(cgl::vec3 position = cgl::vec3(0.0f, 0.0f, 0.0f), cgl::vec3 up = cgl::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH)
@@ -111,8 +111,8 @@ namespace cgl
                 ImGui::DragFloat3("Position:", &(Position[0]), 0.1f, -1000.0f, 1000.0f);
                 ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -glm::pi<float>(), glm::pi<float>());
                 ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -glm::pi<float>(), glm::pi<float>());
-                ImGui::DragFloat("Near Plane:", &Near, 0.1f, -1000.0f, 1000.0f);
-                ImGui::DragFloat("Far Plane:", &Far, 0.1f, -1000.0f, 1000.0f);
+                ImGui::DragFloat("Near Plane:", &Near, 0.1f, -10000.0f, 10000.0f);
+                ImGui::DragFloat("Far Plane:", &Far, 0.1f, -10000.0f, 10000.0f);
                 ImGui::DragFloat("Movement Speed:", &MovementSpeed, 0.1f, -1000.0f, 1000.0f);
                 ImGui::TreePop();
             }
@@ -292,7 +292,7 @@ namespace ogl
         float Zoom;
 
         float Near = 0.1f;
-        float Far = 1000.0f;
+        float Far = 5000.0f;
 
         // constructor with vectors
         Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH)
@@ -344,11 +344,11 @@ namespace ogl
                 if (ImGui::Button("Reset"))
                     this->Reset();
 
-                ImGui::DragFloat3("Position:", &Position[0], 0.1f, -100.0f, 100.0f);
-                ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -glm::pi<float>(), glm::pi<float>());
-                ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -glm::pi<float>(), glm::pi<float>());
-                ImGui::DragFloat("Near Plane:", &Near, 0.1f, -1000.0f, 1000.0f);
-                ImGui::DragFloat("Far Plane:", &Far, 0.1f, -1000.0f, 1000.0f);
+                ImGui::DragFloat3("Position:", &Position[0], 0.1f, -10000.0f, 10000.0f);
+                ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -2*glm::pi<float>(), 2*glm::pi<float>());
+                ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -2*glm::pi<float>(), 2*glm::pi<float>());
+                ImGui::DragFloat("Near Plane:", &Near, 0.1f, -10000.0f, 10000.0f);
+                ImGui::DragFloat("Far Plane:", &Far, 0.1f, -10000.0f, 10000.0f);
                 ImGui::DragFloat("Movement Speed:", &MovementSpeed, 0.1f, -1000.0f, 1000.0f);
                 ImGui::TreePop();
             }
