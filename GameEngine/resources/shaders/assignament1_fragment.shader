@@ -62,8 +62,6 @@ uniform Material material;
 uniform vec3 viewPos;
 
 uniform DirectionalLight dirLight;
-#define NR_POINT_LIGHTS 4  
-uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform Spotlight spotlight;
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
@@ -80,8 +78,8 @@ void main()
 	result += CalculateDirectionalLight(dirLight, norm, viewDir);
 
 	// Point Light
-	for (int i = 0; i < NR_POINT_LIGHTS; ++i)
-		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
+	/*for (int i = 0; i < NR_POINT_LIGHTS; ++i)
+		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);*/
 
 	// Spotlight
 	result += CalculateSpotlight(spotlight, norm, outFragPos, viewDir);
