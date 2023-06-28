@@ -3,8 +3,10 @@
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
+#include <IMGUI/imgui.h>
 
 #include <vector>
+#include <array>
 
 #include <mat4.h>
 #include <vec4.h>
@@ -36,6 +38,7 @@ public:
     virtual void ProcessKeyboard(CamMovement direction, double deltaTime) = 0;
     virtual void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) = 0;
     virtual void ProcessMouseScroll(float yoffset) = 0;
+    virtual std::array<float, 8> GetBaseInfo() = 0;
 
     // euler Angles
     float Yaw;
@@ -99,6 +102,21 @@ namespace cgl
             Yaw = yaw;
             Pitch = pitch;
             updateCameraVectors();
+        }
+
+        Camera(std::array<float, 8> param)
+            :Front(cgl::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+        {
+            Position = cgl::vec3(param[0], param[1], param[2]);
+            WorldUp  = cgl::vec3(param[3], param[4], param[5]);
+            Yaw      = param[6];
+            Pitch    = param[7];
+            updateCameraVectors();
+        }
+
+        std::array<float, 8> GetBaseInfo() override
+        {
+            return { Position[0], Position[1], Position[2], Up[0], Up[1], Up[2], Yaw, Pitch };
         }
 
         void OnImGui() override
@@ -335,6 +353,21 @@ namespace ogl
             Far = cglCam.Far;
 
             updateCameraVectors();
+        }
+
+        Camera(std::array<float, 8> param)
+            :Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+        {
+            Position = glm::vec3(param[0], param[1], param[2]);
+            WorldUp = glm::vec3(param[3], param[4], param[5]);
+            Yaw = param[6];
+            Pitch = param[7];
+            updateCameraVectors();
+        }
+
+        std::array<float, 8> GetBaseInfo() override
+        {
+            return { Position[0], Position[1], Position[2], Up[0], Up[1], Up[2], Yaw, Pitch };
         }
 
         void OnImGui() override
