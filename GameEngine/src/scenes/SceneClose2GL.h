@@ -12,7 +12,6 @@
 
 #include <mat4.h>
 #include <vec4.h>
-#include "Line.hpp"
 
 class SceneClose2GL : public Scene_t
 {
@@ -37,8 +36,6 @@ private:
 
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;
-
-	cgl::Line lines;
 
 	DirectionalLight dirLight;
 	SpotLight spotlight;

@@ -26,6 +26,7 @@
 //#include "core/Texture.h"
 
 // Engine
+#include "Lines.hpp"
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
@@ -89,6 +90,9 @@ int main()
     Menu* m_MainMenu = new Menu(m_CurrentScene);
     m_CurrentScene = m_MainMenu;
 
+    Debug::Line& m_LinesDrawer = Debug::Line::OnStart();
+    Shader m_DebugLineShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
+
     Scene_t::pScreenWidth = pScreenWidth;
     Scene_t::pScreenHeight = pScreenHeight;
 
@@ -144,6 +148,7 @@ int main()
 
                 m_CurrentScene->OnUpdate(deltaTime);
                 m_CurrentScene->OnImGuiRender();
+                m_LinesDrawer.OnUpdate(m_DebugLineShader, ogl::Camera(pCamera->GetBaseInfo()), (float)*pScreenWidth / (float)*pScreenHeight);
             }
             ImGui::End();
 

@@ -1,4 +1,5 @@
 #include "SceneClose2GL.h"
+#include "Lines.hpp"
 
 struct BoundingVolume
 {
@@ -69,10 +70,9 @@ void SceneClose2GL::OnUpdate(float deltaTime)
     spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
     lightingShader.SetUniformLight(spotlight);
 
-    lines.Add(glm::vec3{ 0,0,0 }, glm::vec3{ 10,0,0 });
-    lines.Add(glm::vec3{ 0,0,0 }, glm::vec3{ 0,10,0 });
-    lines.Add(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,10 });
-    lines.Draw(lightingShader);
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 10,0,0 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,10,0 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,10 });
 
     for (int i = 0; i < objects.size(); ++i)
     {
