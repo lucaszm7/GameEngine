@@ -23,7 +23,7 @@ public:
 			LoadClassicModel(path);
 	}
 
-	void Draw(Shader& shader) const;
+	void Draw(Shader& shader, DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
 	void OnImGui() const;
 	std::vector<Mesh> meshes;
 	std::string name;

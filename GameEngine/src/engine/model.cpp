@@ -1,6 +1,6 @@
 #include "model.h"
 
-void Model::Draw(Shader& shader) const
+void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -12,7 +12,7 @@ void Model::Draw(Shader& shader) const
 
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
-		meshes[i].Draw(shader);
+		meshes[i].Draw(shader, drawPrimitive);
 	}
 }
 

@@ -70,14 +70,14 @@ void SceneClose2GL::OnUpdate(float deltaTime)
     spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
     lightingShader.SetUniformLight(spotlight);
 
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 10,0,0 });
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,10,0 });
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,10 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 });
 
     for (int i = 0; i < objects.size(); ++i)
     {
         lightingShader.SetUniform3f("uColor", colors[i]);
-        objects[i]->Draw(lightingShader);
+        objects[i]->Draw(lightingShader, drawPrimitive);
     }
 }
 
@@ -102,6 +102,22 @@ void SceneClose2GL::OnImGuiRender()
         oglCamera.Pitch = cglCamera.Pitch;
         oglCamera.updateCameraVectors();
     } 
+
+    ImGui::Text("Drawing Primitive");
+    if (ImGui::RadioButton("Triangle", drawPrimitive == DrawPrimitive::Triangle))
+    {
+        drawPrimitive = DrawPrimitive::Triangle;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Point", drawPrimitive == DrawPrimitive::Point))
+    {
+        drawPrimitive = DrawPrimitive::Point;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("WireFrame", drawPrimitive == DrawPrimitive::WireFrame))
+    {
+        drawPrimitive = DrawPrimitive::WireFrame;
+    }
 
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))
@@ -159,8 +175,6 @@ void SceneClose2GL::OnImGuiRender()
         }
     }
 }
-
-
 
 void SceneClose2GL::AddObject(std::string_view label)
 {

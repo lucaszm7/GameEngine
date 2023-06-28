@@ -58,6 +58,8 @@ private:
 	bool isCullingClockWise = false;
 	bool isLoadingClockWise = false;
 
+	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
+
 	bool isLookAt = false;
 	unsigned int selectedLookAt = 0;
 };
