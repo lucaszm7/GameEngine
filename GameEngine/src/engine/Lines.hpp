@@ -6,6 +6,13 @@
 #include <Shader.h>
 #include <camera.h>
 
+#ifdef _DEBUG
+	constexpr bool isDebug = true;
+#endif
+#ifndef _DEBUG
+	constexpr bool isDebug = false;
+#endif
+
 namespace Debug
 {
 	class Line
@@ -13,7 +20,7 @@ namespace Debug
 		private:
 			inline static std::vector<glm::vec3> m_vertices;
 			inline static glm::vec3 m_uColor;
-			
+
 			int m_maxVertices;
 			GLuint m_VAO;
 			GLuint m_VBO;

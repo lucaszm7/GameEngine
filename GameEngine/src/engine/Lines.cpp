@@ -41,6 +41,8 @@ namespace Debug
 
 	void Line::OnUpdate(Shader& shader, const ogl::Camera& camera, float aspectRatio)
 	{
+		if (!isDebug)
+			return;
 		shader.Bind();
 		shader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
 		shader.SetUniformMatrix4fv("view", camera.GetViewMatrix());
