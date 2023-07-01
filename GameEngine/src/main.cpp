@@ -142,6 +142,7 @@ int main()
                 {
                     delete m_CurrentScene;
                     m_CurrentScene = m_MainMenu;
+                    pCamera = m_CurrentScene->GetCamera();
                     glfwSetWindowTitle(pWindow, m_MainMenu->c_SceneName.c_str());
                     ResetEngine();
                 }
@@ -210,10 +211,6 @@ void processInputs(GLFWwindow* window, double deltaTime)
         pCamera->ProcessKeyboard(CamMovement::DOWN, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
