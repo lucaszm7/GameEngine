@@ -1,6 +1,6 @@
 #include "model.h"
 
-void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
+void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -14,6 +14,42 @@ void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 	{
 		meshes[i].Draw(shader, drawPrimitive);
 	}
+}
+
+void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection) const
+{
+	cgl::mat4 model = cgl::mat4::identity();
+	model = cgl::translate(model, transform.position);
+	model = cgl::rotate(model, transform.rotation.x, cgl::vec3(1.0f, 0.0f, 0.0f));
+	model = cgl::rotate(model, transform.rotation.y, cgl::vec3(0.0f, 1.0f, 0.0f));
+	model = cgl::rotate(model, transform.rotation.z, cgl::vec3(0.0f, 0.0f, 1.0f));
+	model = cgl::scale(model, transform.scale);
+
+	cgl::mat4 mvp = model * view * projection;
+	for (unsigned int i = 0; i < meshes.size(); ++i)
+	{
+		Mesh meshCopy = meshes[i];
+		for (auto& vertice : meshCopy.vertices)
+		{
+			cgl::vec3 newPos = (mvp * cgl::vec4(vertice.Position, 1.0f));
+			vertice.Position = glm::vec3(newPos.x, newPos.y, newPos.z);
+
+			cgl::vec3 newNormal = (model.transpose() * cgl::vec4(vertice.Normal, 1.0f));
+			vertice.Normal = glm::vec3(newPos.x, newPos.y, newPos.z);
+		}
+		meshCopy.Draw(shader, drawPrimitive);
+	}
+}
+
+cgl::mat4 Model::GetModelMatrix() const
+{
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, transform.position);
+	model = glm::rotate(model, transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, transform.scale);
+	return model;
 }
 
 void Model::OnImGui() const
@@ -45,9 +81,20 @@ void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrie
 	std::string sHasText;
 	bool hasTexture;
 
+	std::string defaultName;
+
 	std::getline(stream, line);
 	ss << line;
-	ss >> line >> line >> line >> name;
+	ss >> line >> line >> line >> defaultName;
+
+	int id = 0;
+	name = defaultName;
+	while (m_NamesMap.contains(name))
+	{
+		id = std::rand() % (int)(2e10);
+		name = defaultName + '_' + std::to_string(id);
+	}
+	m_NamesMap[name] = id;
 
 	std::getline(stream, line);
 	ss.str(std::string());
@@ -212,7 +259,16 @@ void Model::LoadClassicModel(const std::string& path)
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	name = path.substr(0, path.find_last_of('/'));
+	std::string defaultName = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - path.find_last_of('/'));
+	int id = 0;
+	name = defaultName;
+	while (m_NamesMap.contains(name))
+	{
+		id = std::rand() % (int)(2e10);
+		name = defaultName + '_' + std::to_string(id);
+	}
+
+	m_NamesMap[name] = id;
 	processNode(scene->mRootNode, scene);
 }
 
