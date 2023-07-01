@@ -46,7 +46,7 @@ void SceneAssigment1::OnUpdate(float deltaTime)
     for (int i = 0; i < objects.size(); ++i)
     {
         lightingShader.SetUniform3f("uColor", colors[i]);
-        objects[i]->Draw(lightingShader);
+        objects[i]->DrawOpenGL(lightingShader);
     }
 }
 

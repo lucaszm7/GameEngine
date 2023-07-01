@@ -25,8 +25,8 @@ public:
 
 
 private:
-	Model cubeModel;
-	Shader lightingShader;
+	Shader OpenGLShader;
+	Shader Close2GLShader;
 
 	cgl::Camera cglCamera;
 	ogl::Camera oglCamera;
@@ -40,7 +40,7 @@ private:
 	DirectionalLight dirLight;
 	SpotLight spotlight;
 
-	std::vector<Model*> objects;
+	std::vector<std::unique_ptr<Model>> objects;
 	std::vector<glm::vec3> colors;
 
 	std::vector<std::string> lookAtObjects;
