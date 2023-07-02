@@ -50,7 +50,9 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 {
     if (isOpenGLRendered)
     {
-        view = oglCamera.GetViewMatrix(isLookAt && objects.size() > 0 ? &objects[selectedLookAt]->transform.position : nullptr);
+        glm::vec3 lookAtLocation = !objects.empty() ? objects[selectedLookAt]->transform.position : glm::vec3();
+        isLookAt ? oglCamera.SetLookAt(lookAtLocation) : oglCamera.UnSetLookAt();
+        view = oglCamera.GetViewMatrix();
         projection = oglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
     
         OpenGLShader.Bind();
@@ -71,8 +73,9 @@ void SceneClose2GL::OnUpdate(float deltaTime)
     }
     else
     {
-        cgl::vec3 lookAtLocation = objects.size() > 0 ? (objects[selectedLookAt]->transform.position) : cgl::vec3();
-        view = cglCamera.GetViewMatrix(isLookAt && objects.size() > 0 ? &lookAtLocation : nullptr);
+        cgl::vec3 lookAtLocation = !objects.empty() ? objects[selectedLookAt]->transform.position : cgl::vec3();
+        isLookAt ? cglCamera.SetLookAt(lookAtLocation) : cglCamera.UnSetLookAt();
+        view = cglCamera.GetViewMatrix();
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
         Close2GLShader.Bind();
@@ -233,10 +236,33 @@ void SceneClose2GL::AddObject(std::string_view label)
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());
 
-    cglCamera.Reset();
-    cglCamera.Position.z = (aabb.max.y - aabb.min.y) / 2;
-    cglCamera.Position.y = (aabb.max.y - aabb.min.y) / 2;
-    cglCamera.Position.x = (aabb.max.y - aabb.min.y) / 2;
+    float aspectRatio = (float)*pScreenWidth / (float)*pScreenHeight;
+
+    if (isOpenGLRendered)
+    {
+        oglCamera.Reset();
+        float OPP = (aabb.max.y + aabb.min.y) / 2;
+        float OPPX = (aabb.max.x + aabb.min.x) / 2;
+        oglCamera.Position.x = (aabb.max.x + aabb.min.x) / 2;
+        oglCamera.Position.y = (aabb.max.y + aabb.min.y) / 2;
+        float TAN = glm::tan(glm::radians(oglCamera.Zoom / 2));
+        float yBig = (aabb.max.z + ((aabb.max.y - OPP)  / TAN));
+        float xBig = (aabb.max.z + ((aabb.max.x - OPPX) / glm::tan(glm::radians((oglCamera.Zoom * aspectRatio) / 2))));
+        oglCamera.Position.z = (xBig > yBig) ? xBig : yBig;
+
+    }
+    else
+    {
+        cglCamera.Reset();
+        float OPP = (aabb.max.y + aabb.min.y) / 2;
+        float OPPX = (aabb.max.x + aabb.min.x) / 2;
+        cglCamera.Position.x = (aabb.max.x + aabb.min.x) / 2;
+        cglCamera.Position.y = (aabb.max.y + aabb.min.y) / 2;
+        float TAN = glm::tan(glm::radians(cglCamera.Zoom / 2));
+        float yBig = (aabb.max.z + ((aabb.max.y - OPP) / TAN));
+        float xBig = (aabb.max.z + ((aabb.max.x - OPPX) / glm::tan(glm::radians((cglCamera.Zoom * aspectRatio) / 2))));
+        cglCamera.Position.z = (xBig > yBig) ? xBig : yBig;
+    }
 }
 
 void SceneClose2GL::EnableCullFace()

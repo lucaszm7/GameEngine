@@ -26,7 +26,8 @@ SceneAssigment1::~SceneAssigment1()
 
 void SceneAssigment1::OnUpdate(float deltaTime)
 {
-	view = isLookAt ? pCamera.GetViewMatrix(&objects[selectedLookAt]->transform.position) : pCamera.GetViewMatrix();
+    isLookAt ? pCamera.SetLookAt(objects[selectedLookAt]->transform.position) : pCamera.UnSetLookAt();
+	view = pCamera.GetViewMatrix();
 	projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
     lightingShader.Bind();
