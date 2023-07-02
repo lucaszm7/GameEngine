@@ -11,14 +11,10 @@
 #include <initializer_list>
 
 #include <GLM/glm.hpp>
-
 #include "math_utils.h"
-
-using std::sqrt;
 
 namespace cgl
 {
-
 	struct vec3
 	{
 		union
