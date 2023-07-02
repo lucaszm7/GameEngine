@@ -19,11 +19,11 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection, bool isCulling, bool isCullingClockWise) const
 {
 	cgl::mat4 model = cgl::mat4::identity();
-	// model.translate(cgl::vec4(transform.position, 1.0f));
+	model.translate(cgl::vec4(transform.position, 0.0f));
 	// model.rotateX(transform.rotation.x);
 	// model.rotateY(transform.rotation.y);
 	// model.rotateZ(transform.rotation.z);
-	// model.scale(transform.scale);
+	model.scale(transform.scale);
 
 	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
 	for (unsigned int i = 0; i < meshes.size(); ++i)

@@ -25,16 +25,28 @@ namespace cgl
 		set_collum(3, newPos);
 	}
 
-	void mat4::rotateX(float degrees)
+	void mat4::rotateZ(float radians)
 	{
+		mat[0][0] *= glm::cos(radians);
+		mat[0][1] *= -glm::sin(radians);
+		mat[1][1] *= glm::cos(radians);
+		mat[1][0] *= glm::sin(radians);
 	}
 
-	void mat4::rotateY(float degrees)
+	void mat4::rotateY(float radians)
 	{
+		mat[0][0] *= glm::cos(radians);
+		mat[0][2] *= glm::sin(radians);
+		mat[2][0] *= -glm::sin(radians);
+		mat[2][2] *= glm::cos(radians);
 	}
 
-	void mat4::rotateZ(float degrees)
+	void mat4::rotateX(float radians)
 	{
+		mat[1][1] *= glm::cos(radians);
+		mat[1][2] *= glm::sin(radians);
+		mat[2][1] *= glm::cos(radians);
+		mat[2][2] *= glm::sin(radians);
 	}
 
 	void mat4::scale(const vec3& s)
