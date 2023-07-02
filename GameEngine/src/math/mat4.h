@@ -27,11 +27,11 @@ namespace cgl
 		mat4(const glm::mat4& glmMat4);
 		mat4(const vec4& l0, const vec4& l1, const vec4& l2, const vec4& l3);
 		
-		void translate(const vec4& t);
-		void rotateX(float degrees);
-		void rotateY(float degrees);
-		void rotateZ(float degrees);
-		void scale(const vec3& s);
+		static mat4 translate(const vec4& t);
+		static mat4 rotateX(float degrees);
+		static mat4 rotateY(float degrees);
+		static mat4 rotateZ(float degrees);
+		static mat4 scale(const vec3& s);
 
 		bool operator == (const mat4& m4) const;
 		mat4& operator = (const mat4& m4) = default;
