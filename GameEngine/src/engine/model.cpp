@@ -19,11 +19,11 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection) const
 {
 	cgl::mat4 model = cgl::mat4::identity();
-	model = cgl::translate(model, transform.position);
-	model = cgl::rotate(model, transform.rotation.x, cgl::vec3(1.0f, 0.0f, 0.0f));
-	model = cgl::rotate(model, transform.rotation.y, cgl::vec3(0.0f, 1.0f, 0.0f));
-	model = cgl::rotate(model, transform.rotation.z, cgl::vec3(0.0f, 0.0f, 1.0f));
-	model = cgl::scale(model, transform.scale);
+	model.translate(cgl::vec4(transform.position));
+	model.rotateX(transform.rotation.x);
+	model.rotateY(transform.rotation.y);
+	model.rotateZ(transform.rotation.z);
+	model.scale(transform.scale);
 
 	cgl::mat4 mvp = model * view * projection;
 	for (unsigned int i = 0; i < meshes.size(); ++i)
@@ -31,10 +31,10 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 		Mesh meshCopy = meshes[i];
 		for (auto& vertice : meshCopy.vertices)
 		{
-			cgl::vec3 newPos = (mvp * cgl::vec4(vertice.Position, 1.0f));
+			cgl::vec3 newPos = (mvp * cgl::vec4(vertice.Position, 1.0f)).to_vec3();
 			vertice.Position = glm::vec3(newPos.x, newPos.y, newPos.z);
 
-			cgl::vec3 newNormal = (model.transpose() * cgl::vec4(vertice.Normal, 1.0f));
+			cgl::vec3 newNormal = (model.transpose() * cgl::vec4(vertice.Normal, 1.0f)).to_vec3();
 			vertice.Normal = glm::vec3(newPos.x, newPos.y, newPos.z);
 		}
 		meshCopy.Draw(shader, drawPrimitive);

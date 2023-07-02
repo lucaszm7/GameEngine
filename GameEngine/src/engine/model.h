@@ -11,6 +11,7 @@
 
 #include "shader.h"
 #include "mesh.h"
+#include "vec4.h"
 
 struct Model
 {

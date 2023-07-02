@@ -4,8 +4,11 @@ namespace cgl
 {
 	inline std::ostream& operator << (std::ostream& out, const mat4& m)
 	{
-		return out << m.get_line(0) << '\n' << m.get_line(0) << '\n' << 
-					  m.get_line(0) << '\n' << m.get_line(0);
+		return out
+			<< m.get_line(0) << '\n' 
+			<< m.get_line(1) << '\n' 
+			<< m.get_line(2) << '\n' 
+			<< m.get_line(3);
 	}
 
 	mat4::mat4(const vec4& l0, const vec4& l1, const vec4& l2, const vec4& l3)
@@ -14,6 +17,31 @@ namespace cgl
 		mat[1] = l1.get_array();
 		mat[2] = l2.get_array();
 		mat[3] = l3.get_array();
+	}
+
+	void mat4::translate(const vec4& t)
+	{
+		vec4 newPos = get_collum(3) + t;
+		set_collum(3, newPos);
+	}
+
+	void mat4::rotateX(float degrees)
+	{
+	}
+
+	void mat4::rotateY(float degrees)
+	{
+	}
+
+	void mat4::rotateZ(float degrees)
+	{
+	}
+
+	void mat4::scale(const vec3& s)
+	{
+		mat[0][0] *= s[0];
+		mat[1][1] *= s[1];
+		mat[2][2] *= s[2];
 	}
 
 	bool mat4::operator==(const mat4& m4) const
@@ -48,6 +76,14 @@ namespace cgl
 	vec4 mat4::get_collum(int i) const
 	{
 		return vec4(mat[0][i], mat[1][i], mat[2][i], mat[3][i]);
+	}
+
+	void mat4::set_collum(int i, const vec4& v)
+	{
+		mat[0][i] = v[0];
+		mat[1][i] = v[1];
+		mat[2][i] = v[2];
+		mat[3][i] = v[3];
 	}
 
 	mat4 mat4::transpose() const
