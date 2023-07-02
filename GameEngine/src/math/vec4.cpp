@@ -29,7 +29,7 @@ namespace cgl
 		return vec3(x, y, z);
 	}
 
-	inline vec4 operator - (vec4 u, vec4 v)
+	vec4 operator - (const vec4& u, const vec4& v)
 	{
 		return vec4(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2], u.e[3] - v.e[3]);
 	}
@@ -100,6 +100,13 @@ namespace cgl
 	inline vec4 vec4::unit_vector() const
 	{
 		return *this / this->lenght();
+	}
+
+	bool vec4::is_canonic_cube() const
+	{
+		return x <= 1.0f && x >= -1.0f
+			&& y <= 1.0f && y >= -1.0f
+			&& z <= 1.0f && z >= -1.0f;
 	}
 	
 	float vec4::lenght_squared() const

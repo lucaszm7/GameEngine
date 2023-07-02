@@ -53,7 +53,7 @@ private:
 	void DisableCullFace();
 
 	bool isOpenGLRendered = false;
-	bool isEnableCullFace = true;
+	bool isEnableCullFace = false;
 
 	bool isCullingClockWise = false;
 	bool isLoadingClockWise = false;

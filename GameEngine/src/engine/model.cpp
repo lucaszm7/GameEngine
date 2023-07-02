@@ -16,28 +16,58 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	}
 }
 
-void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection) const
+void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection, bool isCulling, bool isCullingClockWise) const
 {
-	cgl::mat4 model = cgl::mat4::identity();
-	model.translate(cgl::vec4(transform.position));
-	model.rotateX(transform.rotation.x);
-	model.rotateY(transform.rotation.y);
-	model.rotateZ(transform.rotation.z);
-	model.scale(transform.scale);
+	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(transform.position, 1.0f));
+	// model = model * cgl::mat4::rotateX(transform.rotation.x);
+	// model = model * cgl::mat4::rotateY(transform.rotation.y);
+	// model = model * cgl::mat4::rotateZ(transform.rotation.z);
+	cgl::mat4 scale = cgl::mat4::scale(transform.scale);
 
-	cgl::mat4 mvp = model * view * projection;
+	cgl::mat4 model = translate * scale;
+
+	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
-		Mesh meshCopy = meshes[i];
-		for (auto& vertice : meshCopy.vertices)
-		{
-			cgl::vec3 newPos = (mvp * cgl::vec4(vertice.Position, 1.0f)).to_vec3();
-			vertice.Position = glm::vec3(newPos.x, newPos.y, newPos.z);
+		std::vector<cgl::vec4> cglVertices;
+		cglVertices.reserve(meshes[i].vertices.size());
 
-			cgl::vec3 newNormal = (model.transpose() * cgl::vec4(vertice.Normal, 1.0f)).to_vec3();
-			vertice.Normal = glm::vec3(newPos.x, newPos.y, newPos.z);
+		for (unsigned int j = 0; j < meshes[i].vertices.size(); j+=3)
+		{
+			// Go To Homogeneus Clipping Space
+			// Vertex Transforms
+			cgl::vec4 v0 = mvp * cgl::vec4(meshes[i].vertices[j+0].Position, 1.0f);
+			cgl::vec4 v1 = mvp * cgl::vec4(meshes[i].vertices[j+1].Position, 1.0f);
+			cgl::vec4 v2 = mvp * cgl::vec4(meshes[i].vertices[j+2].Position, 1.0f);
+
+			// Go To Normalized Device Coordinates
+			// Perspective division
+			v0 /= v0.w;
+			v1 /= v1.w;
+			v2 /= v2.w;
+
+			// Clipping
+			if (!v0.is_canonic_cube() || !v1.is_canonic_cube() || !v2.is_canonic_cube())
+				continue;
+
+			// Culling
+			if (isCulling)
+			{
+				cgl::vec3 u = (v1 - v0).to_vec3();
+				cgl::vec3 v = (v2 - v0).to_vec3();
+				float sign = (u.x * v.y) - (v.x * u.y);
+				if (isCullingClockWise && sign > 0.0f)
+					continue;
+				if (!isCullingClockWise && sign < 0.0f)
+					continue;
+			}
+
+			cglVertices.push_back(v0);
+			cglVertices.push_back(v1);
+			cglVertices.push_back(v2);
 		}
-		meshCopy.Draw(shader, drawPrimitive);
+
+		Mesh::DrawRaw(shader, cglVertices, drawPrimitive);
 	}
 }
 

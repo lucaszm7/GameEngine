@@ -59,9 +59,9 @@ namespace cgl
 		vec4& operator *= (const float& f);
 		vec4& operator /= (const float t);
 
-		friend inline vec4 operator - (vec4 u, vec4 v);
-		friend inline vec4 operator * (const vec4& u, const vec4& v);
-		friend inline vec4 operator * (float t, const vec4& v);
+		friend vec4 operator - (const vec4& u, const vec4& v);
+		friend vec4 operator * (const vec4& u, const vec4& v);
+		friend vec4 operator * (float t, const vec4& v);
 
 		inline std::array<float, 4> get_array() const { return e; }
 		float lenght() const;
@@ -69,6 +69,9 @@ namespace cgl
 
 		float dot(const vec4& v) const;
 		vec4 unit_vector() const;
+
+		// Verify is is in [-1, 1] space
+		bool is_canonic_cube() const;
 		friend inline std::ostream& operator << (std::ostream& out, const vec4& v);
 	};
 

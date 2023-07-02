@@ -39,7 +39,6 @@
 
 // Scenes
 #include "scenes/SceneSplineCollisionDetection.h"
-#include "scenes/SceneAssigment1.h"
 #include "scenes/SceneClose2GL.h"
 
 
@@ -97,7 +96,6 @@ int main()
     Scene_t::pScreenHeight = pScreenHeight;
 
     m_MainMenu->RegisterApp<SceneSplineCollisionDetection>("Spline Collision Detection");
-    m_MainMenu->RegisterApp<SceneAssigment1>("POS CG - Assingment 1");
     m_MainMenu->RegisterApp<SceneClose2GL>("Close 2 GL");
 
     double deltaTime = 0.0f;

@@ -19,29 +19,52 @@ namespace cgl
 		mat[3] = l3.get_array();
 	}
 
-	void mat4::translate(const vec4& t)
+	mat4 mat4::translate(const vec4& t)
 	{
-		vec4 newPos = get_collum(3) + t;
-		set_collum(3, newPos);
+		mat4 tra = mat4::identity();
+		tra.set_collum(3, t);
+		return tra;
 	}
 
-	void mat4::rotateX(float degrees)
+	mat4 mat4::rotateZ(float radians)
 	{
+		mat4 rot = mat4::identity();
+		rot[0][0] *= glm::cos(radians);
+		rot[0][1] *= -glm::sin(radians);
+		rot[1][1] *= glm::cos(radians);
+		rot[1][0] *= glm::sin(radians);
+		return rot;
 	}
 
-	void mat4::rotateY(float degrees)
+	mat4 mat4::rotateY(float radians)
 	{
+		mat4 rot = mat4::identity();
+
+		rot[0][0] *= glm::cos(radians);
+		rot[0][2] *= glm::sin(radians);
+		rot[2][0] *= -glm::sin(radians);
+		rot[2][2] *= glm::cos(radians);
+		return rot;
 	}
 
-	void mat4::rotateZ(float degrees)
+	mat4 mat4::rotateX(float radians)
 	{
+		mat4 rot = mat4::identity();
+
+		rot[1][1] *= glm::cos(radians);
+		rot[1][2] *= glm::sin(radians);
+		rot[2][1] *= glm::cos(radians);
+		rot[2][2] *= glm::sin(radians);
+		return rot;
 	}
 
-	void mat4::scale(const vec3& s)
+	mat4 mat4::scale(const vec3& s)
 	{
-		mat[0][0] *= s[0];
-		mat[1][1] *= s[1];
-		mat[2][2] *= s[2];
+		mat4 tra = mat4::identity();
+		tra[0][0] *= s[0];
+		tra[1][1] *= s[1];
+		tra[2][2] *= s[2];
+		return tra;
 	}
 
 	bool mat4::operator==(const mat4& m4) const
