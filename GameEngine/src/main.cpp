@@ -26,6 +26,7 @@
 //#include "core/Texture.h"
 
 // Engine
+#include "Lines.hpp"
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
@@ -89,6 +90,9 @@ int main()
     Menu* m_MainMenu = new Menu(m_CurrentScene);
     m_CurrentScene = m_MainMenu;
 
+    Debug::Line& m_LinesDrawer = Debug::Line::OnStart();
+    Shader m_DebugLineShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
+
     Scene_t::pScreenWidth = pScreenWidth;
     Scene_t::pScreenHeight = pScreenHeight;
 
@@ -138,12 +142,14 @@ int main()
                 {
                     delete m_CurrentScene;
                     m_CurrentScene = m_MainMenu;
+                    pCamera = m_CurrentScene->GetCamera();
                     glfwSetWindowTitle(pWindow, m_MainMenu->c_SceneName.c_str());
                     ResetEngine();
                 }
 
                 m_CurrentScene->OnUpdate(deltaTime);
                 m_CurrentScene->OnImGuiRender();
+                m_LinesDrawer.OnUpdate(m_DebugLineShader, ogl::Camera(pCamera->GetBaseInfo()), (float)*pScreenWidth / (float)*pScreenHeight);
             }
             ImGui::End();
 
@@ -205,10 +211,6 @@ void processInputs(GLFWwindow* window, double deltaTime)
         pCamera->ProcessKeyboard(CamMovement::DOWN, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

@@ -87,6 +87,9 @@
     <ClCompile Include="src\math\vec2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\Lines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
@@ -97,6 +100,8 @@
     <None Include="resources\shaders\assignament1_vertex.shader" />
     <None Include="resources\shaders\viewport_vertex.shader" />
     <None Include="resources\shaders\viewport_fragment.shader" />
+    <None Include="resources\shaders\cgl_fragment.shader" />
+    <None Include="resources\shaders\cgl_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">
@@ -198,7 +203,7 @@
     <ClInclude Include="src\engine\ViewPort.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Line.hpp">
+    <ClInclude Include="src\engine\Lines.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

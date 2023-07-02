@@ -189,6 +189,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\Lines.cpp" />
     <ClCompile Include="src\math\mat4.cpp" />
     <ClCompile Include="src\math\vec3.cpp" />
     <ClCompile Include="src\math\vec4.cpp" />
@@ -217,6 +218,8 @@
   <ItemGroup>
     <None Include="resources\shaders\assignament1_fragment.shader" />
     <None Include="resources\shaders\assignament1_vertex.shader" />
+    <None Include="resources\shaders\cgl_fragment.shader" />
+    <None Include="resources\shaders\cgl_vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
     <None Include="resources\shaders\light_fragment.shader" />
     <None Include="resources\shaders\light_vertex.shader" />
@@ -225,7 +228,7 @@
     <None Include="resources\shaders\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\engine\Line.hpp" />
+    <ClInclude Include="src\engine\Lines.hpp" />
     <ClInclude Include="src\engine\ViewPort.hpp" />
     <ClInclude Include="src\math\mat4.h" />
     <ClInclude Include="src\math\math_utils.h" />

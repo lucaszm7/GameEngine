@@ -33,6 +33,13 @@ struct Transform
 	glm::vec3 scale = glm::vec3(1.0f);
 };
 
+enum class DrawPrimitive
+{
+	Triangle = GL_FILL,
+	Point = GL_POINT,
+	WireFrame = GL_LINE
+};
+
 class Mesh
 {
 public:
@@ -42,7 +49,7 @@ public:
 
 	Mesh() = default;
 	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
-	void Draw(Shader& shader) const;
+	void Draw(Shader& shader, DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
 	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
 
 private:

@@ -27,6 +27,12 @@ namespace cgl
 		mat4(const glm::mat4& glmMat4);
 		mat4(const vec4& l0, const vec4& l1, const vec4& l2, const vec4& l3);
 		
+		void translate(const vec4& t);
+		void rotateX(float degrees);
+		void rotateY(float degrees);
+		void rotateZ(float degrees);
+		void scale(const vec3& s);
+
 		bool operator == (const mat4& m4) const;
 		mat4& operator = (const mat4& m4) = default;
 		mat4  operator - () const;
@@ -36,6 +42,7 @@ namespace cgl
 
 		vec4 get_line(int i) const;
 		vec4 get_collum(int i) const;
+		void set_collum(int i, const vec4& v);
 
 		mat4 transpose() const;
 		float determinant() const;

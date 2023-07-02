@@ -12,7 +12,6 @@
 
 #include <mat4.h>
 #include <vec4.h>
-#include "Line.hpp"
 
 class SceneClose2GL : public Scene_t
 {
@@ -26,8 +25,8 @@ public:
 
 
 private:
-	Model cubeModel;
-	Shader lightingShader;
+	Shader OpenGLShader;
+	Shader Close2GLShader;
 
 	cgl::Camera cglCamera;
 	ogl::Camera oglCamera;
@@ -38,12 +37,10 @@ private:
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;
 
-	cgl::Line lines;
-
 	DirectionalLight dirLight;
 	SpotLight spotlight;
 
-	std::vector<Model*> objects;
+	std::vector<std::unique_ptr<Model>> objects;
 	std::vector<glm::vec3> colors;
 
 	std::vector<std::string> lookAtObjects;
@@ -60,6 +57,8 @@ private:
 
 	bool isCullingClockWise = false;
 	bool isLoadingClockWise = false;
+
+	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
 
 	bool isLookAt = false;
 	unsigned int selectedLookAt = 0;

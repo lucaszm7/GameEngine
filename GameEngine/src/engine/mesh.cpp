@@ -33,7 +33,7 @@ void Mesh::setupBuffers()
 }
 
 
-void Mesh::Draw(Shader& shader) const
+void Mesh::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	for (int i = 0; i < textures.size(); ++i)
 	{
@@ -43,6 +43,7 @@ void Mesh::Draw(Shader& shader) const
 	}
 	shader.SetUniform1f("material.shininess", 64);
 	VAO->Bind();
+	glPolygonMode(GL_FRONT_AND_BACK, (GLenum)drawPrimitive);
 	glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, nullptr);
 	VAO->Unbind();
 

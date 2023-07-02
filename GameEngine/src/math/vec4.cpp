@@ -24,6 +24,11 @@ namespace cgl
 	vec4::vec4(const vec3& v3, float w)
 		: e{ v3[0], v3[1], v3[2], w } {}
 
+	vec3 vec4::to_vec3() const
+	{
+		return vec3(x, y, z);
+	}
+
 	inline vec4 operator - (vec4 u, vec4 v)
 	{
 		return vec4(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2], u.e[3] - v.e[3]);

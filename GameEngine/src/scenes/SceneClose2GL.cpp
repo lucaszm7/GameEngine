@@ -1,4 +1,5 @@
 #include "SceneClose2GL.h"
+#include "Lines.hpp"
 
 struct BoundingVolume
 {
@@ -6,7 +7,7 @@ struct BoundingVolume
     glm::vec3 min{ 0.f,0.f,0.f };
 };
 
-BoundingVolume CalculateEnclosingAABB(const Model* obj)
+BoundingVolume CalculateEnclosingAABB(const std::unique_ptr<Model>& obj)
 {
     BoundingVolume r;
     for (const auto& mesh : obj->meshes)
@@ -33,13 +34,13 @@ BoundingVolume CalculateEnclosingAABB(const Model* obj)
 
 SceneClose2GL::SceneClose2GL()
     :
-    cubeModel("resources/models/cube_text.in"),
-    lightingShader("resources/shaders/assignament1_vertex.shader", "resources/shaders/assignament1_fragment.shader"),
+    OpenGLShader("resources/shaders/assignament1_vertex.shader", "resources/shaders/assignament1_fragment.shader"),
+    Close2GLShader("resources/shaders/cgl_vertex.shader", "resources/shaders/cgl_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, oglCamera.Position, oglCamera.Right)
 {
-    objects.push_back(&cubeModel);
+    objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
     colors.emplace_back(1.0f, 1.0f, 0.0f);
 }
 
@@ -49,36 +50,53 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 {
     if (isOpenGLRendered)
     {
-        view = oglCamera.GetViewMatrix(isLookAt ? &objects[selectedLookAt]->transform.position : nullptr);
+        glm::vec3 lookAtLocation = !objects.empty() ? objects[selectedLookAt]->transform.position : glm::vec3();
+        isLookAt ? oglCamera.SetLookAt(lookAtLocation) : oglCamera.UnSetLookAt();
+        view = oglCamera.GetViewMatrix();
         projection = oglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+    
+        OpenGLShader.Bind();
+        OpenGLShader.SetUniformMatrix4fv("view", view);
+        OpenGLShader.SetUniformMatrix4fv("projection", projection);
+        OpenGLShader.SetUniform3f("viewPos", cglCamera.Position);
+        // Lights Sources
+        OpenGLShader.SetUniformLight(dirLight);
+        spotlight.position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
+        spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
+        OpenGLShader.SetUniformLight(spotlight);
+
+        for (int i = 0; i < objects.size(); ++i)
+        {
+            OpenGLShader.SetUniform3f("uColor", colors[i]);
+            objects[i]->DrawOpenGL(OpenGLShader, drawPrimitive);
+        }
     }
     else
     {
-        cgl::vec3 lookAtLocation = (objects[selectedLookAt]->transform.position);
-        view = cglCamera.GetViewMatrix(isLookAt ? &lookAtLocation : nullptr);
+        cgl::vec3 lookAtLocation = !objects.empty() ? objects[selectedLookAt]->transform.position : cgl::vec3();
+        isLookAt ? cglCamera.SetLookAt(lookAtLocation) : cglCamera.UnSetLookAt();
+        view = cglCamera.GetViewMatrix();
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+
+        Close2GLShader.Bind();
+        Close2GLShader.SetUniform3f("viewPos", cglCamera.Position);
+        // Lights Sources
+        Close2GLShader.SetUniformLight(dirLight);
+        spotlight.position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
+        spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
+        Close2GLShader.SetUniformLight(spotlight);
+
+        for (int i = 0; i < objects.size(); ++i)
+        {
+            Close2GLShader.SetUniform3f("uColor", colors[i]);
+            objects[i]->DrawCGL(Close2GLShader, drawPrimitive, view, projection);
+        }
     }
 
-    lightingShader.Bind();
-    lightingShader.SetUniformMatrix4fv("view", view);
-    lightingShader.SetUniformMatrix4fv("projection", projection);
-    lightingShader.SetUniform3f("viewPos", cglCamera.Position);
-    // Lights Sources
-    lightingShader.SetUniformLight(dirLight);
-    spotlight.position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
-    spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
-    lightingShader.SetUniformLight(spotlight);
 
-    lines.Add(glm::vec3{ 0,0,0 }, glm::vec3{ 10,0,0 });
-    lines.Add(glm::vec3{ 0,0,0 }, glm::vec3{ 0,10,0 });
-    lines.Add(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,10 });
-    lines.Draw(lightingShader);
-
-    for (int i = 0; i < objects.size(); ++i)
-    {
-        lightingShader.SetUniform3f("uColor", colors[i]);
-        objects[i]->Draw(lightingShader);
-    }
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 });
 }
 
 void SceneClose2GL::OnImGuiRender()
@@ -102,6 +120,22 @@ void SceneClose2GL::OnImGuiRender()
         oglCamera.Pitch = cglCamera.Pitch;
         oglCamera.updateCameraVectors();
     } 
+
+    ImGui::Text("Drawing Primitive");
+    if (ImGui::RadioButton("Triangle", drawPrimitive == DrawPrimitive::Triangle))
+    {
+        drawPrimitive = DrawPrimitive::Triangle;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Point", drawPrimitive == DrawPrimitive::Point))
+    {
+        drawPrimitive = DrawPrimitive::Point;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("WireFrame", drawPrimitive == DrawPrimitive::WireFrame))
+    {
+        drawPrimitive = DrawPrimitive::WireFrame;
+    }
 
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))
@@ -143,24 +177,36 @@ void SceneClose2GL::OnImGuiRender()
     ImGui::Checkbox("Look At", &isLookAt);
 
     ImGui::Separator();
-    for (int i = 0; i < objects.size(); ++i)
+    int i = 0;
+    for (auto it = objects.begin(); it != objects.end();)
     {
-        if (isLookAt && ImGui::RadioButton(("LookAt " + objects[i]->name).c_str(), selectedLookAt == i))
+        if (isLookAt && ImGui::RadioButton(("LookAt " + (*it)->name).c_str(), selectedLookAt == i))
         {
             selectedLookAt = i;
             ImGui::SameLine();
         }
 
-        if (ImGui::TreeNode(std::string(objects[i]->name).c_str()))
+        if (ImGui::TreeNode(std::string((*it)->name).c_str()))
         {
-            objects[i]->OnImGui();
-            ImGui::ColorEdit3(std::string("Color of" + objects[i]->name).c_str(), &colors[i][0]);
+            (*it)->OnImGui();
+            ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &colors[i][0]);
             ImGui::TreePop();
+        }
+        else
+            ImGui::SameLine();
+
+        if (ImGui::Button(std::string("Delete " + (*it)->name).c_str()))
+        {
+            it = objects.erase(it);
+            colors.erase(colors.begin() + i);
+        }
+        else
+        {
+            it++;
+            i++;
         }
     }
 }
-
-
 
 void SceneClose2GL::AddObject(std::string_view label)
 {
@@ -172,18 +218,17 @@ void SceneClose2GL::AddObject(std::string_view label)
 
     if (label == "COW")
     {
-        Model* newModel = new Model("resources/models/cow_up_no_text.in", tri);
-        objects.push_back(newModel);
+        objects.emplace_back(std::make_unique<Model>("resources/models/cow_up_no_text.in", tri));
     }
     else if (label == "CUBE")
     {
-        Model* newModel = new Model("resources/models/cube_text.in", tri);
-        objects.push_back(newModel);
+        objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", tri));
+
     }
     else if (label == "BACKPACK")
     {
-        Model* newModel = new Model("resources/models/backpack/backpack.obj", tri);
-        objects.push_back(newModel);
+        objects.emplace_back(std::make_unique<Model>("resources/models/backpack/backpack.obj", tri));
+
     }
 
     colors.emplace_back(cgl::random_double(0, 1), cgl::random_double(0, 1), cgl::random_double(0, 1));
@@ -191,27 +236,33 @@ void SceneClose2GL::AddObject(std::string_view label)
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());
 
-    auto height = aabb.max.y;
+    float aspectRatio = (float)*pScreenWidth / (float)*pScreenHeight;
 
-    auto width = aabb.max.x - aabb.min.x;
-    auto vertical_FOV = cglCamera.Zoom * (3.1415936 / 180);
+    if (isOpenGLRendered)
+    {
+        oglCamera.Reset();
+        float OPP = (aabb.max.y + aabb.min.y) / 2;
+        float OPPX = (aabb.max.x + aabb.min.x) / 2;
+        oglCamera.Position.x = (aabb.max.x + aabb.min.x) / 2;
+        oglCamera.Position.y = (aabb.max.y + aabb.min.y) / 2;
+        float TAN = glm::tan(glm::radians(oglCamera.Zoom / 2));
+        float yBig = (aabb.max.z + ((aabb.max.y - OPP)  / TAN));
+        float xBig = (aabb.max.z + ((aabb.max.x - OPPX) / glm::tan(glm::radians((oglCamera.Zoom * aspectRatio) / 2))));
+        oglCamera.Position.z = (xBig > yBig) ? xBig : yBig;
 
-    auto max_z = aabb.max.z;
-
-    auto horizontal_FOV = 2 * glm::atan(glm::tan(vertical_FOV / 2) * (*pScreenWidth / *pScreenHeight));
-
-    auto distance_vertical = height / (2 * glm::tan(vertical_FOV / 2));
-    // alert ('vertical' + distance_vertical);
-    auto distance_horizontal = width / (2 * glm::tan(horizontal_FOV / 2));
-    // alert ('horizontal' + distance_horizontal);
-    auto z_distance = distance_vertical >= distance_horizontal ? distance_vertical : distance_horizontal;
-
-    
-
-    cglCamera.Position.z = z_distance + max_z;
-    cglCamera.Position.y = (aabb.max.y - aabb.min.y) / 2;
-    cglCamera.Position.x = width/2;
-
+    }
+    else
+    {
+        cglCamera.Reset();
+        float OPP = (aabb.max.y + aabb.min.y) / 2;
+        float OPPX = (aabb.max.x + aabb.min.x) / 2;
+        cglCamera.Position.x = (aabb.max.x + aabb.min.x) / 2;
+        cglCamera.Position.y = (aabb.max.y + aabb.min.y) / 2;
+        float TAN = glm::tan(glm::radians(cglCamera.Zoom / 2));
+        float yBig = (aabb.max.z + ((aabb.max.y - OPP) / TAN));
+        float xBig = (aabb.max.z + ((aabb.max.x - OPPX) / glm::tan(glm::radians((cglCamera.Zoom * aspectRatio) / 2))));
+        cglCamera.Position.z = (xBig > yBig) ? xBig : yBig;
+    }
 }
 
 void SceneClose2GL::EnableCullFace()

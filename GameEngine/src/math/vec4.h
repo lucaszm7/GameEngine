@@ -47,6 +47,8 @@ namespace cgl
 
 		vec4& operator=(const vec4& v) = default;
 
+		vec3 to_vec3() const;
+
 		inline float operator [] (int i) const { return e[i]; }
 		inline float& operator [] (int i) { return e[i]; }
 		

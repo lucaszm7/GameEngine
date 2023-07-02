@@ -26,7 +26,8 @@ SceneAssigment1::~SceneAssigment1()
 
 void SceneAssigment1::OnUpdate(float deltaTime)
 {
-	view = isLookAt ? pCamera.GetViewMatrix(&objects[selectedLookAt]->transform.position) : pCamera.GetViewMatrix();
+    isLookAt ? pCamera.SetLookAt(objects[selectedLookAt]->transform.position) : pCamera.UnSetLookAt();
+	view = pCamera.GetViewMatrix();
 	projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
     lightingShader.Bind();
@@ -46,7 +47,7 @@ void SceneAssigment1::OnUpdate(float deltaTime)
     for (int i = 0; i < objects.size(); ++i)
     {
         lightingShader.SetUniform3f("uColor", colors[i]);
-        objects[i]->Draw(lightingShader);
+        objects[i]->DrawOpenGL(lightingShader);
     }
 }
 

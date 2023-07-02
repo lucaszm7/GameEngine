@@ -3,8 +3,10 @@
 #include <GL/glew.h>
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
+#include <IMGUI/imgui.h>
 
 #include <vector>
+#include <array>
 
 #include <mat4.h>
 #include <vec4.h>
@@ -36,6 +38,7 @@ public:
     virtual void ProcessKeyboard(CamMovement direction, double deltaTime) = 0;
     virtual void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true) = 0;
     virtual void ProcessMouseScroll(float yoffset) = 0;
+    virtual std::array<float, 13> GetBaseInfo() = 0;
 
     // euler Angles
     float Yaw;
@@ -47,7 +50,7 @@ public:
     float Zoom;
 
     float Near = 0.1f;
-    float Far = 1000.0f;
+    float Far = 5000.0f;
 
 private:
     virtual void updateCameraVectors() = 0;
@@ -58,6 +61,10 @@ namespace cgl
     // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
     class Camera : public BaseCam
     {
+    private:
+        bool isLookAt = false;
+        cgl::vec3 lookAtPos = glm::vec3(0.f, 0.f, 0.f);
+
     public:
 
         // camera Attributes
@@ -101,6 +108,11 @@ namespace cgl
             updateCameraVectors();
         }
 
+        std::array<float, 13> GetBaseInfo() override
+        {
+            return { Position[0], Position[1], Position[2], Up[0], Up[1], Up[2], lookAtPos[0], lookAtPos[1], lookAtPos[2], Zoom, Yaw, Pitch, (float)isLookAt, };
+        }
+
         void OnImGui() override
         {
             if (ImGui::TreeNode("Camera Config"))
@@ -125,7 +137,7 @@ namespace cgl
             MouseSensitivity = SENSITIVITY;
             Zoom = ZOOM;
 
-            Far = 1000.0f;
+            Far = 5000.0f;
             Near = 0.1f;
 
             Position = cgl::vec3(0.0f, 0.0f, 0.0f);
@@ -135,13 +147,22 @@ namespace cgl
             updateCameraVectors();
         }
 
-        // returns the view matrix calculated using Euler Angles and the LookAt Matrix
-        cgl::mat4 GetViewMatrix(cgl::vec3* lookAt = nullptr) const
+        void SetLookAt(const cgl::vec3& pointInWCS)
         {
-            if (!lookAt)
-                return this->lookAt(Position, Position + Front, Up);
-            else
-                return this->lookAt(Position, *lookAt, Up);
+            isLookAt = true;
+            lookAtPos = (pointInWCS - Position).normalized();
+            updateCameraVectors();
+        }
+
+        void UnSetLookAt()
+        {
+            isLookAt = false;
+        }
+
+        // returns the view matrix calculated using Euler Angles and the LookAt Matrix
+        inline cgl::mat4 GetViewMatrix() const
+        {
+            return lookAt(Position, Position + Front, Up);
         }
 
         cgl::mat4 GetProjectionMatrix(float aspectRatio) const
@@ -258,7 +279,7 @@ namespace cgl
             front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
             front.y = sin(glm::radians(Pitch));
             front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-            Front = front.normalized();
+            Front = isLookAt ? lookAtPos.normalized() : front.normalized();
             // also re-calculate the Right and Up vector
             cgl::vec3 right = Front.cross(WorldUp);
             Right = right.normalized(); // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
@@ -273,6 +294,10 @@ namespace ogl
     // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
     class Camera : public BaseCam
     {
+    private:
+        bool isLookAt = false;
+        glm::vec3 lookAtPos = glm::vec3(0.f, 0.f, 0.f);
+    
     public:
 
         // camera Attributes
@@ -293,6 +318,7 @@ namespace ogl
 
         float Near = 0.1f;
         float Far = 5000.0f;
+
 
         // constructor with vectors
         Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH)
@@ -337,6 +363,24 @@ namespace ogl
             updateCameraVectors();
         }
 
+        Camera(std::array<float, 13> param)
+            :Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(param[9])
+        {
+            WorldUp = glm::vec3(0.f, 1.0f, 0.f);
+            Position = glm::vec3(param[0], param[1], param[2]);
+            Up = glm::vec3(param[3], param[4], param[5]);
+            lookAtPos = glm::vec3(param[6], param[7], param[8]);
+            Yaw = param[10];
+            Pitch = param[11];
+            isLookAt = (bool)param[12];
+            updateCameraVectors();
+        }
+
+        std::array<float, 13> GetBaseInfo() override
+        {
+            return { Position[0], Position[1], Position[2], Up[0], Up[1], Up[2], lookAtPos[0], lookAtPos[1], lookAtPos[2], Zoom, Yaw, Pitch, (float)isLookAt,};
+        }
+
         void OnImGui() override
         {
             if (ImGui::TreeNode("Camera Config"))
@@ -361,7 +405,7 @@ namespace ogl
             MouseSensitivity = SENSITIVITY;
             Zoom = ZOOM;
 
-            Far = 1000.0f;
+            Far = 5000.0f;
             Near = 0.1f;
 
             Position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -371,16 +415,25 @@ namespace ogl
             updateCameraVectors();
         }
 
-        // returns the view matrix calculated using Euler Angles and the LookAt Matrix
-        glm::mat4 GetViewMatrix(glm::vec3* lookAt = nullptr) const
+        void SetLookAt(const glm::vec3& pointInWCS)
         {
-            if (!lookAt)
-                return glm::lookAt(Position, Position + Front, Up);
-            else
-                return glm::lookAt(Position, *lookAt, Up);
+            isLookAt = true;
+            lookAtPos = glm::normalize(pointInWCS - Position);
+            updateCameraVectors();
         }
 
-        glm::mat4 GetProjectionMatrix(float aspectRatio) const
+        void UnSetLookAt()
+        {
+            isLookAt = false;
+        }
+
+        // returns the view matrix calculated using Euler Angles and the LookAt Matrix
+        inline glm::mat4 GetViewMatrix() const
+        {
+            return glm::lookAt(Position, Position + Front, Up);
+        }
+
+        inline glm::mat4 GetProjectionMatrix(float aspectRatio) const
         {
             return glm::perspective(glm::radians(Zoom), aspectRatio, Near, Far);
         }
@@ -445,7 +498,7 @@ namespace ogl
             front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
             front.y = sin(glm::radians(Pitch));
             front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-            Front = glm::normalize(front);
+            Front = glm::normalize(isLookAt ? lookAtPos : front);
             // also re-calculate the Right and Up vector
             Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
             Up = glm::normalize(glm::cross(Right, Front));
