@@ -49,3 +49,18 @@ void Mesh::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 
 	glActiveTexture(GL_TEXTURE0);
 }
+
+void Mesh::DrawRaw(Shader& shader, const std::vector<cgl::vec4>& vert, DrawPrimitive drawPrimitive)
+{
+	shader.Bind();
+	VertexArray nVAO;
+	nVAO.Bind();
+	VertexBuffer nVBO(&vert[0], static_cast<unsigned int>(vert.size() * 4 * sizeof(float)));
+	nVBO.Bind();
+	VertexBufferLayout nVBL;
+	nVBL.Push<float>(4); // positions
+	nVAO.AddBuffer(nVBO, nVBL);
+	glDrawArrays(GL_TRIANGLES, 0, vert.size());
+	nVAO.Unbind();
+	shader.Unbind();
+}

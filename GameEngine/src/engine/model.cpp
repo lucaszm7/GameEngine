@@ -19,7 +19,7 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection) const
 {
 	cgl::mat4 model = cgl::mat4::identity();
-	model.translate(cgl::vec4(transform.position));
+	model.translate(cgl::vec4(transform.position, 1.0f));
 	model.rotateX(transform.rotation.x);
 	model.rotateY(transform.rotation.y);
 	model.rotateZ(transform.rotation.z);
@@ -28,16 +28,26 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 	cgl::mat4 mvp = model * view * projection;
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
-		Mesh meshCopy = meshes[i];
-		for (auto& vertice : meshCopy.vertices)
-		{
-			cgl::vec3 newPos = (mvp * cgl::vec4(vertice.Position, 1.0f)).to_vec3();
-			vertice.Position = glm::vec3(newPos.x, newPos.y, newPos.z);
+		/*std::vector<cgl::vec4> cglVertices = {
+		   { 0.0f,  0.5f,  0.0f, 1.0f},
+		   { 0.5f, -0.5f,  0.0f, 1.0f},
+		   {-0.5f, -0.5f,  0.0f, 1.0f}
+		};*/
 
-			cgl::vec3 newNormal = (model.transpose() * cgl::vec4(vertice.Normal, 1.0f)).to_vec3();
-			vertice.Normal = glm::vec3(newPos.x, newPos.y, newPos.z);
+		std::vector<cgl::vec4> cglVertices;
+		cglVertices.reserve(meshes[i].vertices.size());
+
+		for (auto& vertice : meshes[i].vertices)
+		{
+			cgl::vec4 HomogeneousClippingSpace = mvp.transpose() * cgl::vec4(vertice.Position, 1.0f);
+
+			// Cliping
+			// Culling
+
+			cglVertices.push_back(HomogeneousClippingSpace);
 		}
-		meshCopy.Draw(shader, drawPrimitive);
+
+		Mesh::DrawRaw(shader, cglVertices, drawPrimitive);
 	}
 }
 
