@@ -57,6 +57,16 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 
 			// Cliping
 			// Culling
+			if (isCulling)
+			{
+				cgl::vec3 u = (v1 - v0).to_vec3();
+				cgl::vec3 v = (v2 - v0).to_vec3();
+				float sign = (u.x * v.y) - (v.x * u.y);
+				if (isCullingClockWise && sign > 0.0f)
+					continue;
+				if (!isCullingClockWise && sign < 0.0f)
+					continue;
+			}
 
 			cglVertices.push_back(v0);
 			cglVertices.push_back(v1);
