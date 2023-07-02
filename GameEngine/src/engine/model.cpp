@@ -16,16 +16,16 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	}
 }
 
-void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection) const
+void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection, bool isCulling, bool isCullingClockWise) const
 {
 	cgl::mat4 model = cgl::mat4::identity();
-	model.translate(cgl::vec4(transform.position, 1.0f));
-	model.rotateX(transform.rotation.x);
-	model.rotateY(transform.rotation.y);
-	model.rotateZ(transform.rotation.z);
-	model.scale(transform.scale);
+	// model.translate(cgl::vec4(transform.position, 1.0f));
+	// model.rotateX(transform.rotation.x);
+	// model.rotateY(transform.rotation.y);
+	// model.rotateZ(transform.rotation.z);
+	// model.scale(transform.scale);
 
-	cgl::mat4 mvp = model * view * projection;
+	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
 		/*std::vector<cgl::vec4> cglVertices = {
@@ -37,14 +37,30 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 		std::vector<cgl::vec4> cglVertices;
 		cglVertices.reserve(meshes[i].vertices.size());
 
-		for (auto& vertice : meshes[i].vertices)
+		for (unsigned int j = 0; j < meshes[i].vertices.size(); j+=3)
 		{
-			cgl::vec4 HomogeneousClippingSpace = mvp.transpose() * cgl::vec4(vertice.Position, 1.0f);
+			// Go To Homogeneus Clipping Space
+			// Vertex Transforms
+			cgl::vec4 v0 = mvp * cgl::vec4(meshes[i].vertices[j+0].Position, 1.0f);
+			cgl::vec4 v1 = mvp * cgl::vec4(meshes[i].vertices[j+1].Position, 1.0f);
+			cgl::vec4 v2 = mvp * cgl::vec4(meshes[i].vertices[j+2].Position, 1.0f);
+
+			// Go To Normalized Device Coordinates
+			// Perspective division
+			v0 /= v0.w;
+			v1 /= v1.w;
+			v2 /= v2.w;
+
+			// Clipping
+			if (!v0.is_canonic_cube() || !v1.is_canonic_cube() || !v2.is_canonic_cube())
+				continue;
 
 			// Cliping
 			// Culling
 
-			cglVertices.push_back(HomogeneousClippingSpace);
+			cglVertices.push_back(v0);
+			cglVertices.push_back(v1);
+			cglVertices.push_back(v2);
 		}
 
 		Mesh::DrawRaw(shader, cglVertices, drawPrimitive);
