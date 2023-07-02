@@ -69,9 +69,6 @@
     <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\SceneAssigment1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\scenes\SceneClose2GL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -96,8 +93,8 @@
     <None Include="resources\shaders\fragment.shader" />
     <None Include="resources\shaders\light_vertex.shader" />
     <None Include="resources\shaders\light_fragment.shader" />
-    <None Include="resources\shaders\assignament1_fragment.shader" />
-    <None Include="resources\shaders\assignament1_vertex.shader" />
+    <None Include="resources\shaders\ogl_fragment.shader" />
+    <None Include="resources\shaders\ogl_vertex.shader" />
     <None Include="resources\shaders\viewport_vertex.shader" />
     <None Include="resources\shaders\viewport_fragment.shader" />
     <None Include="resources\shaders\cgl_fragment.shader" />
@@ -177,9 +174,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scenes\SceneAssigment1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\scenes\SceneClose2GL.h">

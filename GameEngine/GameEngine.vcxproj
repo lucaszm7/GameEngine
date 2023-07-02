@@ -194,7 +194,6 @@
     <ClCompile Include="src\math\vec3.cpp" />
     <ClCompile Include="src\math\vec4.cpp" />
     <ClCompile Include="src\scenes\SceneClose2GL.cpp" />
-    <ClCompile Include="src\scenes\SceneAssigment1.cpp" />
     <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
@@ -216,8 +215,8 @@
     <ClCompile Include="src\math\vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\shaders\assignament1_fragment.shader" />
-    <None Include="resources\shaders\assignament1_vertex.shader" />
+    <None Include="resources\shaders\ogl_fragment.shader" />
+    <None Include="resources\shaders\ogl_vertex.shader" />
     <None Include="resources\shaders\cgl_fragment.shader" />
     <None Include="resources\shaders\cgl_vertex.shader" />
     <None Include="resources\shaders\fragment.shader" />
@@ -235,7 +234,6 @@
     <ClInclude Include="src\math\vec3.h" />
     <ClInclude Include="src\math\vec4.h" />
     <ClInclude Include="src\scenes\SceneClose2GL.h" />
-    <ClInclude Include="src\scenes\SceneAssigment1.h" />
     <ClInclude Include="src\engine\scene.h" />
     <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />

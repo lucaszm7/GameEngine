@@ -34,7 +34,7 @@ BoundingVolume CalculateEnclosingAABB(const std::unique_ptr<Model>& obj)
 
 SceneClose2GL::SceneClose2GL()
     :
-    OpenGLShader("resources/shaders/assignament1_vertex.shader", "resources/shaders/assignament1_fragment.shader"),
+    OpenGLShader("resources/shaders/ogl_vertex.shader", "resources/shaders/ogl_fragment.shader"),
     Close2GLShader("resources/shaders/cgl_vertex.shader", "resources/shaders/cgl_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
@@ -42,6 +42,7 @@ SceneClose2GL::SceneClose2GL()
 {
     objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
     colors.emplace_back(1.0f, 1.0f, 0.0f);
+    DisableCullFace();
 }
 
 SceneClose2GL::~SceneClose2GL() = default;
@@ -58,11 +59,11 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         OpenGLShader.Bind();
         OpenGLShader.SetUniformMatrix4fv("view", view);
         OpenGLShader.SetUniformMatrix4fv("projection", projection);
-        OpenGLShader.SetUniform3f("viewPos", cglCamera.Position);
+        OpenGLShader.SetUniform3f("viewPos", oglCamera.Position);
         // Lights Sources
         OpenGLShader.SetUniformLight(dirLight);
-        spotlight.position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
-        spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
+        spotlight.position = glm::vec3(oglCamera.Position.x, oglCamera.Position.y, oglCamera.Position.z);
+        spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         OpenGLShader.SetUniformLight(spotlight);
 
         for (int i = 0; i < objects.size(); ++i)
@@ -79,13 +80,6 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
         Close2GLShader.Bind();
-        Close2GLShader.SetUniform3f("viewPos", cglCamera.Position);
-        // Lights Sources
-        Close2GLShader.SetUniformLight(dirLight);
-        spotlight.position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
-        spotlight.direction = glm::vec3(cglCamera.Front.x, cglCamera.Front.y, cglCamera.Front.z);
-        Close2GLShader.SetUniformLight(spotlight);
-
         for (int i = 0; i < objects.size(); ++i)
         {
             Close2GLShader.SetUniform3f("uColor", colors[i]);
