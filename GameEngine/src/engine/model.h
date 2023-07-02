@@ -26,7 +26,7 @@ public:
 
 	cgl::mat4 GetModelMatrix() const;
 	void DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
-	void DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection) const;
+	void DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection, bool isCulling = false, bool isCullingClockWise = false) const;
 	void OnImGui() const;
 	std::vector<Mesh> meshes;
 	std::string name;

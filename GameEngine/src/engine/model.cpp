@@ -28,12 +28,6 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
-		/*std::vector<cgl::vec4> cglVertices = {
-		   { 0.0f,  0.5f,  0.0f, 1.0f},
-		   { 0.5f, -0.5f,  0.0f, 1.0f},
-		   {-0.5f, -0.5f,  0.0f, 1.0f}
-		};*/
-
 		std::vector<cgl::vec4> cglVertices;
 		cglVertices.reserve(meshes[i].vertices.size());
 
@@ -55,7 +49,6 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 			if (!v0.is_canonic_cube() || !v1.is_canonic_cube() || !v2.is_canonic_cube())
 				continue;
 
-			// Cliping
 			// Culling
 			if (isCulling)
 			{

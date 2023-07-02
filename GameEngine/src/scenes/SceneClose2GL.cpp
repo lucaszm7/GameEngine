@@ -83,7 +83,7 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         for (int i = 0; i < objects.size(); ++i)
         {
             Close2GLShader.SetUniform3f("uColor", colors[i]);
-            objects[i]->DrawCGL(Close2GLShader, drawPrimitive, view, projection);
+            objects[i]->DrawCGL(Close2GLShader, drawPrimitive, view, projection, isEnableCullFace, isCullingClockWise);
         }
     }
 
@@ -134,7 +134,7 @@ void SceneClose2GL::OnImGuiRender()
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))
     {
-        if (isEnableCullFace)
+        if (isEnableCullFace && isOpenGLRendered)
             EnableCullFace();
         else
             DisableCullFace();
@@ -144,13 +144,13 @@ void SceneClose2GL::OnImGuiRender()
         if (ImGui::RadioButton("Culling Clock Wise", isCullingClockWise))
         {
             isCullingClockWise = true;
-            EnableCullFace();
+            isOpenGLRendered ? EnableCullFace() : DisableCullFace();
         }
         ImGui::SameLine();
         if (ImGui::RadioButton("Culling Counter Clock Wise", !isCullingClockWise))
         {
             isCullingClockWise = false;
-            EnableCullFace();
+            isOpenGLRendered ? EnableCullFace() : DisableCullFace();
         }
     }
 
