@@ -34,20 +34,17 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 
 		for (unsigned int j = 0; j < meshes[i].vertices.size(); j+=3)
 		{
+			// ===============================
 			// Go To Homogeneus Clipping Space
+			// ===============================
+			// 
 			// Vertex Transforms
 			cgl::vec4 v0 = mvp * cgl::vec4(meshes[i].vertices[j+0].Position, 1.0f);
 			cgl::vec4 v1 = mvp * cgl::vec4(meshes[i].vertices[j+1].Position, 1.0f);
 			cgl::vec4 v2 = mvp * cgl::vec4(meshes[i].vertices[j+2].Position, 1.0f);
 
-			// Go To Normalized Device Coordinates
-			// Perspective division
-			v0 /= v0.w;
-			v1 /= v1.w;
-			v2 /= v2.w;
-
 			// Clipping
-			if (!v0.is_canonic_cube() || !v1.is_canonic_cube() || !v2.is_canonic_cube())
+			if (!v0.is_in_range(v0.w) || !v1.is_in_range(v1.w) || !v2.is_in_range(v2.w))
 				continue;
 
 			// Culling
@@ -61,6 +58,15 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 				if (!isCullingClockWise && sign < 0.0f)
 					continue;
 			}
+
+			// ===================================
+			// Go To Normalized Device Coordinates
+			// ===================================
+			// 
+			// Perspective division
+			v0 /= v0.w;
+			v1 /= v1.w;
+			v2 /= v2.w;
 
 			cglVertices.push_back(v0);
 			cglVertices.push_back(v1);

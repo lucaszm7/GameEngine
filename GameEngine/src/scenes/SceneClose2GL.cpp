@@ -103,6 +103,7 @@ void SceneClose2GL::OnImGuiRender()
         cglCamera.Position = oglCamera.Position;
         cglCamera.Yaw = oglCamera.Yaw;
         cglCamera.Pitch = oglCamera.Pitch;
+        cglCamera.MovementSpeed = oglCamera.MovementSpeed;
         cglCamera.updateCameraVectors();
     } 
     ImGui::SameLine();
@@ -112,6 +113,7 @@ void SceneClose2GL::OnImGuiRender()
         oglCamera.Position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
         oglCamera.Yaw = cglCamera.Yaw;
         oglCamera.Pitch = cglCamera.Pitch;
+        oglCamera.MovementSpeed = cglCamera.MovementSpeed;
         oglCamera.updateCameraVectors();
     } 
 
