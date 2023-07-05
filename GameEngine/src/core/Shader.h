@@ -14,6 +14,12 @@
 #include <vec3.h>
 #include <mat4.h>
 
+enum class ShaderStage
+{
+	VERTEX = GL_VERTEX_SHADER,
+	FRAGMENT = GL_FRAGMENT_SHADER
+};
+
 class Shader
 {
 private:
@@ -39,11 +45,14 @@ public:
 	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4);
 	void SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4);
 	
+	unsigned int GetSubroutineIndex(ShaderStage shaderStage, const std::string& subroutineIndexName) const;
+	void SetUniformSubroutine(ShaderStage shaderStage, unsigned int index) const;
+
 	void SetUniformMaterial(const Material& mat);
-	void SetUniformLight(const DirectionalLight& light);
+	void SetUniformLight(const DirectionalLight& light, ShaderStage shaderStage = ShaderStage::FRAGMENT);
 	void SetUniformLight(const PointLight& light);
 	void SetUniformLight(const std::vector<PointLight>& lights);
-	void SetUniformLight(const SpotLight& light);
+	void SetUniformLight(const SpotLight& light, ShaderStage shaderStage = ShaderStage::FRAGMENT);
 
 private:
 	std::string ParseShader(const std::string& filepath) const;
