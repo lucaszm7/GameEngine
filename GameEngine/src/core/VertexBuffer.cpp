@@ -14,7 +14,9 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size, GLenum mode)
 
 VertexBuffer::~VertexBuffer()
 {
+#ifdef _DEBUG
     std::cout << "Deleting Vertex Buffer - " << m_RendererID << "\n";
+#endif
     Unbind();
     glDeleteBuffers(1, &m_RendererID);
 }

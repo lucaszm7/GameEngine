@@ -109,6 +109,13 @@ namespace cgl
 			&& z <= 1.0f && z >= -1.0f;
 	}
 	
+	bool vec4::is_in_range(const float w) const
+	{
+		return x <= w && x >= -w
+			&& y <= w && y >= -w
+			&& z <= w && z >= -w;
+	}
+
 	float vec4::lenght_squared() const
 	{
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2] + e[3] * e[3];

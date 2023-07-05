@@ -43,6 +43,12 @@ SceneClose2GL::SceneClose2GL()
     objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
     colors.emplace_back(1.0f, 1.0f, 0.0f);
     DisableCullFace();
+
+    VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
+    VertexShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Phong");
+
+    FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Gouraud");
+    FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Phong");
 }
 
 SceneClose2GL::~SceneClose2GL() = default;
@@ -60,11 +66,26 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         OpenGLShader.SetUniformMatrix4fv("view", view);
         OpenGLShader.SetUniformMatrix4fv("projection", projection);
         OpenGLShader.SetUniform3f("viewPos", oglCamera.Position);
-        // Lights Sources
-        OpenGLShader.SetUniformLight(dirLight);
+
         spotlight.position = glm::vec3(oglCamera.Position.x, oglCamera.Position.y, oglCamera.Position.z);
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
-        OpenGLShader.SetUniformLight(spotlight);
+        
+        if (isGouraudShading)
+        {
+            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, VertexShadingGouraudIndex);
+            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, FragmentShadingGouraudIndex);
+            OpenGLShader.SetUniformLight(dirLight, ShaderStage::VERTEX);
+            OpenGLShader.SetUniformLight(spotlight, ShaderStage::VERTEX);
+        }
+        else
+        {
+            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX,   VertexShadingPhongIndex);
+            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, FragmentShadingPhongIndex);
+            OpenGLShader.SetUniformLight(dirLight, ShaderStage::FRAGMENT);
+            OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
+        }
+
+        // Lights Sources
 
         for (int i = 0; i < objects.size(); ++i)
         {
@@ -87,7 +108,6 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         }
     }
 
-
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 });
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 });
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 });
@@ -103,6 +123,7 @@ void SceneClose2GL::OnImGuiRender()
         cglCamera.Position = oglCamera.Position;
         cglCamera.Yaw = oglCamera.Yaw;
         cglCamera.Pitch = oglCamera.Pitch;
+        cglCamera.MovementSpeed = oglCamera.MovementSpeed;
         cglCamera.updateCameraVectors();
     } 
     ImGui::SameLine();
@@ -112,8 +133,9 @@ void SceneClose2GL::OnImGuiRender()
         oglCamera.Position = glm::vec3(cglCamera.Position.x, cglCamera.Position.y, cglCamera.Position.z);
         oglCamera.Yaw = cglCamera.Yaw;
         oglCamera.Pitch = cglCamera.Pitch;
+        oglCamera.MovementSpeed = cglCamera.MovementSpeed;
         oglCamera.updateCameraVectors();
-    } 
+    }
 
     ImGui::Text("Drawing Primitive");
     if (ImGui::RadioButton("Triangle", drawPrimitive == DrawPrimitive::Triangle))
@@ -129,6 +151,17 @@ void SceneClose2GL::OnImGuiRender()
     if (ImGui::RadioButton("WireFrame", drawPrimitive == DrawPrimitive::WireFrame))
     {
         drawPrimitive = DrawPrimitive::WireFrame;
+    }
+
+    ImGui::Text("Shading Model");
+    if (ImGui::RadioButton("Gouraud Shading", isGouraudShading))
+    {
+        isGouraudShading = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Phong Shading", !isGouraudShading))
+    {
+        isGouraudShading = false;
     }
 
     ImGui::Separator();

@@ -9,7 +9,9 @@ VertexArray::VertexArray()
 VertexArray::~VertexArray()
 {
     Unbind();
+#ifdef _DEBUG
     std::cout << "Deleting Vertex Array - " << m_RendererID << "\n";
+#endif
     glDeleteVertexArrays(1, &m_RendererID);
 }
 

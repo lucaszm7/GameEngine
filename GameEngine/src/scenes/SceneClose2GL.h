@@ -52,11 +52,19 @@ private:
 	void EnableCullFace();
 	void DisableCullFace();
 
-	bool isOpenGLRendered = false;
+	bool isOpenGLRendered = true;
 	bool isEnableCullFace = false;
 
 	bool isCullingClockWise = false;
 	bool isLoadingClockWise = false;
+
+	unsigned int VertexShadingGouraudIndex;
+	unsigned int VertexShadingPhongIndex;
+
+	unsigned int FragmentShadingGouraudIndex;
+	unsigned int FragmentShadingPhongIndex;
+
+	bool isGouraudShading = false;
 
 	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
 

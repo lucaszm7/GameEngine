@@ -70,8 +70,10 @@ namespace cgl
 		float dot(const vec4& v) const;
 		vec4 unit_vector() const;
 
-		// Verify is is in [-1, 1] space
+		// Verify if is in [-1, 1] space
 		bool is_canonic_cube() const;
+		// Verify if is in [-w, w] space
+		bool is_in_range(const float w) const;
 		friend inline std::ostream& operator << (std::ostream& out, const vec4& v);
 	};
 
