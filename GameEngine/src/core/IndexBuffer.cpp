@@ -14,7 +14,9 @@ IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count, GLenum mo
 
 IndexBuffer::~IndexBuffer()
 {
+#ifdef _DEBUG
     std::cout << "Deleting Index Buffer - " << m_RendererID << "\n";
+#endif
     Unbind();
     glDeleteBuffers(1, &m_RendererID);
 }
