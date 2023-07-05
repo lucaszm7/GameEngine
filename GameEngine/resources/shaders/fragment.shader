@@ -59,10 +59,10 @@ out vec4 FragColor;
 uniform Material material;
 uniform vec3 viewPos;
 
-uniform DirectionalLight dirLight;
+uniform DirectionalLight fragmentDirectionalLight;
 #define NR_POINT_LIGHTS 4  
 uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform Spotlight spotlight;
+uniform Spotlight fragmentSpotlight;
 
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
@@ -75,14 +75,14 @@ void main()
 	vec3 result = vec3(0);
 
 	// Directional Light
-	result += CalculateDirectionalLight(dirLight, norm, viewDir);
+    result += CalculateDirectionalLight(fragmentDirectionalLight, norm, viewDir);
 
 	// Point Light
 	for (int i = 0; i < NR_POINT_LIGHTS; ++i)
 		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
 
 	// Spotlight
-	result += CalculateSpotlight(spotlight, norm, outFragPos, viewDir);
+    result += CalculateSpotlight(fragmentSpotlight, norm, outFragPos, viewDir);
 
 	// Emission map
 	// result += texture(material.emission, outTexCoord).rgb;

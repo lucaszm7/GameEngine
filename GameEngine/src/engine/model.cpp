@@ -18,6 +18,7 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 
 void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection, bool isCulling, bool isCullingClockWise) const
 {
+	// Build Model Matrix
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(transform.position, 1.0f));
 	// model = model * cgl::mat4::rotateX(transform.rotation.x);
 	// model = model * cgl::mat4::rotateY(transform.rotation.y);
@@ -26,7 +27,9 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 
 	cgl::mat4 model = translate * scale;
 
+	// Build Transform Matrix
 	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
+	
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
 		std::vector<cgl::vec4> cglVertices;
@@ -37,7 +40,7 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 			// ===============================
 			// Go To Homogeneus Clipping Space
 			// ===============================
-			// 
+			
 			// Vertex Transforms
 			cgl::vec4 v0 = mvp * cgl::vec4(meshes[i].vertices[j+0].Position, 1.0f);
 			cgl::vec4 v1 = mvp * cgl::vec4(meshes[i].vertices[j+1].Position, 1.0f);
@@ -62,7 +65,7 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 			// ===================================
 			// Go To Normalized Device Coordinates
 			// ===================================
-			// 
+			
 			// Perspective division
 			v0 /= v0.w;
 			v1 /= v1.w;

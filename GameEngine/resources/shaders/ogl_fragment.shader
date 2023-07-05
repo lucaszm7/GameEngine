@@ -55,42 +55,62 @@ in vec3 outFragPos;
 in vec2 outTexCoord;
 
 in vec3 outColor;
+in vec3 outViewPos;
 
 out vec4 FragColor;
 
 uniform Material material;
-uniform vec3 viewPos;
 
-uniform DirectionalLight dirLight;
-uniform Spotlight spotlight;
+uniform DirectionalLight fragmentDirectionalLight;
+uniform Spotlight fragmentSpotlight;
 
-vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
-vec3 CalculateSpotlight (Spotlight  light, vec3 normal, vec3 FragPos, vec3 viewDir);
+subroutine vec3 Shading(vec3 normal, vec3 viewDir);
+subroutine uniform Shading shadingSelected;
+
+vec3 Gouraud(vec3 normal, vec3 viewDir);
+vec3 Phong(vec3 normal, vec3 viewDir);
+
+vec3 PhongDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
+vec3 PhongPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
+vec3 PhongSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 
 void main()
 {
 	vec3 norm = normalize(outNormal);
-	vec3 viewDir = normalize(viewPos - outFragPos);
-	vec3 result = vec3(0);
+    vec3 viewDir = normalize(outViewPos - outFragPos);
+    vec3 result = shadingSelected(norm, viewDir);
 
+	FragColor = vec4(result, 1.0);
+}
+
+subroutine (Shading) 
+vec3 Gouraud(vec3 normal, vec3 viewDir)
+{
+    return outColor;
+}
+
+subroutine (Shading) 
+vec3 Phong(vec3 normal, vec3 viewDir)
+{
+    vec3 result = vec3(0.0);
+	
 	// Directional Light
-	result += CalculateDirectionalLight(dirLight, norm, viewDir);
+    result += PhongDirectionalLight(fragmentDirectionalLight, normal, viewDir);
 
 	// Point Light
 	/*for (int i = 0; i < NR_POINT_LIGHTS; ++i)
 		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);*/
 
 	// Spotlight
-	result += CalculateSpotlight(spotlight, norm, outFragPos, viewDir);
+    result += PhongSpotlight(fragmentSpotlight, normal, outFragPos, viewDir);
 
 	// Emission map
 	// result += texture(material.emission, outTexCoord).rgb;
-
-	FragColor = vec4(result, 1.0);
+	
+    return result;
 }
 
-vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
+vec3 PhongDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
 	// diffuse shading
 	vec3 lightDir = normalize(-light.direction);
@@ -108,7 +128,7 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 	return (ambient + diffuse + specular);
 }
 
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
+vec3 PhongPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 {
 	// Ambient light
     vec3 ambient = light.ambient * outColor;
@@ -135,7 +155,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewD
 	return (ambient + diffuse + specular);
 }
 
-vec3 CalculateSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir)
+vec3 PhongSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 {
 	// Ambient light
     vec3 ambient = light.ambient * outColor;
