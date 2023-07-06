@@ -90,7 +90,7 @@ int main()
     m_CurrentScene = m_MainMenu;
 
     Debug::Line& m_LinesDrawer = Debug::Line::OnStart();
-    Shader m_DebugLineShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader");
+    Shader m_DebugLineShader("resources/shaders/Lines_vertex.shader", "resources/shaders/Lines_fragment.shader");
 
     Scene_t::pScreenWidth = pScreenWidth;
     Scene_t::pScreenHeight = pScreenHeight;
@@ -457,3 +457,4 @@ DebugCallBack(GLenum source, GLenum type, GLuint id, GLenum severity,
     std::cout << std::endl;
     std::cout << "\n\033[1;31m ------------ END OF DEBUG ------------ \033[0m\n" << std::endl;
 }
+ 

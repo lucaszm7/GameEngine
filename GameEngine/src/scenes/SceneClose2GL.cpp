@@ -85,8 +85,6 @@ void SceneClose2GL::OnUpdate(float deltaTime)
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
         }
 
-        // Lights Sources
-
         for (int i = 0; i < objects.size(); ++i)
         {
             OpenGLShader.SetUniform3f("uColor", colors[i]);
@@ -108,9 +106,9 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         }
     }
 
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 });
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 });
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 }, glm::vec3{1.0f, 0.0f, 0.0f});
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 }, glm::vec3{0.0f, 1.0f, 0.0f});
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 }, glm::vec3{0.0f, 0.0f, 1.0f});
 }
 
 void SceneClose2GL::OnImGuiRender()

@@ -99,6 +99,8 @@
     <None Include="resources\shaders\viewport_fragment.shader" />
     <None Include="resources\shaders\cgl_fragment.shader" />
     <None Include="resources\shaders\cgl_vertex.shader" />
+    <None Include="resources\shaders\Lines_fragment.shader" />
+    <None Include="resources\shaders\Lines_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">
