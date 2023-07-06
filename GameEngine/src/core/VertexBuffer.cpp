@@ -39,3 +39,15 @@ void VertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void VertexBuffer::Update(const void* data, unsigned int size)
+{
+    if (size > Size())
+    {
+        std::cout << "Cannot update an already existing buffer with more than is allocated...\n";
+        return;
+    }
+    Bind();
+    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+    Unbind();
+}
+
