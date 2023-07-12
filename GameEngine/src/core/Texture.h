@@ -22,6 +22,8 @@ public:
 	Texture::Type type;
 
 	Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam = Texture::Parameter::LINEAR);
+	Texture(const char* data, Texture::Parameter texParam = Texture::Parameter::LINEAR);
+
 	~Texture();
 
 	void Bind(unsigned int slot = 0) const;
@@ -46,7 +48,8 @@ public:
 	{
 		DIFFUSE,
 		SPECULAR,
-		EMISSION
+		EMISSION,
+		RAW
 	};
 
 	static std::string to_string(Texture::Type type)
@@ -60,6 +63,8 @@ public:
 			return "specular";
 		case EMISSION:
 			return "emission";
+		case RAW:
+			return "raw";
 		}
 	}
 
