@@ -2,105 +2,75 @@
 
 namespace Debug
 {
-	Line::Line(int maxVertices,
-		const std::vector<glm::vec3>& vertices,
-		const glm::vec3 color)
+	Line::Line(int maxVertices)
+		:m_maxVertices(maxVertices)
+		,m_primitiveMode(GL_LINES)
 	{
-		m_maxVertices = maxVertices;
-		m_vertices = vertices;
-		m_uColor = color;
-		m_primitiveMode = GL_LINES;
-
-		int n = m_vertices.size();
-		if (m_maxVertices < n)
-			m_maxVertices = n;
-
-		glGenVertexArrays(1, &m_VAO);
-		glGenBuffers(1, &m_VBO);
-		glBindVertexArray(m_VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		if (n > 0)
-			glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float) * m_maxVertices, &m_vertices[0], GL_DYNAMIC_DRAW);
-		else
-			glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float) * m_maxVertices, NULL, GL_DYNAMIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		m_vertexBufferSize = m_maxVertices * 3 * sizeof(float);
+		m_vertexBufferSize = m_maxVertices * sizeof(LineVertex);
+		m_vertices.reserve(m_vertexBufferSize);
+		_create_buffer();
 	}
 
-	Line& Line::OnStart(int maxVertices,
-		const std::vector<glm::vec3>& vertices,
-		const glm::vec3 color)
+	Line& Line::OnStart(int maxVertices)
 	{
-		static Line instance(maxVertices, vertices, color);
+		static Line instance(maxVertices);
 		return instance;
 	}
 
 	void Line::OnUpdate(Shader& shader, const ogl::Camera& camera, float aspectRatio)
 	{
+		if (m_vertices.empty())
+			return;
+
 		shader.Bind();
-		shader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
 		shader.SetUniformMatrix4fv("view", camera.GetViewMatrix());
 		shader.SetUniformMatrix4fv("projection", camera.GetProjectionMatrix(aspectRatio));
 
-		shader.SetUniform3f("lightColor", m_uColor);
 		_buffer();
 
-		glBindVertexArray(m_VAO);
+		m_VAO->Bind();
 		glDrawArrays(m_primitiveMode, 0, m_vertices.size());
-		glBindVertexArray(0);
+		m_VAO->Unbind();
 		shader.Unbind();
 		m_vertices.clear();
 	}
 
-	void Line::Draw(const glm::vec3& start, const glm::vec3& end)
+	void Line::Draw(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color)
 	{
-		m_vertices.push_back(start);
-		m_vertices.push_back(end);
+		m_vertices.emplace_back(start, color);
+		m_vertices.emplace_back(end, color);
+	}
+
+	void Line::Draw(const glm::vec3& start, const glm::vec3& end, const glm::vec3& colorStart, const glm::vec3& colorEnd)
+	{
+		m_vertices.emplace_back(start, colorStart);
+		m_vertices.emplace_back(end, colorEnd);
 	}
 
 	void Line::_buffer()
 	{
-		unsigned int vertexBufferSize = m_vertices.size() * sizeof(glm::vec3);
-		if (vertexBufferSize <= m_vertexBufferSize && vertexBufferSize > 0)
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBufferSize, &m_vertices[0]);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
-		else if (m_vertexBufferSize == 0)
-		{
-			_create_buffer();
-		}
+		unsigned int vertexBufferSize = m_vertices.size() * sizeof(LineVertex);
+		if (vertexBufferSize <= m_vertexBufferSize)
+			m_VBO->Update(m_vertices.data(), vertexBufferSize);
 		else
-		{
-			glDeleteVertexArrays(1, &m_VAO);
-			glDeleteBuffers(1, &m_VBO);
 			_create_buffer();
-		}
 	}
 
 	void Line::_create_buffer()
 	{
-		unsigned int vertexBufferSize = m_vertices.size() * sizeof(glm::vec3);
+		if (m_VAO)
+			m_VAO.release();
+		if (m_VBO)
+			m_VBO.release();
 
-		glGenVertexArrays(1, &m_VAO);
-		glGenBuffers(1, &m_VBO);
-		glBindVertexArray(m_VAO);
+		m_vertexBufferSize = m_vertices.size() * sizeof(LineVertex);
+		m_VAO = std::make_unique<VertexArray>();
+		m_VBO = std::make_unique<VertexBuffer>(m_vertices.data(), m_vertexBufferSize, GL_DYNAMIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		if (vertexBufferSize > 0)
-			glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, &m_vertices[0], GL_DYNAMIC_DRAW);
+		VertexBufferLayout VBL;
+		VBL.Push<float>(3);
+		VBL.Push<float>(3);
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		m_vertexBufferSize = vertexBufferSize;
+		m_VAO->AddBuffer(*m_VBO, VBL);
 	}
 }

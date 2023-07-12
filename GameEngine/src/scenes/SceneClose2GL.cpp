@@ -85,8 +85,6 @@ void SceneClose2GL::OnUpdate(float deltaTime)
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
         }
 
-        // Lights Sources
-
         for (int i = 0; i < objects.size(); ++i)
         {
             OpenGLShader.SetUniform3f("uColor", colors[i]);
@@ -108,9 +106,9 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         }
     }
 
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 });
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 });
-    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 });
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 }, glm::vec3{1.0f, 0.0f, 0.0f});
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 }, glm::vec3{0.0f, 1.0f, 0.0f});
+    Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 }, glm::vec3{0.0f, 0.0f, 1.0f});
 }
 
 void SceneClose2GL::OnImGuiRender()
@@ -187,8 +185,8 @@ void SceneClose2GL::OnImGuiRender()
         }
     }
 
-    const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK" };
-    if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 3))
+    const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK", "TEAPOT", "DRAGON"};
+    if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 5))
         AddObject(std::string(possibleObjects[selectedObjectToAdd]));
 
     if (ImGui::RadioButton("Load Clock Wise", isLoadingClockWise))
@@ -244,19 +242,15 @@ void SceneClose2GL::AddObject(std::string_view label)
         tri = TriangleOrientation::CounterClockWise;
 
     if (label == "COW")
-    {
         objects.emplace_back(std::make_unique<Model>("resources/models/cow_up_no_text.in", tri));
-    }
     else if (label == "CUBE")
-    {
         objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", tri));
-
-    }
     else if (label == "BACKPACK")
-    {
         objects.emplace_back(std::make_unique<Model>("resources/models/backpack/backpack.obj", tri));
-
-    }
+    else if (label == "TEAPOT")
+        objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", tri));
+    else if (label == "DRAGON")
+        objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", tri));
 
     colors.emplace_back(cgl::random_double(0, 1), cgl::random_double(0, 1), cgl::random_double(0, 1));
 

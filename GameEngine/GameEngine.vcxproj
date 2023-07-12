@@ -215,6 +215,8 @@
     <ClCompile Include="src\math\vec2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\shaders\Lines_fragment.shader" />
+    <None Include="resources\shaders\Lines_vertex.shader" />
     <None Include="resources\shaders\ogl_fragment.shader" />
     <None Include="resources\shaders\ogl_vertex.shader" />
     <None Include="resources\shaders\cgl_fragment.shader" />
