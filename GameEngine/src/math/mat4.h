@@ -47,6 +47,7 @@ namespace cgl
 		mat4 transpose() const;
 		float determinant() const;
 		static mat4 identity();
+		static mat4 viewport(unsigned int screenWidth, unsigned int screenHeight);
 
 		float* get_pointer() const { return (float*)(&(mat[0][0])); };
 		inline vec4 operator [] (int i) const { return vec4(mat[i]); }
