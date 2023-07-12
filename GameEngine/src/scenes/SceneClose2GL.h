@@ -33,6 +33,7 @@ private:
 
 	cgl::mat4 view;
 	cgl::mat4 projection;
+	cgl::mat4 viewport;
 
 	std::shared_ptr<unsigned int> screenWidth;
 	std::shared_ptr<unsigned int> screenHeight;

@@ -16,9 +16,18 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	}
 }
 
-void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4& view, const cgl::mat4& projection, bool isCulling, bool isCullingClockWise) const
+void Model::DrawCGL(Shader& shader, 
+	DrawPrimitive drawPrimitive, 
+	const cgl::mat4& view, 
+	const cgl::mat4& projection, 
+	const cgl::mat4& viewport,
+	bool isCulling, 
+	bool isCullingClockWise) const
 {
+	// ==================
 	// Build Model Matrix
+	// ==================
+
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(transform.position, 1.0f));
 	// model = model * cgl::mat4::rotateX(transform.rotation.x);
 	// model = model * cgl::mat4::rotateY(transform.rotation.y);
@@ -27,7 +36,10 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 
 	cgl::mat4 model = translate * scale;
 
-	// Build Transform Matrix
+	// ======================
+	// Build MVP Matrix
+	// ======================
+
 	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
 	
 	for (unsigned int i = 0; i < meshes.size(); ++i)
@@ -71,6 +83,14 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 			v1 /= v1.w;
 			v2 /= v2.w;
 
+			// =======================
+			// Go To Pixel Coordinates
+			// =======================
+
+			v0 = viewport * v0;
+			v1 = viewport * v1;
+			v2 = viewport * v2;
+
 			cglVertices.push_back(v0);
 			cglVertices.push_back(v1);
 			cglVertices.push_back(v2);
@@ -78,6 +98,22 @@ void Model::DrawCGL(Shader& shader, DrawPrimitive drawPrimitive, const cgl::mat4
 
 		Mesh::DrawRaw(shader, cglVertices, drawPrimitive);
 	}
+}
+
+void Model::ViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
+{
+	m_FrameBuffer.resize(screenWidth, screenHeight);
+	m_ZBuffer.resize(screenWidth, screenHeight);
+}
+
+void Model::ClearFrameBuffer()
+{
+	m_FrameBuffer.clear(glm::vec3(0.0f));
+}
+
+void Model::ClearZBuffer()
+{
+	m_ZBuffer.clear(std::numeric_limits<unsigned int>::max());
 }
 
 cgl::mat4 Model::GetModelMatrix() const

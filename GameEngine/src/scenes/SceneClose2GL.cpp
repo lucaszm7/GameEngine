@@ -93,16 +93,21 @@ void SceneClose2GL::OnUpdate(float deltaTime)
     }
     else
     {
+        Model::ViewPort(*screenWidth, *screenHeight);
+        Model::ClearFrameBuffer();
+        Model::ClearZBuffer();
+
         cgl::vec3 lookAtLocation = !objects.empty() ? objects[selectedLookAt]->transform.position : cgl::vec3();
         isLookAt ? cglCamera.SetLookAt(lookAtLocation) : cglCamera.UnSetLookAt();
         view = cglCamera.GetViewMatrix();
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
+        viewport = cgl::mat4::viewport(*screenWidth, *screenHeight);
 
         Close2GLShader.Bind();
         for (int i = 0; i < objects.size(); ++i)
         {
             Close2GLShader.SetUniform3f("uColor", colors[i]);
-            objects[i]->DrawCGL(Close2GLShader, drawPrimitive, view, projection, isEnableCullFace, isCullingClockWise);
+            objects[i]->DrawCGL(Close2GLShader, drawPrimitive, view, projection, viewport, isEnableCullFace, isCullingClockWise);
         }
     }
 
