@@ -202,5 +202,8 @@
     <ClInclude Include="src\engine\Lines.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\math\mat.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
