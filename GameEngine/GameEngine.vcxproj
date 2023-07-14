@@ -200,7 +200,6 @@
     <ClCompile Include="src\core\Texture.cpp" />
     <ClCompile Include="src\core\VertexArray.cpp" />
     <ClCompile Include="src\core\VertexBuffer.cpp" />
-    <ClCompile Include="src\engine\line.cpp" />
     <ClCompile Include="src\engine\mesh.cpp" />
     <ClCompile Include="src\engine\model.cpp" />
     <ClCompile Include="src\engine\Spline.cpp" />
@@ -247,7 +246,6 @@
     <ClInclude Include="src\core\VertexBufferLayout.h" />
     <ClInclude Include="src\engine\camera.h" />
     <ClInclude Include="src\engine\light.h" />
-    <ClInclude Include="src\engine\line.h" />
     <ClInclude Include="src\engine\material.h" />
     <ClInclude Include="src\engine\mesh.h" />
     <ClInclude Include="src\engine\model.h" />

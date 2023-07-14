@@ -6,7 +6,6 @@
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
-#include "line.h"
 #include "model.h"
 #include "Timer.hpp"
 

@@ -8,7 +8,7 @@
 #include "camera.h"
 #include "light.h"
 // #include "material.h"
-#include "line.h"
+#include "Lines.hpp"
 // #include "engine/mesh.h"
 #include "model.h"
 #include "Timer.hpp"
@@ -33,8 +33,6 @@ private:
 	Shader lightingShader;
 	Shader lightSourceShader;
 
-	Line* line;
-
 	DirectionalLight dirLight;
 	std::vector<PointLight> pointLights;
 	SpotLight spotlight;
@@ -58,8 +56,8 @@ private:
 
 	void EnableCullFace();
 	void DisableCullFace();
-	void DrawNode(NodeV7* node, Line* lines);
-	void DrawAABB(AABB* aabb, Line* lines);
+	void DrawNode(NodeV7* node, const glm::vec3& color);
+	void DrawAABB(AABB* aabb, const glm::vec3& color);
 	void CreateCilinderSpline(const std::string& filePath, 
 		int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor);
 

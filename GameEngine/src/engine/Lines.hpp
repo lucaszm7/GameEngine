@@ -39,7 +39,7 @@ namespace Debug
 			void _buffer();
 
 			Line(const Line&) = delete;
-			Line(int maxVertices = 300);
+			explicit Line(int maxVertices = 300);
 		
 		public:
 			static Line& OnStart(int maxVertices = 300);

@@ -62,9 +62,6 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     colon.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
     endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::ClockWise);
 
-    line = new Line(10000, collDet.collisionResults.collisionVectors);
-    line->m_vertices.reserve(10000);
-
     lightVAO.Bind();
     VertexBuffer lightVBO(&cubeVertices[0], static_cast<unsigned int>(cubeVertices.size() * sizeof(float)), GL_STATIC_DRAW);
     VertexBufferLayout lightVBL;
@@ -95,84 +92,76 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
     view = pCamera.GetViewMatrix();
     projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
 
-    // Draw Light Source
-    lightVAO.Bind();
-    lightSourceShader.Bind();
-    lightSourceShader.SetUniformMatrix4fv("view", view);
-    lightSourceShader.SetUniformMatrix4fv("projection", projection);
-
-    line->m_vertices.clear();
-    lightSourceShader.SetUniformMatrix4fv("model", glm::mat4(1.0f));
-
     if (debugControlPointsColon || debugControlPointsEndo)
     {
         if (debugControlPointsEndo)
         {
-            line->m_vertices.clear();
-            for (int i = 0; i < endoSplineModel->controlPoints.size() - 1; ++i)
+            for (int i = 0; i < endoSplineModel->controlPoints.size() - 1; i+=2)
             {
-                line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
-                line->m_vertices.push_back(endoSplineModel->controlPoints[i + 1]);
+                auto& controlPointA = endoSplineModel->controlPoints[i];
+                auto& controlPointB = endoSplineModel->controlPoints[i + 1];
+                Debug::Line::Draw(
+                    glm::vec3(controlPointA.x(), controlPointA.y(), controlPointA.z()),
+                    glm::vec3(controlPointB.x(), controlPointB.y(), controlPointB.z()), 
+                    glm::vec3(0.0f, 1.0f, 0.0f));
             }
-            for (int i = 0; i < endoSplineModel->controlPointsVectorPos.size(); ++i)
+            for (int i = 0; i < endoSplineModel->controlPointsVectorPos.size() - 1; i += 2)
             {
-                for (int j = 0; j < endoSplineModel->controlPointsVectorPos[0].size(); ++j)
+                auto& controlPointA = endoSplineModel->controlPoints[i];
+                for (int j = 0; j < endoSplineModel->controlPointsVectorPos[0].size() - 1; j += 2)
                 {
-                    line->m_vertices.push_back(endoSplineModel->controlPoints[i]);
-                    line->m_vertices.push_back(endoSplineModel->controlPointsVectorPos[i][j]);
+                    auto& controlPointB = endoSplineModel->controlPointsVectorPos[i][j];
+                    Debug::Line::Draw(
+                        glm::vec3(controlPointA.x(), controlPointA.y(), controlPointA.z()),
+                        glm::vec3(controlPointB.x(), controlPointB.y(), controlPointB.z()),
+                        glm::vec3(0.0f, 1.0f, 0.0f));
                 }
             }
-            line->Buffer();
-            lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
-            line->Draw();
         }
         if (debugControlPointsColon)
         {
-            line->m_vertices.clear();
-            for (int i = 0; i < colonSplineModel->controlPoints.size() - 1; ++i)
+            for (int i = 0; i < colonSplineModel->controlPoints.size() - 1; i += 2)
             {
-                line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
-                line->m_vertices.push_back(colonSplineModel->controlPoints[i + 1]);
+                auto& controlPointA = colonSplineModel->controlPoints[i];
+                auto& controlPointB = colonSplineModel->controlPoints[i + 1];
+                Debug::Line::Draw(
+                    glm::vec3(controlPointA.x(), controlPointA.y(), controlPointA.z()),
+                    glm::vec3(controlPointB.x(), controlPointB.y(), controlPointB.z()),
+                    glm::vec3(0.0f, 0.0f, 1.0f));
             }
-            for (int i = 0; i < colonSplineModel->controlPointsVectorPos.size(); ++i)
+            for (int i = 0; i < colonSplineModel->controlPointsVectorPos.size() - 1; i += 2)
             {
-                for (int j = 0; j < colonSplineModel->controlPointsVectorPos[0].size(); ++j)
+                auto& controlPointA = colonSplineModel->controlPoints[i];
+                for (int j = 0; j < colonSplineModel->controlPointsVectorPos[0].size() - 1; j+=2)
                 {
-                    line->m_vertices.push_back(colonSplineModel->controlPoints[i]);
-                    line->m_vertices.push_back(colonSplineModel->controlPointsVectorPos[i][j]);
+                    auto& controlPointB = colonSplineModel->controlPointsVectorPos[i][j];
+                    Debug::Line::Draw(
+                        glm::vec3(controlPointA.x(), controlPointA.y(), controlPointA.z()),
+                        glm::vec3(controlPointB.x(), controlPointB.y(), controlPointB.z()),
+                        glm::vec3(0.0f, 0.0f, 1.0f));
                 }
             }
-            line->Buffer();
-            lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
-            line->Draw();
         }
     }
 
     if (debugCollDet && hasCollisionDetection)
     {
-        line->m_vertices.clear();
-        for (int i = 0; i < collDet.collisionResults.collisionVectors.size(); ++i)
+        for (int i = 0; !collDet.collisionResults.collisionVectors.empty() &&
+                        i < collDet.collisionResults.collisionVectors.size() - 1; i+=2)
         {
-            line->m_vertices.push_back(collDet.collisionResults.collisionVectors[i]);
+            auto& controlPointA = collDet.collisionResults.collisionVectors[i];
+            auto& controlPointB = collDet.collisionResults.collisionVectors[i + 1];
+            Debug::Line::Draw(
+                glm::vec3(controlPointA.x(), controlPointA.y(), controlPointA.z()),
+                glm::vec3(controlPointB.x(), controlPointB.y(), controlPointB.z()),
+                glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         }
-        line->Buffer();
-        lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
-        line->Draw();
     }
 
     if (drawAABB)
     {
-        line->m_vertices.clear();
-        DrawNode(collDet.rootColon, line);
-        line->Buffer();
-        lightSourceShader.SetUniform3f("lightColor", glm::vec3(0.0f, 0.0f, 1.0f));
-        line->Draw();
-
-        line->m_vertices.clear();
-        DrawNode(collDet.rootEndo, line);
-        line->Buffer();
-        lightSourceShader.SetUniform3f("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
-        line->Draw();
+        DrawNode(collDet.rootColon, glm::vec3(0.0f, 0.0f, 1.0f));
+        DrawNode(collDet.rootEndo, glm::vec3(1.0f, 0.0f, 0.0f));
     }
 
     lightingShader.Bind();
@@ -280,56 +269,56 @@ void SceneSplineCollisionDetection::DisableCullFace()
     glDisable(GL_CULL_FACE);
 }
 
-void SceneSplineCollisionDetection::DrawNode(NodeV7* node, Line* lines)
+void SceneSplineCollisionDetection::DrawNode(NodeV7* node, const glm::vec3& color)
 {
-    DrawAABB(&(node->bv), lines);
+    DrawAABB(&(node->bv), color);
 
     if (node->type != NodeType::LEAF)
     {
         if (node->left != nullptr)
-            DrawNode(node->left, lines);
+            DrawNode(node->left, color);
         if (node->right != nullptr)
-            DrawNode(node->right, lines);
+            DrawNode(node->right, color);
     }
 }
 
-void SceneSplineCollisionDetection::DrawAABB(AABB* aabb, Line* lines)
+void SceneSplineCollisionDetection::DrawAABB(AABB* aabb, const glm::vec3& color)
 {
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->min.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->min.y(), aabb->min.z()), 
+        glm::vec3(aabb->max.x(), aabb->min.y(), aabb->min.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->min.y(), aabb->min.z()), 
+        glm::vec3(aabb->min.x(), aabb->min.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->min.y(), aabb->min.z()),
+        glm::vec3(aabb->min.x(), aabb->max.y(), aabb->min.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->min.y(), aabb->max.z()),
+        glm::vec3(aabb->max.x(), aabb->min.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->min.y(), aabb->max.z()),
+        glm::vec3(aabb->min.x(), aabb->max.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->min.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->max.x(), aabb->min.y(), aabb->max.z()),
+        glm::vec3(aabb->min.x(), aabb->min.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
+    Debug::Line::Draw(glm::vec3(aabb->max.x(), aabb->min.y(), aabb->min.z()),
+        glm::vec3(aabb->max.x(), aabb->max.y(), aabb->min.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->max.y(), aabb->min.z()),
+        glm::vec3(aabb->min.x(), aabb->max.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->min.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
+    Debug::Line::Draw(glm::vec3(aabb->min.x(), aabb->max.y(), aabb->min.z()),
+        glm::vec3(aabb->max.x(), aabb->max.y(), aabb->min.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->min.x(), aabb->max.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->max.x(), aabb->max.y(), aabb->max.z()),
+        glm::vec3(aabb->min.x(), aabb->max.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->min.y(), aabb->max.z()));
+    Debug::Line::Draw(glm::vec3(aabb->max.x(), aabb->max.y(), aabb->max.z()),
+        glm::vec3(aabb->max.x(), aabb->min.y(), aabb->max.z()), color);
 
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->max.z()));
-    lines->m_vertices.emplace_back(Eigen::Vector3f(aabb->max.x(), aabb->max.y(), aabb->min.z()));
+    Debug::Line::Draw(glm::vec3(aabb->max.x(), aabb->max.y(), aabb->max.z()),
+        glm::vec3(aabb->max.x(), aabb->max.y(), aabb->min.z()), color);
 }
 
 void SceneSplineCollisionDetection::CreateCilinderSpline(const std::string& filePath, int nControlPoints, int nVectorsPerControlPoints, double CorrectionFactor)
