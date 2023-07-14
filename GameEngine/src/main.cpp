@@ -37,8 +37,8 @@
 #include "ViewPort.hpp"
 
 // Scenes
-#include "scenes/SceneSplineCollisionDetection.h"
-#include "scenes/SceneClose2GL.h"
+#include "scenes/SplineCollDet/SceneSplineCollisionDetection.h"
+#include "scenes/Close2GL/SceneClose2GL.h"
 
 
 void processInputs(GLFWwindow* window, double deltaTime);

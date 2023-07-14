@@ -49,6 +49,9 @@ SceneClose2GL::SceneClose2GL()
 
     FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Gouraud");
     FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Phong");
+
+    FragmentColoringSolidIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "SolidColor");
+    FragmentColoringTextureIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "TextureColor");
 }
 
 SceneClose2GL::~SceneClose2GL() = default;
@@ -70,17 +73,19 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         spotlight.position = glm::vec3(oglCamera.Position.x, oglCamera.Position.y, oglCamera.Position.z);
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         
+        unsigned int subroutineIndex[2] = { isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex, 
+                                            showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex };
         if (isGouraudShading)
         {
-            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, VertexShadingGouraudIndex);
-            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, FragmentShadingGouraudIndex);
+            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingGouraudIndex);
+            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, subroutineIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::VERTEX);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::VERTEX);
         }
         else
         {
-            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX,   VertexShadingPhongIndex);
-            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, FragmentShadingPhongIndex);
+            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingPhongIndex);
+            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, subroutineIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::FRAGMENT);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
         }
@@ -166,6 +171,8 @@ void SceneClose2GL::OnImGuiRender()
     {
         isGouraudShading = false;
     }
+
+    ImGui::Checkbox("Show Textures", &showTexture);
 
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))

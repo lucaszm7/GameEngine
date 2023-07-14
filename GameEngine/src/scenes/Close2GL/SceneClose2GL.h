@@ -58,11 +58,16 @@ private:
 	bool isCullingClockWise = false;
 	bool isLoadingClockWise = false;
 
+	bool showTexture = false;
+
 	unsigned int VertexShadingGouraudIndex;
 	unsigned int VertexShadingPhongIndex;
 
 	unsigned int FragmentShadingGouraudIndex;
 	unsigned int FragmentShadingPhongIndex;
+
+	unsigned int FragmentColoringSolidIndex;
+	unsigned int FragmentColoringTextureIndex;
 
 	bool isGouraudShading = false;
 
