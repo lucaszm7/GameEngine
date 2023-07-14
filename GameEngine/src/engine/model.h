@@ -18,11 +18,12 @@ struct Model
 {
 public:
 	Model(const std::string& path, TriangleOrientation triOrientation = TriangleOrientation::CounterClockWise)
+		:m_Path(path)
 	{
-		if (path.substr(path.find_last_of('.') + 1) == "in")
-			LoadCustomModel(path, triOrientation);
+		if (m_Path.substr(m_Path.find_last_of('.') + 1) == "in")
+			LoadCustomModel(triOrientation);
 		else
-			LoadClassicModel(path);
+			LoadClassicModel();
 	}
 
 	void DrawOpenGL(Shader& shader, 
@@ -49,13 +50,14 @@ public:
 	static cgl::mat<glm::vec3>* GetFrameBuffer() { return &m_FrameBuffer; };
 
 private:
+	std::string m_Path;
 	inline static std::unordered_map<std::string, int> m_NamesMap;
 
 	inline static cgl::mat<glm::vec3> m_FrameBuffer;
 	inline static cgl::mat<unsigned int> m_ZBuffer;
 
-	void LoadClassicModel(const std::string& path);
-	void LoadCustomModel(const std::string& path, TriangleOrientation triOrientation);
+	void LoadClassicModel();
+	void LoadCustomModel(TriangleOrientation triOrientation);
 
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);

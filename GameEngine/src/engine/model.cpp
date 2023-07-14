@@ -138,11 +138,11 @@ void Model::OnImGui() const
 	}
 }
 
-void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrientation)
+void Model::LoadCustomModel(TriangleOrientation triOrientation)
 {
-	std::ifstream stream(path);
+	std::ifstream stream(m_Path);
 	if (!stream)
-		throw new std::exception(std::string("Could not open file: " + path).c_str());
+		throw new std::exception(std::string("Could not open file: " + m_Path).c_str());
 
 	std::stringstream ss;
 	std::string line;
@@ -324,17 +324,17 @@ void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrie
 	meshes.emplace_back(vertices, indices, textures);
 }
 
-void Model::LoadClassicModel(const std::string& path)
+void Model::LoadClassicModel()
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(m_Path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	std::string defaultName = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - path.find_last_of('/'));
+	std::string defaultName = m_Path.substr(m_Path.find_last_of('/') + 1, m_Path.find_last_of('.') - m_Path.find_last_of('/') - 1);
 	int id = 0;
 	name = defaultName;
 	while (m_NamesMap.contains(name))
@@ -426,7 +426,7 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		}
 		if (!skip)
 		{
-			Texture texture(name + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
+			Texture texture(m_Path.substr(0, m_Path.find_last_of('/')) + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}
