@@ -193,8 +193,8 @@
     <ClCompile Include="src\math\mat4.cpp" />
     <ClCompile Include="src\math\vec3.cpp" />
     <ClCompile Include="src\math\vec4.cpp" />
-    <ClCompile Include="src\scenes\SceneClose2GL.cpp" />
-    <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp" />
+    <ClCompile Include="src\scenes\Close2GL\SceneClose2GL.cpp" />
+    <ClCompile Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
     <ClCompile Include="src\core\Texture.cpp" />
@@ -235,9 +235,9 @@
     <ClInclude Include="src\math\math_utils.h" />
     <ClInclude Include="src\math\vec3.h" />
     <ClInclude Include="src\math\vec4.h" />
-    <ClInclude Include="src\scenes\SceneClose2GL.h" />
+    <ClInclude Include="src\scenes\Close2GL\SceneClose2GL.h" />
     <ClInclude Include="src\engine\scene.h" />
-    <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h" />
+    <ClInclude Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.h" />
     <ClInclude Include="src\core\IndexBuffer.h" />
     <ClInclude Include="src\core\Shader.h" />
     <ClInclude Include="src\core\Texture.h" />

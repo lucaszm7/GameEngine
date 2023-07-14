@@ -63,10 +63,10 @@
     <ClCompile Include="src\engine\Spline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\SceneSplineCollisionDetection.cpp">
+    <ClCompile Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\SceneClose2GL.cpp">
+    <ClCompile Include="src\scenes\Close2GL\SceneClose2GL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\math\mat4.cpp">
@@ -166,13 +166,13 @@
     <ClInclude Include="src\engine\Spline.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scenes\SceneSplineCollisionDetection.h">
+    <ClInclude Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\scenes\SceneClose2GL.h">
+    <ClInclude Include="src\scenes\Close2GL\SceneClose2GL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math\mat4.h">

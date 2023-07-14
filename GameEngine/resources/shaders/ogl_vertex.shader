@@ -118,24 +118,22 @@ vec3 GouraudDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 vec3 GouraudSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 {
 	// Ambient light
-    vec3 ambient = light.ambient * outColor;
+    vec3 ambient = light.ambient * uColor;
 
 	// Diffuse light
     vec3 lightDir = normalize(light.position - FragPos);
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * outColor;
+    vec3 diffuse = light.diffuse * diff * uColor;
 
 	// Specular light
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
-    vec3 specular = light.specular * spec * outColor;
+    vec3 specular = light.specular * spec * uColor;
 
 	// Point light attenuation
     float distance = length(light.position - FragPos);
     float attenuation = 1.0 /
-		(light.constant + light.
-    linear * distance
-    +light.quadratic * (distance * distance));
+		(light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     float theta = dot(lightDir, normalize(-light.direction));
     float epsilon = light.cutOff - light.outerCutOff;
