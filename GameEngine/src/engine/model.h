@@ -14,6 +14,25 @@
 #include "vec4.h"
 #include "mat.hpp"
 
+struct Pixel
+{
+	union
+	{
+		struct
+		{
+			unsigned char r, g, b;
+		};
+		unsigned char p[3];
+	};
+};
+
+inline std::ostream& operator << (std::ostream& out, const Pixel& p)
+{
+	return out << (unsigned int)p.r << ',' 
+			   << (unsigned int)p.g << ',' 
+		       << (unsigned int)p.b;
+}
+
 struct Model
 {
 public:
