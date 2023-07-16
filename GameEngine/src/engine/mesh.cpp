@@ -50,19 +50,16 @@ void Mesh::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void Mesh::DrawRaw(Shader& shader, const std::vector<cgl::vec4>& vert, DrawPrimitive drawPrimitive)
+void Mesh::Rasterize(std::vector<cgl::vec4>& vertices, DrawPrimitive drawPrimitive)
 {
-	if (vert.empty())
-		return;
+	for (unsigned int i = 0; i < vertices.size(); i += 3)
+	{
+		auto& p0 = vertices[i+0];
+		auto& p1 = vertices[i+1];
+		auto& p2 = vertices[i+2];
 
-	VertexArray nVAO;
-	nVAO.Bind();
-	VertexBuffer nVBO(&vert[0], static_cast<unsigned int>(vert.size() * 4 * sizeof(float)));
-	nVBO.Bind();
-	VertexBufferLayout nVBL;
-	nVBL.Push<float>(4); // positions
-	nVAO.AddBuffer(nVBO, nVBL);
-	glPolygonMode(GL_FRONT_AND_BACK, (GLenum)drawPrimitive);
-	glDrawArrays(GL_TRIANGLES, 0, vert.size());
-	nVAO.Unbind();
+
+
+	}
 }
+
