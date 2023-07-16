@@ -33,8 +33,8 @@ Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter
 	}
 }
 
-Texture::Texture(const char* data, Texture::Parameter texParam)
-	:type(Texture::Type::RAW)
+Texture::Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam)
+	:type(Texture::Type::RAW), m_Width(width), m_Height(height)
 {
 	if (data)
 	{

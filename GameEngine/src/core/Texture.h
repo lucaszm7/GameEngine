@@ -22,7 +22,7 @@ public:
 	Texture::Type type;
 
 	Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam = Texture::Parameter::LINEAR);
-	Texture(const char* data, Texture::Parameter texParam = Texture::Parameter::LINEAR);
+	Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam = Texture::Parameter::LINEAR);
 
 	~Texture();
 
