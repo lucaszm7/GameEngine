@@ -9,6 +9,7 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	model = glm::rotate(model, transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	model = glm::scale(model, transform.scale);
 	shader.SetUniformMatrix4fv("model", model);
+	shader.SetUniform3f("uColor", color);
 
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
@@ -16,11 +17,13 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	}
 }
 
-void Model::DrawCGL(Shader& shader, 
-	DrawPrimitive drawPrimitive, 
-	const cgl::mat4& view, 
-	const cgl::mat4& projection, 
-	const cgl::mat4& viewport,
+void Model::DrawSoftwareRasterized(
+	DrawPrimitive drawPrimitive,
+	const cgl::mat4& view,
+	const cgl::mat4& projection,
+	const cgl::mat4& viewport, 
+	unsigned int screenWidth, 
+	unsigned int screenHeight, 
 	bool isCulling, 
 	bool isCullingClockWise) const
 {
@@ -95,12 +98,13 @@ void Model::DrawCGL(Shader& shader,
 			cglVertices.push_back(v1);
 			cglVertices.push_back(v2);
 		}
-
-		Mesh::DrawRaw(shader, cglVertices, drawPrimitive);
+		Mesh::Rasterize(cglVertices);
 	}
+	Texture texCGL(&Model::GetFrameBuffer()->data()->r, screenWidth, screenHeight);
+	m_MapToViewport.OnRenderTexture(texCGL);
 }
 
-void Model::ViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
+void Model::SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
 {
 	m_FrameBuffer.resize(screenWidth, screenHeight);
 	m_ZBuffer.resize(screenWidth, screenHeight);
@@ -108,12 +112,12 @@ void Model::ViewPort(const unsigned int screenWidth, const unsigned int screenHe
 
 void Model::ClearFrameBuffer()
 {
-	m_FrameBuffer.clear(glm::vec3(0.0f));
+	m_FrameBuffer.clear(m_ClearColor);
 }
 
 void Model::ClearZBuffer()
 {
-	m_ZBuffer.clear(std::numeric_limits<unsigned int>::max());
+	m_ZBuffer.clear(std::numeric_limits<float>::max());
 }
 
 cgl::mat4 Model::GetModelMatrix() const
@@ -318,8 +322,8 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		indices.push_back(counter++);
 	}
 
-	Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
-	textures.push_back(tex);
+	/*Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
+	textures.push_back(tex);*/
 
 	meshes.emplace_back(vertices, indices, textures);
 }

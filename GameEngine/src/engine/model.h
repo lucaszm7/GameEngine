@@ -13,6 +13,7 @@
 #include "mesh.h"
 #include "vec4.h"
 #include "mat.hpp"
+#include "ViewPort.hpp"
 
 struct Pixel
 {
@@ -36,8 +37,8 @@ inline std::ostream& operator << (std::ostream& out, const Pixel& p)
 struct Model
 {
 public:
-	Model(const std::string& path, TriangleOrientation triOrientation = TriangleOrientation::CounterClockWise)
-		:m_Path(path)
+	Model(const std::string& path, glm::vec3 col = glm::vec3(1.0f,0.0f,0.0f), TriangleOrientation triOrientation = TriangleOrientation::CounterClockWise)
+		:color(col), m_Path(path)
 	{
 		if (m_Path.substr(m_Path.find_last_of('.') + 1) == "in")
 			LoadCustomModel(triOrientation);
@@ -52,28 +53,34 @@ public:
 	void OnImGui() const;
 	std::vector<Mesh> meshes;
 	std::string name;
+	glm::vec3 color;
 	std::vector<Texture> textures_loaded;
 	Transform transform;
 
-	void DrawCGL(Shader& shader,
-		DrawPrimitive drawPrimitive, 
-		const cgl::mat4& view, 
-		const cgl::mat4& projection, 
-		const cgl::mat4& viewport,
+	void DrawSoftwareRasterized(
+		DrawPrimitive drawPrimitive,
+		const cgl::mat4& view,
+		const cgl::mat4& projection,
+		const cgl::mat4& viewport, 
+		unsigned int screenWidth, 
+		unsigned int screenHeight, 
 		bool isCulling = false, 
 		bool isCullingClockWise = false) const;
 
-	static void ViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
+	static void SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
 	static void ClearFrameBuffer();
+	static void SetClearColor(const Pixel& p) { m_ClearColor = p; };
 	static void ClearZBuffer();
-	static cgl::mat<glm::vec3>* GetFrameBuffer() { return &m_FrameBuffer; };
+	static cgl::mat<Pixel>* GetFrameBuffer() { return &m_FrameBuffer; };
 
 private:
 	std::string m_Path;
 	inline static std::unordered_map<std::string, int> m_NamesMap;
 
-	inline static cgl::mat<glm::vec3> m_FrameBuffer;
-	inline static cgl::mat<unsigned int> m_ZBuffer;
+	ViewPort m_MapToViewport;
+	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
+	inline static cgl::mat<Pixel> m_FrameBuffer;
+	inline static cgl::mat<float> m_ZBuffer;
 
 	void LoadClassicModel();
 	void LoadCustomModel(TriangleOrientation triOrientation);
