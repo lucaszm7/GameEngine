@@ -8,7 +8,7 @@ namespace cgl
 	class mat
 	{
 	private:
-		std::vector<std::vector<_Type>> matrix;
+		_Type* matrix;
 		unsigned int m_rowsSize = 0;
 		unsigned int m_collumsSize = 0;
 
@@ -18,11 +18,12 @@ namespace cgl
 		mat(unsigned int _rows, unsigned int _collums)
 			:m_rowsSize(_rows), m_collumsSize(_collums)
 		{
-			matrix.resize(m_rowsSize);
-			for (auto& row : matrix)
-			{
-				row.resize(m_collumsSize);
-			}
+			matrix = new _Type[m_rowsSize * m_collumsSize];
+		}
+
+		~mat()
+		{
+			delete[] matrix;
 		}
 
 		void resize(unsigned int _rows, unsigned int _collums)
@@ -33,21 +34,30 @@ namespace cgl
 			m_rowsSize = _rows;
 			m_collumsSize = _collums;
 
-			matrix.resize(m_rowsSize);
-			for (auto& row : matrix)
-			{
-				row.resize(m_collumsSize);
-			}
+			delete[] matrix;
+
+			matrix = new _Type[m_rowsSize * m_collumsSize];
 		};
 
-		size_t RowSize() const { return m_rowsSize; };
-		size_t CollumSize() const { return m_collumsSize; };
+		_Type* data()
+		{
+			return matrix;
+		}
+
+		size_t row_size() const { return m_rowsSize; };
+		size_t collum_size() const { return m_collumsSize; };
 		size_t size() const { return m_rowsSize * m_collumsSize; };
+
+		_Type get(unsigned int row, unsigned int collum)
+		{
+			return matrix(row * m_rowsSize + collum);
+		}
+
 		void clear(const _Type& def)
 		{
-			for (auto& rows : matrix)
+			for (unsigned int i = 0; i < size(); ++i)
 			{
-				std::ranges::fill(rows, def);
+				matrix[i] = def;
 			}
 		}
 
