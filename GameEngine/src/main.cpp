@@ -56,14 +56,14 @@ void ImGuiDockSpace();
 void ResetEngine();
 void ShowExampleAppDockSpace(bool* p_open);
 
-GLFWwindow* pWindow;
+inline GLFWwindow* pWindow;
 
-std::shared_ptr<unsigned int> pScreenWidth;
-std::shared_ptr<unsigned int> pScreenHeight;
+inline std::shared_ptr<unsigned int> pScreenWidth;
+inline std::shared_ptr<unsigned int> pScreenHeight;
 
-BaseCam* pCamera;
+inline BaseCam* pCamera;
 
-std::unique_ptr<ViewPort> pViewport;
+inline std::unique_ptr<ViewPort> pViewport;
 
 static bool firstMouse = true;
 static float lastX = 0.0f;
