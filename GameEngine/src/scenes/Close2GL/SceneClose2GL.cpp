@@ -35,13 +35,11 @@ BoundingVolume CalculateEnclosingAABB(const std::unique_ptr<Model>& obj)
 SceneClose2GL::SceneClose2GL()
     :
     OpenGLShader("resources/shaders/ogl_vertex.shader", "resources/shaders/ogl_fragment.shader"),
-    Close2GLShader("resources/shaders/cgl_vertex.shader", "resources/shaders/cgl_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, oglCamera.Position, oglCamera.Right)
 {
-    objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
-    colors.emplace_back(1.0f, 1.0f, 0.0f);
+    objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", glm::vec3{ 1.0f,1.0f,0.0f }));
     DisableCullFace();
 
     VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
@@ -73,32 +71,34 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         spotlight.position = glm::vec3(oglCamera.Position.x, oglCamera.Position.y, oglCamera.Position.z);
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         
-        unsigned int subroutineIndex[2] = { isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex, 
-                                            showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex };
+        std::array<unsigned int, 2> fragmentSubroutineIndex;
+        fragmentSubroutineIndex[1] = (isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex);
+        fragmentSubroutineIndex[0] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
+        OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
+        
         if (isGouraudShading)
         {
             OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingGouraudIndex);
-            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, subroutineIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::VERTEX);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::VERTEX);
         }
         else
         {
             OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingPhongIndex);
-            OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, subroutineIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::FRAGMENT);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
         }
 
         for (int i = 0; i < objects.size(); ++i)
         {
-            OpenGLShader.SetUniform3f("uColor", colors[i]);
             objects[i]->DrawOpenGL(OpenGLShader, drawPrimitive);
         }
     }
     else
     {
-        Model::ViewPort(*screenWidth, *screenHeight);
+        Model::SetViewPort(*screenWidth, *screenHeight);
+        Pixel clearColor{ (unsigned char)(imguiClearColor[0]*255), (unsigned char)(imguiClearColor[1] * 255), (unsigned char)(imguiClearColor[2] * 255) };
+        Model::SetClearColor(clearColor);
         Model::ClearFrameBuffer();
         Model::ClearZBuffer();
 
@@ -108,11 +108,11 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
         viewport = cgl::mat4::viewport(*screenWidth, *screenHeight);
 
-        Close2GLShader.Bind();
         for (int i = 0; i < objects.size(); ++i)
         {
-            Close2GLShader.SetUniform3f("uColor", colors[i]);
-            objects[i]->DrawCGL(Close2GLShader, drawPrimitive, view, projection, viewport, isEnableCullFace, isCullingClockWise);
+            objects[i]->DrawSoftwareRasterized(drawPrimitive, 
+                view, projection, viewport, 
+                *screenWidth, *screenHeight, isEnableCullFace, isCullingClockWise);
         }
     }
 
@@ -143,6 +143,11 @@ void SceneClose2GL::OnImGuiRender()
         oglCamera.Pitch = cglCamera.Pitch;
         oglCamera.MovementSpeed = cglCamera.MovementSpeed;
         oglCamera.updateCameraVectors();
+    }
+
+    if (!isOpenGLRendered)
+    {
+        ImGui::ColorEdit3(std::string("Close2GL Clear Color").c_str(), imguiClearColor);
     }
 
     ImGui::Text("Drawing Primitive");
@@ -226,7 +231,7 @@ void SceneClose2GL::OnImGuiRender()
         if (ImGui::TreeNode(std::string((*it)->name).c_str()))
         {
             (*it)->OnImGui();
-            ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &colors[i][0]);
+            ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &(*it)->color[0]);
             ImGui::TreePop();
         }
         else
@@ -235,7 +240,6 @@ void SceneClose2GL::OnImGuiRender()
         if (ImGui::Button(std::string("Delete " + (*it)->name).c_str()))
         {
             it = objects.erase(it);
-            colors.erase(colors.begin() + i);
         }
         else
         {
@@ -253,18 +257,18 @@ void SceneClose2GL::AddObject(std::string_view label)
     else
         tri = TriangleOrientation::CounterClockWise;
 
-    if (label == "COW")
-        objects.emplace_back(std::make_unique<Model>("resources/models/cow_up_no_text.in", tri));
-    else if (label == "CUBE")
-        objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", tri));
-    else if (label == "BACKPACK")
-        objects.emplace_back(std::make_unique<Model>("resources/models/backpack/backpack.obj", tri));
-    else if (label == "TEAPOT")
-        objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", tri));
-    else if (label == "DRAGON")
-        objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", tri));
+    glm::vec3 color(cgl::random_double(0, 1), cgl::random_double(0, 1), cgl::random_double(0, 1));
 
-    colors.emplace_back(cgl::random_double(0, 1), cgl::random_double(0, 1), cgl::random_double(0, 1));
+    if (label == "COW")
+        objects.emplace_back(std::make_unique<Model>("resources/models/cow_up_no_text.in", color, tri));
+    else if (label == "CUBE")
+        objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", color, tri));
+    else if (label == "BACKPACK")
+        objects.emplace_back(std::make_unique<Model>("resources/models/backpack/backpack.obj", color, tri));
+    else if (label == "TEAPOT")
+        objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", color, tri));
+    else if (label == "DRAGON")
+        objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", color, tri));
 
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());
@@ -282,7 +286,6 @@ void SceneClose2GL::AddObject(std::string_view label)
         float yBig = (aabb.max.z + ((aabb.max.y - OPP)  / TAN));
         float xBig = (aabb.max.z + ((aabb.max.x - OPPX) / glm::tan(glm::radians((oglCamera.Zoom * aspectRatio) / 2))));
         oglCamera.Position.z = (xBig > yBig) ? xBig : yBig;
-
     }
     else
     {

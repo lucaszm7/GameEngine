@@ -22,10 +22,8 @@ public:
 	void OnImGuiRender() override;
 	BaseCam* GetCamera() override { return isOpenGLRendered ? (BaseCam*)&oglCamera : (BaseCam*)&cglCamera; }
 
-
 private:
 	Shader OpenGLShader;
-	Shader Close2GLShader;
 
 	cgl::Camera cglCamera;
 	ogl::Camera oglCamera;
@@ -41,8 +39,6 @@ private:
 	SpotLight spotlight;
 
 	std::vector<std::unique_ptr<Model>> objects;
-	std::vector<glm::vec3> colors;
-
 	std::vector<std::string> lookAtObjects;
 
 	int selectedObjectToAdd = 0;
@@ -72,6 +68,8 @@ private:
 	bool isGouraudShading = false;
 
 	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
+
+	float imguiClearColor[3] = { 255.0f,255.0f,255.0f };
 
 	bool isLookAt = false;
 	unsigned int selectedLookAt = 0;
