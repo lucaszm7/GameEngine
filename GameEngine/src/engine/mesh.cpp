@@ -58,6 +58,19 @@ void Mesh::Rasterize(std::vector<cgl::vec4>& vertices, DrawPrimitive drawPrimiti
 		auto& p1 = vertices[i+1];
 		auto& p2 = vertices[i+2];
 
+		// Ordena de forma decrescente em Y (top to bottom)
+		if (p1.y < p0.y)
+			p0 = p1;
+		if (p2.y < p0.y)
+			p0 = p2;
+		if (p2.y < p1.y)
+			p1 = p2;
+
+		cgl::vec3 edge0 = (p1 - p0).to_vec3();
+		cgl::vec3 edge1 = (p2 - p0).to_vec3();
+
+		int incrementX = (edge0.x / edge0.y);
+		int incrementZ = (edge0.z / edge0.y);
 
 
 	}

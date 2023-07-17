@@ -97,7 +97,7 @@ void SceneClose2GL::OnUpdate(float deltaTime)
     else
     {
         Model::SetViewPort(*screenWidth, *screenHeight);
-        Pixel clearColor{ (unsigned char)(imguiClearColor[0]*255), (unsigned char)(imguiClearColor[1] * 255), (unsigned char)(imguiClearColor[2] * 255) };
+        Pixel clearColor{ (unsigned char)(imguiClearColor[0] * 255), (unsigned char)(imguiClearColor[1] * 255), (unsigned char)(imguiClearColor[2] * 255) };
         Model::SetClearColor(clearColor);
         Model::ClearFrameBuffer();
         Model::ClearZBuffer();

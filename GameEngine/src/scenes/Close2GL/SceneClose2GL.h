@@ -69,7 +69,7 @@ private:
 
 	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
 
-	float imguiClearColor[3] = { 255.0f,255.0f,255.0f };
+	float imguiClearColor[3] = { 1.0f,1.0f,1.0f };
 
 	bool isLookAt = false;
 	unsigned int selectedLookAt = 0;
