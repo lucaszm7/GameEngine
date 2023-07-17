@@ -143,7 +143,17 @@ namespace cgl
 
 	mat4 mat4::viewport(unsigned int screenWidth, unsigned int screenHeight)
 	{
-		return identity();
+		cgl::mat4 viewport = cgl::mat4::identity();
+
+		// Scalamento
+		viewport[0][0] = (float)screenWidth / 2.0f;
+		viewport[1][1] = -(float)screenHeight / 2.0f;
+
+		// Translação
+		viewport[0][3] = (float)screenWidth / 2.0f;  // + coordenada_inicial_x (onde nesse caso é 0)
+		viewport[1][3] = (float)screenHeight / 2.0f; // + coordenada_inicial_y (onde nesse caso é 0)
+
+		return viewport;
 	}
 
 	mat4 mat4::operator-() const
