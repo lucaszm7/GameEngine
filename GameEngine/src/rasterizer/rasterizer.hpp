@@ -84,7 +84,7 @@ private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
 	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimitive drawPrimitive);
-	static void Scanline(unsigned int y, Slope& left, Slope& right);
+	static void Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimitive drawPrimitive);
 
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
 	inline static cgl::mat<Pixel> m_FrameBuffer;

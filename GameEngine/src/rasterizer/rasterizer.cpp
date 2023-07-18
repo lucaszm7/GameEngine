@@ -107,14 +107,22 @@ void Rasterizer::ClearZBuffer()
 	m_ZBuffer.clear(std::numeric_limits<float>::max());
 }
 
-void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right)
+void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimitive drawPrimitive)
 {
 	auto x_left  = (int)left.get();
 	auto x_right = (int)right.get();
 
-	for (int x = x_left; x < x_right; ++x)
+	if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
-		m_FrameBuffer.set(y, x, { 255, 0, 0 });
+		m_FrameBuffer.set(y, x_left, { 255, 0, 0 });
+		m_FrameBuffer.set(y, x_right, { 255, 0, 0 });
+	}
+	else
+	{
+		for (int x = x_left; x < x_right; ++x)
+		{
+			m_FrameBuffer.set(y, x, { 255, 0, 0 });
+		}
 	}
 
 	left.advance();
@@ -165,7 +173,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimiti
 			sides[shortside] = std::make_unique<Slope>(p0.x, p1.x, p1.y - p0.y);
 			for (auto y = y0; y < y1; ++y)
 			{
-				Scanline(y, *sides[0], *sides[1]);
+				Scanline(y, *sides[0], *sides[1], drawPrimitive);
 			}
 		}
 
@@ -176,7 +184,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimiti
 			sides[shortside] = std::make_unique<Slope>(p1.x, p2.x, p2.y - p1.y);
 			for (auto y = y1; y < y2; ++y)
 			{
-				Scanline(y, *sides[0], *sides[1]);
+				Scanline(y, *sides[0], *sides[1], drawPrimitive);
 			}
 		}
 	}
