@@ -1,6 +1,6 @@
 #include "model.h"
 
-void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
+void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -15,109 +15,6 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	{
 		meshes[i].Draw(shader, drawPrimitive);
 	}
-}
-
-void Model::DrawSoftwareRasterized(
-	DrawPrimitive drawPrimitive,
-	const cgl::mat4& view,
-	const cgl::mat4& projection,
-	const cgl::mat4& viewport, 
-	unsigned int screenWidth, 
-	unsigned int screenHeight, 
-	bool isCulling, 
-	bool isCullingClockWise) const
-{
-	// ==================
-	// Build Model Matrix
-	// ==================
-
-	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(transform.position, 1.0f));
-	// model = model * cgl::mat4::rotateX(transform.rotation.x);
-	// model = model * cgl::mat4::rotateY(transform.rotation.y);
-	// model = model * cgl::mat4::rotateZ(transform.rotation.z);
-	cgl::mat4 scale = cgl::mat4::scale(transform.scale);
-
-	cgl::mat4 model = translate * scale;
-
-	// ======================
-	// Build MVP Matrix
-	// ======================
-
-	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
-	
-	for (unsigned int i = 0; i < meshes.size(); ++i)
-	{
-		std::vector<cgl::vec4> cglVertices;
-		cglVertices.reserve(meshes[i].vertices.size());
-
-		for (unsigned int j = 0; j < meshes[i].vertices.size(); j+=3)
-		{
-			// ===============================
-			// Go To Homogeneus Clipping Space
-			// ===============================
-			
-			// Vertex Transforms
-			cgl::vec4 v0 = mvp * cgl::vec4(meshes[i].vertices[j+0].Position, 1.0f);
-			cgl::vec4 v1 = mvp * cgl::vec4(meshes[i].vertices[j+1].Position, 1.0f);
-			cgl::vec4 v2 = mvp * cgl::vec4(meshes[i].vertices[j+2].Position, 1.0f);
-
-			// Clipping
-			if (!v0.is_in_range(v0.w) || !v1.is_in_range(v1.w) || !v2.is_in_range(v2.w))
-				continue;
-
-			// Culling
-			if (isCulling)
-			{
-				cgl::vec3 u = (v1 - v0).to_vec3();
-				cgl::vec3 v = (v2 - v0).to_vec3();
-				float sign = (u.x * v.y) - (v.x * u.y);
-				if (isCullingClockWise && sign > 0.0f)
-					continue;
-				if (!isCullingClockWise && sign < 0.0f)
-					continue;
-			}
-
-			// ===================================
-			// Go To Normalized Device Coordinates
-			// ===================================
-			
-			// Perspective division
-			v0 /= v0.w;
-			v1 /= v1.w;
-			v2 /= v2.w;
-
-			// =======================
-			// Go To Pixel Coordinates
-			// =======================
-
-			v0 = viewport * v0;
-			v1 = viewport * v1;
-			v2 = viewport * v2;
-
-			cglVertices.push_back(v0);
-			cglVertices.push_back(v1);
-			cglVertices.push_back(v2);
-		}
-		Mesh::Rasterize(cglVertices);
-	}
-	Texture texCGL(&Model::GetFrameBuffer()->data()->r, screenWidth, screenHeight);
-	m_MapToViewport.OnRenderTexture(texCGL);
-}
-
-void Model::SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
-{
-	m_FrameBuffer.resize(screenWidth, screenHeight);
-	m_ZBuffer.resize(screenWidth, screenHeight);
-}
-
-void Model::ClearFrameBuffer()
-{
-	m_FrameBuffer.clear(m_ClearColor);
-}
-
-void Model::ClearZBuffer()
-{
-	m_ZBuffer.clear(std::numeric_limits<float>::max());
 }
 
 cgl::mat4 Model::GetModelMatrix() const

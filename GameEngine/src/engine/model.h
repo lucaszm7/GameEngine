@@ -15,25 +15,6 @@
 #include "mat.hpp"
 #include "ViewPort.hpp"
 
-struct Pixel
-{
-	union
-	{
-		struct
-		{
-			unsigned char r, g, b;
-		};
-		unsigned char p[3];
-	};
-};
-
-inline std::ostream& operator << (std::ostream& out, const Pixel& p)
-{
-	return out << (unsigned int)p.r << ',' 
-			   << (unsigned int)p.g << ',' 
-		       << (unsigned int)p.b;
-}
-
 struct Model
 {
 public:
@@ -46,7 +27,7 @@ public:
 			LoadClassicModel();
 	}
 
-	void DrawOpenGL(Shader& shader, 
+	void Draw(Shader& shader, 
 		DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
 	
 	cgl::mat4 GetModelMatrix() const;
@@ -57,30 +38,9 @@ public:
 	std::vector<Texture> textures_loaded;
 	Transform transform;
 
-	void DrawSoftwareRasterized(
-		DrawPrimitive drawPrimitive,
-		const cgl::mat4& view,
-		const cgl::mat4& projection,
-		const cgl::mat4& viewport, 
-		unsigned int screenWidth, 
-		unsigned int screenHeight, 
-		bool isCulling = false, 
-		bool isCullingClockWise = false) const;
-
-	static void SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
-	static void ClearFrameBuffer();
-	static void SetClearColor(const Pixel& p) { m_ClearColor = p; };
-	static void ClearZBuffer();
-	static cgl::mat<Pixel>* GetFrameBuffer() { return &m_FrameBuffer; };
-
 private:
 	std::string m_Path;
 	inline static std::unordered_map<std::string, int> m_NamesMap;
-
-	ViewPort m_MapToViewport;
-	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
-	inline static cgl::mat<Pixel> m_FrameBuffer;
-	inline static cgl::mat<float> m_ZBuffer;
 
 	void LoadClassicModel();
 	void LoadCustomModel(TriangleOrientation triOrientation);
