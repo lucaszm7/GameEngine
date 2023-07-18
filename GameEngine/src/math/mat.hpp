@@ -48,9 +48,9 @@ namespace cgl
 		size_t collum_size() const { return m_collumsSize; };
 		size_t size() const { return m_rowsSize * m_collumsSize; };
 
-		_Type get(unsigned int row, unsigned int collum)
+		void set(unsigned int column, unsigned int row, const _Type& p)
 		{
-			return matrix(row * m_rowsSize + collum);
+			matrix[column * m_rowsSize + row] = p;
 		}
 
 		void clear(const _Type& def)
@@ -60,8 +60,5 @@ namespace cgl
 				matrix[i] = def;
 			}
 		}
-
-		std::vector<_Type>  operator [] (unsigned int i) const { return matrix[i]; };
-		std::vector<_Type>& operator [] (unsigned int i)       { return matrix[i]; };
 	};
 }
