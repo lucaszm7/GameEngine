@@ -31,12 +31,9 @@ namespace cgl
 
 		vec2() = default;
 		vec2(float v);
-
 		vec2(const vec2& v) = default;
-
 		vec2(float e0, float e1) : e{ e0, e1 } {}
 		vec2(std::initializer_list<float> args);
-
 		vec2(const std::array<float, 2>& v) : e(v) {};
 
 		inline float operator [] (int i) const { return e[i]; }

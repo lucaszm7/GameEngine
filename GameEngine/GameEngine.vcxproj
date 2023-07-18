@@ -193,6 +193,7 @@
     <ClCompile Include="src\math\mat4.cpp" />
     <ClCompile Include="src\math\vec3.cpp" />
     <ClCompile Include="src\math\vec4.cpp" />
+    <ClCompile Include="src\rasterizer\rasterizer.cpp" />
     <ClCompile Include="src\scenes\Close2GL\SceneClose2GL.cpp" />
     <ClCompile Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.cpp" />
     <ClCompile Include="src\core\IndexBuffer.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="src\math\math_utils.h" />
     <ClInclude Include="src\math\vec3.h" />
     <ClInclude Include="src\math\vec4.h" />
+    <ClInclude Include="src\rasterizer\rasterizer.hpp" />
     <ClInclude Include="src\scenes\Close2GL\SceneClose2GL.h" />
     <ClInclude Include="src\engine\scene.h" />
     <ClInclude Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.h" />
