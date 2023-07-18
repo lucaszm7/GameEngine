@@ -72,8 +72,8 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         
         std::array<unsigned int, 2> fragmentSubroutineIndex;
-        fragmentSubroutineIndex[1] = (isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex);
-        fragmentSubroutineIndex[0] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
+        fragmentSubroutineIndex[0] = (isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex);
+        fragmentSubroutineIndex[1] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
         OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
         
         if (isGouraudShading)
@@ -91,28 +91,24 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
         for (int i = 0; i < objects.size(); ++i)
         {
-            objects[i]->DrawOpenGL(OpenGLShader, drawPrimitive);
+            objects[i]->Draw(OpenGLShader, drawPrimitive);
         }
     }
     else
     {
-        Model::SetViewPort(*screenWidth, *screenHeight);
+        Rasterizer::SetViewPort(*screenWidth, *screenHeight);
         Pixel clearColor{ (unsigned char)(imguiClearColor[0] * 255), (unsigned char)(imguiClearColor[1] * 255), (unsigned char)(imguiClearColor[2] * 255) };
-        Model::SetClearColor(clearColor);
-        Model::ClearFrameBuffer();
-        Model::ClearZBuffer();
+        Rasterizer::SetClearColor(clearColor);
+        Rasterizer::ClearFrameBuffer();
+        Rasterizer::ClearZBuffer();
 
         cgl::vec3 lookAtLocation = !objects.empty() ? objects[selectedLookAt]->transform.position : cgl::vec3();
         isLookAt ? cglCamera.SetLookAt(lookAtLocation) : cglCamera.UnSetLookAt();
-        view = cglCamera.GetViewMatrix();
-        projection = cglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
-        viewport = cgl::mat4::viewport(*screenWidth, *screenHeight);
 
-        for (int i = 0; i < objects.size(); ++i)
+        for (const auto& object : objects)
         {
-            objects[i]->DrawSoftwareRasterized(drawPrimitive, 
-                view, projection, viewport, 
-                *screenWidth, *screenHeight, isEnableCullFace, isCullingClockWise);
+            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, rasterizerViewPort, *screenWidth, *screenHeight,
+                drawPrimitive, isEnableCullFace, isCullingClockWise);
         }
     }
 

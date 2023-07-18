@@ -9,6 +9,8 @@
 #include "model.h"
 #include "Timer.hpp"
 
+#include "rasterizer/rasterizer.hpp"
+
 #include <mat4.h>
 #include <vec4.h>
 
@@ -40,6 +42,8 @@ private:
 
 	std::vector<std::unique_ptr<Model>> objects;
 	std::vector<std::string> lookAtObjects;
+
+	ViewPort rasterizerViewPort;
 
 	int selectedObjectToAdd = 0;
 	int selectedTriOrientation = 1;
