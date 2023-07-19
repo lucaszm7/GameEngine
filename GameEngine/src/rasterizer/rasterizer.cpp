@@ -1,5 +1,9 @@
 #include "rasterizer.hpp"
 
+static Pixel to_pixel(const glm::vec3& c)
+{
+	return { (unsigned char)(c.x * 255), (unsigned char)(c.y * 255), (unsigned char)(c.z * 255) };
+}
 
 void Rasterizer::DrawSoftwareRasterized(
 	const Model& model, const cgl::Camera& camera, const ViewPort& drawTextureOn,
@@ -35,10 +39,17 @@ void Rasterizer::DrawSoftwareRasterized(
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
 	{
 		std::vector<cgl::vec4> cglVertices;
+		std::vector<Pixel> cglColors;
+
 		cglVertices.reserve(model.meshes[i].vertices.size());
 
 		for (unsigned int j = 0; j < model.meshes[i].vertices.size(); j += 3)
 		{
+			// Get vertices colors
+			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 0].Color));
+			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 1].Color));
+			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 2].Color));
+
 			// ===============================
 			// Go To Homogeneus Clipping Space
 			// ===============================
@@ -85,7 +96,7 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglVertices.push_back(v1);
 			cglVertices.push_back(v2);
 		}
-		Rasterize(cglVertices, drawPrimitive);
+		Rasterize(cglVertices, cglColors, drawPrimitive);
 	}
 	Texture texCGL(&m_FrameBuffer.data()->r, screenWidth, screenHeight);
 	drawTextureOn.OnRenderTexture(texCGL);
@@ -93,8 +104,8 @@ void Rasterizer::DrawSoftwareRasterized(
 
 void Rasterizer::SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
 {
-	m_FrameBuffer.resize(screenWidth, screenHeight);
-	m_ZBuffer.resize(screenWidth, screenHeight);
+	m_FrameBuffer.resize(screenHeight, screenWidth);
+	m_ZBuffer.resize(screenHeight, screenWidth);
 }
 
 void Rasterizer::ClearFrameBuffer()
@@ -107,7 +118,7 @@ void Rasterizer::ClearZBuffer()
 	m_ZBuffer.clear(std::numeric_limits<float>::max());
 }
 
-void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimitive drawPrimitive)
+void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, Pixel color, DrawPrimitive drawPrimitive)
 {
 	auto x_left  = (int)left.get();
 	auto x_right = (int)right.get();
@@ -118,14 +129,14 @@ void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimiti
 
 	if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
-		m_FrameBuffer.set(m_FrameBuffer.collum_size() - y, x_left, { 255, 0, 0 });
-		m_FrameBuffer.set(m_FrameBuffer.collum_size() - y, x_right, { 255, 0, 0 });
+		m_FrameBuffer.set(m_FrameBuffer.row_size() - 1 - y, x_left, color);
+		m_FrameBuffer.set(m_FrameBuffer.row_size() - 1 - y, x_right, color);
 	}
 	else
 	{
 		for (int x = x_left; x < x_right; ++x)
 		{
-			m_FrameBuffer.set(m_FrameBuffer.collum_size() - y, x, { 255, 0, 0 });
+			m_FrameBuffer.set(m_FrameBuffer.row_size() - 1 - y, x, color);
 		}
 	}
 
@@ -133,9 +144,8 @@ void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimiti
 	right.advance();
 }
 
-void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimitive drawPrimitive)
+void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<Pixel>& pixelColors, DrawPrimitive drawPrimitive)
 {
-
 	for (unsigned int i = 0; i < pixelCoordinates.size(); i += 3)
 	{
 		auto& p0 = pixelCoordinates[i + 0];
@@ -177,7 +187,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimiti
 			sides[shortside] = std::make_unique<Slope>(p0.x, p1.x, p1.y - p0.y);
 			for (auto y = y0; y < y1; ++y)
 			{
-				Scanline(y, *sides[0], *sides[1], drawPrimitive);
+				Scanline(y, *sides[0], *sides[1], pixelColors[i], drawPrimitive);
 			}
 		}
 
@@ -188,7 +198,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimiti
 			sides[shortside] = std::make_unique<Slope>(p1.x, p2.x, p2.y - p1.y);
 			for (auto y = y1; y < y2; ++y)
 			{
-				Scanline(y, *sides[0], *sides[1], drawPrimitive);
+				Scanline(y, *sides[0], *sides[1], pixelColors[i], drawPrimitive);
 			}
 		}
 	}
