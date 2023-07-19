@@ -9,16 +9,17 @@ namespace cgl
 	{
 	private:
 		_Type* matrix;
-		unsigned int m_rowsSize = 0;
-		unsigned int m_collumsSize = 0;
+		unsigned int m_height = 0;
+		unsigned int m_width = 0;
 
 	public:
 		mat() = default;
 
-		mat(unsigned int _rows, unsigned int _collums)
-			:m_rowsSize(_rows), m_collumsSize(_collums)
+		// Height x Widht
+		mat(unsigned int height, unsigned int width)
+			:m_height(height), m_width(width)
 		{
-			matrix = new _Type[m_rowsSize * m_collumsSize];
+			matrix = new _Type[m_height * m_width];
 		}
 
 		~mat()
@@ -26,17 +27,21 @@ namespace cgl
 			delete[] matrix;
 		}
 
-		void resize(unsigned int _rows, unsigned int _collums)
+		// Height x Widht
+		void resize(unsigned int height, unsigned int width)
 		{
-			if (_rows == m_rowsSize && _collums == m_collumsSize)
+			if (height == m_height && width == m_width)
 				return;
+#ifdef _DEBUG
+			std::cout << "resizing matrix of " << m_height << " x " << m_width << " to " << height << " x " << width << "\n";
+#endif
 
-			m_rowsSize = _rows;
-			m_collumsSize = _collums;
+			m_height = height;
+			m_width = width;
 
 			delete[] matrix;
 
-			matrix = new _Type[m_rowsSize * m_collumsSize];
+			matrix = new _Type[m_height * m_width];
 		};
 
 		_Type* data()
@@ -44,13 +49,21 @@ namespace cgl
 			return matrix;
 		}
 
-		size_t row_size() const { return m_rowsSize; };
-		size_t collum_size() const { return m_collumsSize; };
-		size_t size() const { return m_rowsSize * m_collumsSize; };
+		size_t row_size() const { return m_height; };
+		size_t collum_size() const { return m_width; };
+		size_t size() const { return m_height * m_width; };
 
-		void set(unsigned int column, unsigned int row, const _Type& p)
+		// y - x
+		void set(unsigned int n_height, unsigned int n_width, const _Type& p)
 		{
-			matrix[column * m_rowsSize + row] = p;
+#ifdef _DEBUG
+			if ((n_height * m_width + n_width) >= size())
+			{
+				std::cout << "Accesing data out of range in matrix...\n";
+				__cpp_static_assert;
+			}
+#endif
+			matrix[n_height * m_width + n_width] = p;
 		}
 
 		void clear(const _Type& def)
