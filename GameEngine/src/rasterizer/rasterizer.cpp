@@ -118,14 +118,14 @@ void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimiti
 
 	if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
-		m_FrameBuffer.set(y, x_left, { 255, 0, 0 });
-		m_FrameBuffer.set(y, x_right, { 255, 0, 0 });
+		m_FrameBuffer.set(m_FrameBuffer.collum_size() - y, x_left, { 255, 0, 0 });
+		m_FrameBuffer.set(m_FrameBuffer.collum_size() - y, x_right, { 255, 0, 0 });
 	}
 	else
 	{
 		for (int x = x_left; x < x_right; ++x)
 		{
-			m_FrameBuffer.set(y, x, { 255, 0, 0 });
+			m_FrameBuffer.set(m_FrameBuffer.collum_size() - y, x, { 255, 0, 0 });
 		}
 	}
 
