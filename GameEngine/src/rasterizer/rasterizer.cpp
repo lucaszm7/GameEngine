@@ -112,6 +112,10 @@ void Rasterizer::Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimiti
 	auto x_left  = (int)left.get();
 	auto x_right = (int)right.get();
 
+	// TODO: why????
+	if (x_right < x_left)
+		std::swap(x_right, x_left);
+
 	if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
 		m_FrameBuffer.set(y, x_left, { 255, 0, 0 });
