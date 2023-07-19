@@ -112,7 +112,7 @@ void Shader::Bind() const
     glUseProgram(m_RendererID);
 }
 
-void Shader::Unbind() const
+void Shader::Unbind()
 {
     glUseProgram(0);
 }
@@ -167,12 +167,17 @@ void Shader::SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4)
 
 unsigned int Shader::GetSubroutineIndex(ShaderStage shaderStage, const std::string& subroutineIndexName) const
 {
-    return glGetSubroutineIndex(m_RendererID, (GLenum)shaderStage, subroutineIndexName.c_str());
+    auto r = glGetSubroutineIndex(m_RendererID, (GLenum)shaderStage, subroutineIndexName.c_str());
+#ifdef _DEBUG
+    if (r == GL_INVALID_INDEX)
+        std::cout << "INVALID SUBROUTINE INDEX\n";
+#endif
+    return r;
 }
 
-void Shader::SetUniformSubroutine(ShaderStage shaderStage, unsigned int index) const
+void Shader::SetUniformSubroutine(ShaderStage shaderStage, size_t count, unsigned int const* index) const
 {
-    glUniformSubroutinesuiv((GLenum)shaderStage, 1, &index);
+    glUniformSubroutinesuiv((GLenum)shaderStage, count, index);
 }
 
 void Shader::SetUniformMaterial(const Material& mat)

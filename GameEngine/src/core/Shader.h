@@ -35,7 +35,7 @@ public:
 	// We call bind here just for consistency, but in behind its actully:
 	// gl_useProgram();
 	void Bind() const;
-	void Unbind() const;
+	static void Unbind();
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 	void SetUniform3f(const std::string& name, float v0, float v1, float v2);
 	void SetUniform3f(const std::string& name, const glm::vec3& v);
@@ -46,7 +46,7 @@ public:
 	void SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4);
 	
 	unsigned int GetSubroutineIndex(ShaderStage shaderStage, const std::string& subroutineIndexName) const;
-	void SetUniformSubroutine(ShaderStage shaderStage, unsigned int index) const;
+	void SetUniformSubroutine(ShaderStage shaderStage, size_t count, unsigned int const* index) const;
 
 	void SetUniformMaterial(const Material& mat);
 	void SetUniformLight(const DirectionalLight& light, ShaderStage shaderStage = ShaderStage::FRAGMENT);

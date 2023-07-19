@@ -31,7 +31,24 @@ Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter
 		std::cout << "ERROR\nFAILED TO LOAD TEXTURE\n";
 		__cpp_static_assert;
 	}
+}
 
+Texture::Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam)
+	:type(Texture::Type::RAW), m_Width(width), m_Height(height)
+{
+	if (data)
+	{
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		setTextureParam(texParam);
+	}
+	else
+	{
+		std::cout << "ERROR\nFAILED TO LOAD TEXTURE\n";
+		__cpp_static_assert;
+	}
 }
 
 void Texture::setTextureParam(Texture::Parameter texParam) const

@@ -13,6 +13,7 @@
 #include <GLM/glm.hpp>
 
 #include "math_utils.h"
+#include "vec2.h"
 #include "vec3.h"
 
 using std::sqrt;
@@ -48,6 +49,7 @@ namespace cgl
 		vec4& operator=(const vec4& v) = default;
 
 		vec3 to_vec3() const;
+		vec2 to_vec2() const;
 
 		inline float operator [] (int i) const { return e[i]; }
 		inline float& operator [] (int i) { return e[i]; }

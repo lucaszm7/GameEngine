@@ -1,6 +1,6 @@
 #include "model.h"
 
-void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
+void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -9,111 +9,12 @@ void Model::DrawOpenGL(Shader& shader, DrawPrimitive drawPrimitive) const
 	model = glm::rotate(model, transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	model = glm::scale(model, transform.scale);
 	shader.SetUniformMatrix4fv("model", model);
+	shader.SetUniform3f("uColor", color);
 
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
 		meshes[i].Draw(shader, drawPrimitive);
 	}
-}
-
-void Model::DrawCGL(Shader& shader, 
-	DrawPrimitive drawPrimitive, 
-	const cgl::mat4& view, 
-	const cgl::mat4& projection, 
-	const cgl::mat4& viewport,
-	bool isCulling, 
-	bool isCullingClockWise) const
-{
-	// ==================
-	// Build Model Matrix
-	// ==================
-
-	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(transform.position, 1.0f));
-	// model = model * cgl::mat4::rotateX(transform.rotation.x);
-	// model = model * cgl::mat4::rotateY(transform.rotation.y);
-	// model = model * cgl::mat4::rotateZ(transform.rotation.z);
-	cgl::mat4 scale = cgl::mat4::scale(transform.scale);
-
-	cgl::mat4 model = translate * scale;
-
-	// ======================
-	// Build MVP Matrix
-	// ======================
-
-	cgl::mat4 mvp = projection.transpose() * view.transpose() * model;
-	
-	for (unsigned int i = 0; i < meshes.size(); ++i)
-	{
-		std::vector<cgl::vec4> cglVertices;
-		cglVertices.reserve(meshes[i].vertices.size());
-
-		for (unsigned int j = 0; j < meshes[i].vertices.size(); j+=3)
-		{
-			// ===============================
-			// Go To Homogeneus Clipping Space
-			// ===============================
-			
-			// Vertex Transforms
-			cgl::vec4 v0 = mvp * cgl::vec4(meshes[i].vertices[j+0].Position, 1.0f);
-			cgl::vec4 v1 = mvp * cgl::vec4(meshes[i].vertices[j+1].Position, 1.0f);
-			cgl::vec4 v2 = mvp * cgl::vec4(meshes[i].vertices[j+2].Position, 1.0f);
-
-			// Clipping
-			if (!v0.is_in_range(v0.w) || !v1.is_in_range(v1.w) || !v2.is_in_range(v2.w))
-				continue;
-
-			// Culling
-			if (isCulling)
-			{
-				cgl::vec3 u = (v1 - v0).to_vec3();
-				cgl::vec3 v = (v2 - v0).to_vec3();
-				float sign = (u.x * v.y) - (v.x * u.y);
-				if (isCullingClockWise && sign > 0.0f)
-					continue;
-				if (!isCullingClockWise && sign < 0.0f)
-					continue;
-			}
-
-			// ===================================
-			// Go To Normalized Device Coordinates
-			// ===================================
-			
-			// Perspective division
-			v0 /= v0.w;
-			v1 /= v1.w;
-			v2 /= v2.w;
-
-			// =======================
-			// Go To Pixel Coordinates
-			// =======================
-
-			v0 = viewport * v0;
-			v1 = viewport * v1;
-			v2 = viewport * v2;
-
-			cglVertices.push_back(v0);
-			cglVertices.push_back(v1);
-			cglVertices.push_back(v2);
-		}
-
-		Mesh::DrawRaw(shader, cglVertices, drawPrimitive);
-	}
-}
-
-void Model::ViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
-{
-	m_FrameBuffer.resize(screenWidth, screenHeight);
-	m_ZBuffer.resize(screenWidth, screenHeight);
-}
-
-void Model::ClearFrameBuffer()
-{
-	m_FrameBuffer.clear(glm::vec3(0.0f));
-}
-
-void Model::ClearZBuffer()
-{
-	m_ZBuffer.clear(std::numeric_limits<unsigned int>::max());
 }
 
 cgl::mat4 Model::GetModelMatrix() const
@@ -138,11 +39,11 @@ void Model::OnImGui() const
 	}
 }
 
-void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrientation)
+void Model::LoadCustomModel(TriangleOrientation triOrientation)
 {
-	std::ifstream stream(path);
+	std::ifstream stream(m_Path);
 	if (!stream)
-		throw new std::exception(std::string("Could not open file: " + path).c_str());
+		throw new std::exception(std::string("Could not open file: " + m_Path).c_str());
 
 	std::stringstream ss;
 	std::string line;
@@ -318,23 +219,23 @@ void Model::LoadCustomModel(const std::string& path, TriangleOrientation triOrie
 		indices.push_back(counter++);
 	}
 
-	Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
-	textures.push_back(tex);
+	/*Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
+	textures.push_back(tex);*/
 
 	meshes.emplace_back(vertices, indices, textures);
 }
 
-void Model::LoadClassicModel(const std::string& path)
+void Model::LoadClassicModel()
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(m_Path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	std::string defaultName = path.substr(path.find_last_of('/') + 1, path.find_last_of('.') - path.find_last_of('/'));
+	std::string defaultName = m_Path.substr(m_Path.find_last_of('/') + 1, m_Path.find_last_of('.') - m_Path.find_last_of('/') - 1);
 	int id = 0;
 	name = defaultName;
 	while (m_NamesMap.contains(name))
@@ -426,7 +327,7 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		}
 		if (!skip)
 		{
-			Texture texture(name + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
+			Texture texture(m_Path.substr(0, m_Path.find_last_of('/')) + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}

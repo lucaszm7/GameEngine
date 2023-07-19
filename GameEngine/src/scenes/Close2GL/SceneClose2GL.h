@@ -6,9 +6,10 @@
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
-#include "line.h"
 #include "model.h"
 #include "Timer.hpp"
+
+#include "rasterizer/rasterizer.hpp"
 
 #include <mat4.h>
 #include <vec4.h>
@@ -23,10 +24,8 @@ public:
 	void OnImGuiRender() override;
 	BaseCam* GetCamera() override { return isOpenGLRendered ? (BaseCam*)&oglCamera : (BaseCam*)&cglCamera; }
 
-
 private:
 	Shader OpenGLShader;
-	Shader Close2GLShader;
 
 	cgl::Camera cglCamera;
 	ogl::Camera oglCamera;
@@ -42,9 +41,9 @@ private:
 	SpotLight spotlight;
 
 	std::vector<std::unique_ptr<Model>> objects;
-	std::vector<glm::vec3> colors;
-
 	std::vector<std::string> lookAtObjects;
+
+	ViewPort rasterizerViewPort;
 
 	int selectedObjectToAdd = 0;
 	int selectedTriOrientation = 1;
@@ -59,15 +58,22 @@ private:
 	bool isCullingClockWise = false;
 	bool isLoadingClockWise = false;
 
+	bool showTexture = false;
+
 	unsigned int VertexShadingGouraudIndex;
 	unsigned int VertexShadingPhongIndex;
 
 	unsigned int FragmentShadingGouraudIndex;
 	unsigned int FragmentShadingPhongIndex;
 
+	unsigned int FragmentColoringSolidIndex;
+	unsigned int FragmentColoringTextureIndex;
+
 	bool isGouraudShading = false;
 
 	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
+
+	float imguiClearColor[3] = { 1.0f,1.0f,1.0f };
 
 	bool isLookAt = false;
 	unsigned int selectedLookAt = 0;

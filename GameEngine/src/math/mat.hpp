@@ -8,7 +8,7 @@ namespace cgl
 	class mat
 	{
 	private:
-		std::vector<std::vector<_Type>> matrix;
+		_Type* matrix;
 		unsigned int m_rowsSize = 0;
 		unsigned int m_collumsSize = 0;
 
@@ -18,11 +18,12 @@ namespace cgl
 		mat(unsigned int _rows, unsigned int _collums)
 			:m_rowsSize(_rows), m_collumsSize(_collums)
 		{
-			matrix.resize(m_rowsSize);
-			for (auto& row : matrix)
-			{
-				row.resize(m_collumsSize);
-			}
+			matrix = new _Type[m_rowsSize * m_collumsSize];
+		}
+
+		~mat()
+		{
+			delete[] matrix;
 		}
 
 		void resize(unsigned int _rows, unsigned int _collums)
@@ -33,25 +34,31 @@ namespace cgl
 			m_rowsSize = _rows;
 			m_collumsSize = _collums;
 
-			matrix.resize(m_rowsSize);
-			for (auto& row : matrix)
-			{
-				row.resize(m_collumsSize);
-			}
+			delete[] matrix;
+
+			matrix = new _Type[m_rowsSize * m_collumsSize];
 		};
 
-		size_t RowSize() const { return m_rowsSize; };
-		size_t CollumSize() const { return m_collumsSize; };
-		size_t size() const { return m_rowsSize * m_collumsSize; };
-		void clear(const _Type& def)
+		_Type* data()
 		{
-			for (auto& rows : matrix)
-			{
-				std::ranges::fill(rows, def);
-			}
+			return matrix;
 		}
 
-		std::vector<_Type>  operator [] (unsigned int i) const { return matrix[i]; };
-		std::vector<_Type>& operator [] (unsigned int i)       { return matrix[i]; };
+		size_t row_size() const { return m_rowsSize; };
+		size_t collum_size() const { return m_collumsSize; };
+		size_t size() const { return m_rowsSize * m_collumsSize; };
+
+		void set(unsigned int column, unsigned int row, const _Type& p)
+		{
+			matrix[column * m_rowsSize + row] = p;
+		}
+
+		void clear(const _Type& def)
+		{
+			for (unsigned int i = 0; i < size(); ++i)
+			{
+				matrix[i] = def;
+			}
+		}
 	};
 }

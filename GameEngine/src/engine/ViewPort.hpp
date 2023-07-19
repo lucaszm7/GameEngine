@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gl/GL.h>
 #include <IMGUI/imgui.h>
 #include <memory>
@@ -36,7 +38,7 @@ public:
         };
 
         quadVAO.Bind();
-        quadVBO = std::make_unique<VertexBuffer>(quadVertices, sizeof(float) * 4, GL_STATIC_DRAW);
+        quadVBO = std::make_unique<VertexBuffer>(quadVertices, sizeof(float) * 24, GL_STATIC_DRAW);
         quadVBL.Push<float>(2);
         quadVBL.Push<float>(2);
         quadVAO.AddBuffer(*quadVBO, quadVBL);
@@ -44,6 +46,41 @@ public:
         
         _Init();
 	}
+
+    ViewPort()
+    {
+        viewportShader = std::make_unique<Shader>("resources/shaders/viewport_vertex.shader", "resources/shaders/viewport_fragment.shader");
+
+        float quadVertices[] = {
+            // positions   // texCoords
+            -1.0f,  1.0f,  0.0f, 1.0f,
+            -1.0f, -1.0f,  0.0f, 0.0f,
+             1.0f, -1.0f,  1.0f, 0.0f,
+
+            -1.0f,  1.0f,  0.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 0.0f,
+             1.0f,  1.0f,  1.0f, 1.0f
+        };
+
+        quadVAO.Bind();
+        quadVBO = std::make_unique<VertexBuffer>(quadVertices, sizeof(float) * 24, GL_STATIC_DRAW);
+        quadVBL.Push<float>(2);
+        quadVBL.Push<float>(2);
+        quadVAO.AddBuffer(*quadVBO, quadVBL);
+        quadVAO.Unbind();
+    }
+
+    void OnRenderTexture(const Texture& tex) const
+    {
+        glDisable(GL_DEPTH_TEST);
+        viewportShader->Bind();
+        quadVAO.Bind();
+        tex.Bind();
+        viewportShader->SetUniform1i("screenTexture", 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        quadVAO.Unbind();
+    }
 
     // Render the frame buffer inside a texture
 	void OnRender()
@@ -102,7 +139,7 @@ private:
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glGenTextures(1, &textureColorbuffer);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, *pScreenWidth, *pScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, *pScreenWidth, *pScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
