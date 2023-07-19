@@ -26,8 +26,9 @@ struct Spotlight
 };
 
 layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aNormal;
-layout(location = 2) in vec2 aTexCoord;
+layout(location = 1) in vec3 aColor;
+layout(location = 2) in vec3 aNormal;
+layout(location = 3) in vec2 aTexCoord;
 
 out vec3 outNormal;
 out vec3 outFragPos;
@@ -44,8 +45,6 @@ uniform vec3 viewPos;
 
 uniform DirectionalLight vertexDirectionalLight;
 uniform Spotlight vertexSpotlight;
-
-uniform vec3 uColor;
 
 subroutine vec3 Shading(vec3 pos, vec3 normal, vec3 viewDir);
 subroutine uniform Shading shadingSelected;
@@ -74,7 +73,7 @@ void main()
 subroutine (Shading) 
 vec3 Phong(vec3 pos, vec3 normal, vec3 viewDir)
 {
-    return uColor;
+    return aColor;
 }
 
 subroutine (Shading) 
@@ -108,9 +107,9 @@ vec3 GouraudDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
 
 	// combine results
-    vec3 ambient = light.ambient * uColor;
-    vec3 diffuse = light.diffuse * diff * uColor;
-    vec3 specular = light.specular * spec * uColor;
+    vec3 ambient = light.ambient * aColor;
+    vec3 diffuse = light.diffuse * diff * aColor;
+    vec3 specular = light.specular * spec * aColor;
 
     return (ambient + diffuse + specular);
 }
@@ -118,17 +117,17 @@ vec3 GouraudDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 vec3 GouraudSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir)
 {
 	// Ambient light
-    vec3 ambient = light.ambient * uColor;
+    vec3 ambient = light.ambient * aColor;
 
 	// Diffuse light
     vec3 lightDir = normalize(light.position - FragPos);
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * uColor;
+    vec3 diffuse = light.diffuse * diff * aColor;
 
 	// Specular light
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64);
-    vec3 specular = light.specular * spec * uColor;
+    vec3 specular = light.specular * spec * aColor;
 
 	// Point light attenuation
     float distance = length(light.position - FragPos);

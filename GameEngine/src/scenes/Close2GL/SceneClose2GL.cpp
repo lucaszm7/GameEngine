@@ -39,7 +39,7 @@ SceneClose2GL::SceneClose2GL()
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, oglCamera.Position, oglCamera.Right)
 {
-    objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", glm::vec3{ 1.0f,1.0f,0.0f }));
+    objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
     DisableCullFace();
 
     VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
@@ -227,7 +227,7 @@ void SceneClose2GL::OnImGuiRender()
         if (ImGui::TreeNode(std::string((*it)->name).c_str()))
         {
             (*it)->OnImGui();
-            ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &(*it)->color[0]);
+            // ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &(*it)->color[0]);
             ImGui::TreePop();
         }
         else
@@ -253,18 +253,16 @@ void SceneClose2GL::AddObject(std::string_view label)
     else
         tri = TriangleOrientation::CounterClockWise;
 
-    glm::vec3 color(cgl::random_double(0, 1), cgl::random_double(0, 1), cgl::random_double(0, 1));
-
     if (label == "COW")
-        objects.emplace_back(std::make_unique<Model>("resources/models/cow_up_no_text.in", color, tri));
+        objects.emplace_back(std::make_unique<Model>("resources/models/cow_up_no_text.in", tri));
     else if (label == "CUBE")
-        objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", color, tri));
+        objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in", tri));
     else if (label == "BACKPACK")
-        objects.emplace_back(std::make_unique<Model>("resources/models/backpack/backpack.obj", color, tri));
+        objects.emplace_back(std::make_unique<Model>("resources/models/backpack/backpack.obj", tri));
     else if (label == "TEAPOT")
-        objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", color, tri));
+        objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", tri));
     else if (label == "DRAGON")
-        objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", color, tri));
+        objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", tri));
 
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());

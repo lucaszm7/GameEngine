@@ -25,6 +25,7 @@ void Mesh::setupBuffers()
 	VBO->Bind();
 	EBO->Bind();
 	VBL.Push<float>(3); // positions
+	VBL.Push<float>(3); // colors
 	VBL.Push<float>(3); // normals
 	VBL.Push<float>(2); // texCoord
 	VAO->AddBuffer(*VBO, VBL);

@@ -1,5 +1,10 @@
 #include "model.h"
 
+static glm::vec3 _random_normalized_color()
+{
+	return { rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0) };
+}
+
 void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
@@ -9,7 +14,6 @@ void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 	model = glm::rotate(model, transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	model = glm::scale(model, transform.scale);
 	shader.SetUniformMatrix4fv("model", model);
-	shader.SetUniform3f("uColor", color);
 
 	for (unsigned int i = 0; i < meshes.size(); ++i)
 	{
@@ -143,6 +147,9 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		Vertex v1;
 		Vertex v2;
 
+		glm::vec3 color = _random_normalized_color();
+		v0.Color = v1.Color = v2.Color = color;
+
 		std::getline(stream, line);
 		ss.str(std::string());
 		ss.clear();
@@ -267,10 +274,22 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+
+	unsigned int triCounter = 0;
+	glm::vec3 triColor = { 1.0f,1.0f,1.0f };
 	// Vertex
 	for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 	{
 		Vertex vertex;
+
+		if (triCounter == 0)
+			triColor = _random_normalized_color();
+		triCounter++;
+		if (triCounter > 3)
+			triCounter = 0;
+
+		vertex.Color = triColor;
+
 		vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 
 		if (mesh->HasNormals())
