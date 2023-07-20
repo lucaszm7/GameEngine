@@ -43,7 +43,7 @@ struct Slope
 	// For this Y where is the X?
 	Slope(float begin, float end, int n_steps)
 	{
-		float inv_steps = 1.0f / n_steps;
+		float inv_steps = 1.0f / (float)n_steps;
 		step = (end - begin) * inv_steps;
 		curr = begin;
 	}
@@ -56,7 +56,9 @@ class Rasterizer
 {
 public:
 	static void DrawSoftwareRasterized(
-		const Model& model, const cgl::Camera& camera, const ViewPort& drawTextureOn,
+		const Model& model, 
+		const cgl::Camera& camera,
+		const ViewPort& drawTextureOn,
 		unsigned int screenWidth,
 		unsigned int screenHeight,
 		DrawPrimitive drawPrimitive = DrawPrimitive::Triangle,
@@ -73,7 +75,7 @@ private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
 	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<Pixel>& pixelColors, DrawPrimitive drawPrimitive);
-	static void Scanline(unsigned int y, Slope& left, Slope& right, Pixel color, DrawPrimitive drawPrimitive);
+	static void Scanline(unsigned int y, Slope& left_x, Slope& right_x, Slope& left_z, Slope& right_z, Pixel color, DrawPrimitive drawPrimitive);
 
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
 	inline static cgl::mat<Pixel> m_FrameBuffer;
