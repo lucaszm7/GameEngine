@@ -26,7 +26,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	cgl::mat4 view = camera.GetViewMatrix();
 
 	// Build Projection Matrix
-	cgl::mat4 projection = camera.GetProjectionMatrix(screenWidth / screenHeight);
+	cgl::mat4 projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
 
 	// Buil ViewPort Matrix
 	cgl::mat4 viewport = cgl::mat4::viewport(screenWidth, screenHeight);
