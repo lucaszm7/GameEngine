@@ -147,8 +147,9 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		Vertex v1;
 		Vertex v2;
 
-		glm::vec3 color = _random_normalized_color();
-		v0.Color = v1.Color = v2.Color = color;
+		v0.Color = {1, 0, 0};
+		v1.Color = {0, 1, 0};
+		v2.Color = {0, 0, 1};
 
 		std::getline(stream, line);
 		ss.str(std::string());

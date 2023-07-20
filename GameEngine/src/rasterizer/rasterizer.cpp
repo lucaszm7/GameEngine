@@ -119,22 +119,24 @@ void Rasterizer::ClearZBuffer()
 	m_ZBuffer.clear(std::numeric_limits<float>::max());
 }
 
-void Rasterizer::Scanline(unsigned int y, Slope& left_x, Slope& right_x, Slope& left_z, Slope& right_z, Pixel color, DrawPrimitive drawPrimitive)
+void Rasterizer::Scanline(unsigned int y, 
+	int x_left, int x_right,
+	float z_left, float z_right,
+	Pixel& color_left, Pixel& color_right, 
+	DrawPrimitive drawPrimitive)
 {
-	auto x_left  = (int)left_x.get();
-	auto x_right = (int)right_x.get();
-
-	float z_left =  left_z.get();
-	float z_right = right_z.get();
-
 	// TODO: why????
 	if (x_right < x_left)
 	{
 		std::swap(x_right, x_left);
 		std::swap(z_right, z_left);
+		std::swap(color_right, color_left);
 	}
 
 	Slope z_buf(z_left, z_right, x_right - x_left);
+	Slope r(color_left.r, color_right.r, x_right - x_left);
+	Slope g(color_left.g, color_right.g, x_right - x_left);
+	Slope b(color_left.b, color_right.b, x_right - x_left);
 
 	if (drawPrimitive == DrawPrimitive::Triangle)
 	{
@@ -142,23 +144,18 @@ void Rasterizer::Scanline(unsigned int y, Slope& left_x, Slope& right_x, Slope& 
 		{
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
-				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, color);
+				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, {(unsigned char)r.get(), (unsigned char)g.get(), (unsigned char)b.get()});
 				m_ZBuffer.set(m_ZBuffer.height() - 1 - y, x, z_buf.get());
 				z_buf.advance();
+				r.advance(); g.advance(); b.advance();
 			}
 		}
 	}
 	else if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
-		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, color);
-		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, color);
+		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, { (unsigned char)r.get(), (unsigned char)g.get(), (unsigned char)b.get() });
+		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, { (unsigned char)r.get(), (unsigned char)g.get(), (unsigned char)b.get() });
 	}
-
-	left_x.advance();
-	right_x.advance();
-
-	left_z.advance();
-	right_z.advance();
 }
 
 void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<Pixel>& pixelColors, DrawPrimitive drawPrimitive)
@@ -169,6 +166,10 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		auto& p1 = pixelCoordinates[i + 1];
 		auto& p2 = pixelCoordinates[i + 2];
 
+		auto& c0 = pixelColors[i + 0];
+		auto& c1 = pixelColors[i + 1];
+		auto& c2 = pixelColors[i + 2];
+
 		auto x0 = (unsigned int)std::trunc(p0.x);
 		auto y0 = (unsigned int)std::trunc(p0.y);
 		auto x1 = (unsigned int)std::trunc(p1.x);
@@ -177,9 +178,9 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		auto y2 = (unsigned int)std::trunc(p2.y);
 
 		// Ordena de forma decrescente em Y (top to bottom)
-		if (std::tie(y1, x1) < std::tie(y0, x0)) { std::swap(x0, x1); std::swap(y0, y1); std::swap(p0, p1); }
-		if (std::tie(y2, x2) < std::tie(y0, x0)) { std::swap(x0, x2); std::swap(y0, y2); std::swap(p0, p2); }
-		if (std::tie(y2, x2) < std::tie(y1, x1)) { std::swap(x1, x2); std::swap(y1, y2); std::swap(p1, p2); }
+		if (std::tie(y1, x1) < std::tie(y0, x0)) { std::swap(x0, x1); std::swap(y0, y1); std::swap(p0, p1); std::swap(c0, c1); }
+		if (std::tie(y2, x2) < std::tie(y0, x0)) { std::swap(x0, x2); std::swap(y0, y2); std::swap(p0, p2); std::swap(c0, c2); }
+		if (std::tie(y2, x2) < std::tie(y1, x1)) { std::swap(x1, x2); std::swap(y1, y2); std::swap(p1, p2); std::swap(c1, c2); }
 
 		// triangulo não tem área. Pois y1 já está abaixo de y0, então se y0 == y2, eles estão todos juntos
 		/*if (y0 == y2)
@@ -194,9 +195,16 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		std::array<std::unique_ptr<Slope>, 2> slope_x;
 		std::array<std::unique_ptr<Slope>, 2> slope_z;
 
+		std::array<std::unique_ptr<Slope>, 2> slope_r;
+		std::array<std::unique_ptr<Slope>, 2> slope_g;
+		std::array<std::unique_ptr<Slope>, 2> slope_b;
+
 		slope_x[!shortside] = std::make_unique<Slope>(p0.x, p2.x, p2.y - p0.y);
 		slope_z[!shortside] = std::make_unique<Slope>(p0.z, p2.z, p2.y - p0.y);
 
+		slope_r[!shortside] = std::make_unique<Slope>(c0.r, c2.r, p2.y - p0.y);
+		slope_g[!shortside] = std::make_unique<Slope>(c0.g, c2.g, p2.y - p0.y);
+		slope_b[!shortside] = std::make_unique<Slope>(c0.b, c2.b, p2.y - p0.y);
 
 		// ====================
 		// Main Rasterizer Loop
@@ -208,9 +216,32 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 			slope_x[shortside] = std::make_unique<Slope>(p0.x, p1.x, p1.y - p0.y);
 			slope_z[shortside] = std::make_unique<Slope>(p0.z, p1.z, p1.y - p0.y);
 
+			slope_r[shortside] = std::make_unique<Slope>(c0.r, c1.r, p2.y - p0.y);
+			slope_g[shortside] = std::make_unique<Slope>(c0.g, c1.g, p2.y - p0.y);
+			slope_b[shortside] = std::make_unique<Slope>(c0.b, c1.b, p2.y - p0.y);
+
 			for (auto y = y0; y < y1; ++y)
 			{
-				Scanline(y, *slope_x[0], *slope_x[1], *slope_z[0], *slope_z[1], pixelColors[i], drawPrimitive);
+				Pixel color_left = { (unsigned char)slope_r[0]->get(), (unsigned char)slope_g[0]->get(), (unsigned char)slope_b[0]->get() };
+				Pixel color_right = { (unsigned char)slope_r[1]->get(), (unsigned char)slope_g[1]->get(), (unsigned char)slope_b[1]->get() };
+
+				Scanline(y, 
+					slope_x[0]->get(), slope_x[1]->get(), 
+					slope_z[0]->get(), slope_z[1]->get(), 
+					color_left, color_right,
+					drawPrimitive);
+				
+				slope_x[0]->advance();
+				slope_x[1]->advance();
+				slope_z[0]->advance();
+				slope_z[1]->advance();
+
+				slope_r[0]->advance();
+				slope_r[1]->advance();
+				slope_g[0]->advance();
+				slope_g[1]->advance();
+				slope_b[0]->advance();
+				slope_b[1]->advance();
 			}
 		}
 
@@ -221,9 +252,32 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 			slope_x[shortside] = std::make_unique<Slope>(p1.x, p2.x, p2.y - p1.y);
 			slope_z[shortside] = std::make_unique<Slope>(p1.z, p2.z, p2.y - p1.y);
 
+			slope_r[shortside] = std::make_unique<Slope>(c1.r, c2.r, p2.y - p1.y);
+			slope_g[shortside] = std::make_unique<Slope>(c1.g, c2.g, p2.y - p1.y);
+			slope_b[shortside] = std::make_unique<Slope>(c1.b, c2.b, p2.y - p1.y);
+
 			for (auto y = y1; y < y2; ++y)
 			{
-				Scanline(y, *slope_x[0], *slope_x[1], *slope_z[0], *slope_z[1], pixelColors[i], drawPrimitive);
+				Pixel color_left = { (unsigned char)slope_r[0]->get(), (unsigned char)slope_g[0]->get(), (unsigned char)slope_b[0]->get() };
+				Pixel color_right = { (unsigned char)slope_r[1]->get(), (unsigned char)slope_g[1]->get(), (unsigned char)slope_b[1]->get() };
+
+				Scanline(y,
+					slope_x[0]->get(), slope_x[1]->get(),
+					slope_z[0]->get(), slope_z[1]->get(),
+					color_left, color_right,
+					drawPrimitive);
+
+				slope_x[0]->advance();
+				slope_x[1]->advance();
+				slope_z[0]->advance();
+				slope_z[1]->advance();
+
+				slope_r[0]->advance();
+				slope_r[1]->advance();
+				slope_g[0]->advance();
+				slope_g[1]->advance();
+				slope_b[0]->advance();
+				slope_b[1]->advance();
 			}
 		}
 	}
