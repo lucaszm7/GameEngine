@@ -51,6 +51,25 @@ Texture::Texture(const unsigned char* data, unsigned int width, unsigned int hei
 	}
 }
 
+void Texture::Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam)
+{
+	if (data)
+	{
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		if (width > m_Width || height > m_Height)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		else
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		setTextureParam(texParam);
+	}
+	else
+	{
+		std::cout << "ERROR\nFAILED TO LOAD TEXTURE: NO DATA PROVIDED\n";
+		__cpp_static_assert;
+	}
+}
+
 void Texture::setTextureParam(Texture::Parameter texParam) const
 {
 	switch (texParam)
@@ -78,8 +97,11 @@ void Texture::setTextureParam(Texture::Parameter texParam) const
 
 Texture::~Texture()
 {
-	// std::cout << "Deleting texture " << m_RendererID << " of\n" << m_FilePath << "\n";
-	// glDeleteTextures(1, &m_RendererID);
+#ifdef _DEBUG
+	if(m_FilePath != "")
+		std::cout << "Deleting texture [" << m_RendererID << "] of " << m_FilePath << "\n";
+#endif
+	glDeleteTextures(1, &m_RendererID);
 }
 
 void Texture::Bind(unsigned int slot) const

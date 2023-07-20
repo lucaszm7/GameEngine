@@ -37,37 +37,28 @@ struct Slope
 	float curr;
 	float step;
 
+	// starting position + distance between start & end * how far we have traveled / how far we are going to travel
+	// x_start + (x_end - x_start) * [(y - y_start) / (y_end - y_start)]
+	// the multiplication gives the t value (percentage traveled)
+	// For this Y where is the X?
 	Slope(float begin, float end, int n_steps)
 	{
-		float inv_steps = 1.0f / n_steps;
+		float inv_steps = 1.0f / (float)n_steps;
 		step = (end - begin) * inv_steps;
 		curr = begin;
 	}
 
 	float get() const { return curr; }
 	void advance() { curr += step; }
-
-	// starting position + distance between start & end * how far we have traveled / how far we are going to travel
-	// x_start + (x_end - x_start) * [(y - y_start) / (y_end - y_start)]
-	// the multiplication gives the t value (percentage traveled)
-	// For this Y where is the X?
-	//float GetVerbose(float y) const
-	//{
-	//	return p0.x + ((p1.x - p0.x) * (y - p0.y)) / (p1.y - p0.y);
-	//}
-
-	//// Optimized
-	//float Get(float y) const
-	//{
-	//	return p0.x + (float)incX * (y - p0.y);
-	//}
 };
 
 class Rasterizer 
 {
 public:
 	static void DrawSoftwareRasterized(
-		const Model& model, const cgl::Camera& camera, const ViewPort& drawTextureOn,
+		const Model& model, 
+		const cgl::Camera& camera,
+		const ViewPort& drawTextureOn,
 		unsigned int screenWidth,
 		unsigned int screenHeight,
 		DrawPrimitive drawPrimitive = DrawPrimitive::Triangle,
@@ -83,8 +74,8 @@ public:
 private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
-	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, DrawPrimitive drawPrimitive);
-	static void Scanline(unsigned int y, Slope& left, Slope& right, DrawPrimitive drawPrimitive);
+	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<Pixel>& pixelColors, DrawPrimitive drawPrimitive);
+	static void Scanline(unsigned int y, Slope& left_x, Slope& right_x, Slope& left_z, Slope& right_z, Pixel color, DrawPrimitive drawPrimitive);
 
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
 	inline static cgl::mat<Pixel> m_FrameBuffer;

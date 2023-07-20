@@ -1,12 +1,12 @@
 #include "mesh.h"
 
-Mesh::Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text)
+Mesh::Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text)
 	: vertices(vert), indices(indi), textures(text)
 {
 	this->setupBuffers();
 }
 
-void Mesh::SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text)
+void Mesh::SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text)
 {
 	vertices = vert;
 	indices = indi;
@@ -25,6 +25,7 @@ void Mesh::setupBuffers()
 	VBO->Bind();
 	EBO->Bind();
 	VBL.Push<float>(3); // positions
+	VBL.Push<float>(3); // colors
 	VBL.Push<float>(3); // normals
 	VBL.Push<float>(2); // texCoord
 	VAO->AddBuffer(*VBO, VBL);
@@ -37,8 +38,8 @@ void Mesh::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
 {
 	for (int i = 0; i < textures.size(); ++i)
 	{
-		textures[i].Bind(i);
-		std::string uniformName = std::format("material.{}", Texture::to_string(textures[i].type));
+		textures[i]->Bind(i);
+		std::string uniformName = std::format("material.{}", Texture::to_string(textures[i]->type));
 		shader.SetUniform1i(uniformName, i);
 	}
 	shader.SetUniform1f("material.shininess", 64);
