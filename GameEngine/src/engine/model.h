@@ -35,7 +35,7 @@ public:
 	void OnImGui() const;
 	std::vector<Mesh> meshes;
 	std::string name;
-	std::vector<Texture> textures_loaded;
+	std::vector<std::shared_ptr<Texture>> textures_loaded;
 	Transform transform;
 
 private:
@@ -47,7 +47,7 @@ private:
 
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMaterialTexture(aiMaterial* material, aiTextureType type, Texture::Type textureType);
+	std::vector<std::shared_ptr<Texture>> loadMaterialTexture(aiMaterial* material, aiTextureType type, Texture::Type textureType);
 };
 
 

@@ -46,12 +46,12 @@ class Mesh
 public:
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	Mesh() = default;
-	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
+	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text);
 	void Draw(Shader& shader, DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
-	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<Texture>& text);
+	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text);
 
 private:
 	std::shared_ptr<VertexArray>  VAO;

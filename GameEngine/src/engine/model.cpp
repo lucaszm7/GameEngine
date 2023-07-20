@@ -134,7 +134,7 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	vertices.reserve(nTriangles * 3);
 	indices.reserve(nTriangles * 3);
@@ -226,8 +226,9 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		indices.push_back(counter++);
 	}
 
-	/*Texture tex("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
-	textures.push_back(tex);*/
+	std::shared_ptr<Texture> tex;
+	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
+	textures.push_back(tex);
 
 	meshes.emplace_back(vertices, indices, textures);
 }
@@ -272,7 +273,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<std::shared_ptr<Texture>> textures;
 
 
 	unsigned int triCounter = 0;
@@ -314,9 +315,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 	// Textures
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	std::vector<Texture> diffuseMaps = loadMaterialTexture(material, aiTextureType_DIFFUSE, Texture::Type::DIFFUSE);
-	std::vector<Texture> specularMaps = loadMaterialTexture(material, aiTextureType_SPECULAR, Texture::Type::SPECULAR);
-	std::vector<Texture> emissionMaps = loadMaterialTexture(material, aiTextureType_EMISSION_COLOR, Texture::Type::EMISSION);
+	std::vector<std::shared_ptr<Texture>> diffuseMaps = loadMaterialTexture(material, aiTextureType_DIFFUSE, Texture::Type::DIFFUSE);
+	std::vector<std::shared_ptr<Texture>> specularMaps = loadMaterialTexture(material, aiTextureType_SPECULAR, Texture::Type::SPECULAR);
+	std::vector<std::shared_ptr<Texture>> emissionMaps = loadMaterialTexture(material, aiTextureType_EMISSION_COLOR, Texture::Type::EMISSION);
 	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	textures.insert(textures.end(), emissionMaps.begin(), emissionMaps.end());
@@ -324,9 +325,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	return Mesh(vertices, indices, textures);
 }
 
-std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureType type, Texture::Type textureType)
+std::vector<std::shared_ptr<Texture>> Model::loadMaterialTexture(aiMaterial* material, aiTextureType type, Texture::Type textureType)
 {
-	std::vector<Texture> textures;
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	for (unsigned int i = 0; i < material->GetTextureCount(type); ++i)
 	{
@@ -335,7 +336,7 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		bool skip = false;
 		for (unsigned int j = 0; j < textures_loaded.size(); ++j)
 		{
-			std::string texPath = textures_loaded[j].GetPath();
+			std::string texPath = textures_loaded[j]->GetPath();
 			std::string fileName = texPath.substr(texPath.find_last_of('/') + 1, texPath.size());
 			if (std::strcmp(fileName.c_str(), str.C_Str()) == 0)
 			{
@@ -346,7 +347,8 @@ std::vector<Texture> Model::loadMaterialTexture(aiMaterial* material, aiTextureT
 		}
 		if (!skip)
 		{
-			Texture texture(m_Path.substr(0, m_Path.find_last_of('/')) + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
+			std::shared_ptr<Texture> texture;
+			texture = std::make_shared<Texture>(m_Path.substr(0, m_Path.find_last_of('/')) + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}
