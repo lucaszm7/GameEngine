@@ -45,11 +45,6 @@ void Rasterizer::DrawSoftwareRasterized(
 
 		for (unsigned int j = 0; j < model.meshes[i].vertices.size(); j += 3)
 		{
-			// Get vertices colors
-			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 0].Color));
-			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 1].Color));
-			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 2].Color));
-
 			// ===============================
 			// Go To Homogeneus Clipping Space
 			// ===============================
@@ -95,6 +90,11 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglVertices.push_back(v0);
 			cglVertices.push_back(v1);
 			cglVertices.push_back(v2);
+
+			// Get vertices colors
+			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 0].Color));
+			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 1].Color));
+			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 2].Color));
 		}
 		Rasterize(cglVertices, cglColors, drawPrimitive);
 	}
