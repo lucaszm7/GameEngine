@@ -165,8 +165,8 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		if (std::tie(y2, x2) < std::tie(y1, x1)) { std::swap(x1, x2); std::swap(y1, y2); std::swap(p1, p2); }
 
 		// triangulo não tem área. Pois y1 já está abaixo de y0, então se y0 == y2, eles estão todos juntos
-		if (y0 == y2)
-			return;
+		/*if (y0 == y2)
+			return;*/
 
 		// Determina se o lado menor está na esquerda ou direita
 		// verdadeiro = direito
