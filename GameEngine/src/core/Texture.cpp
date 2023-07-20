@@ -98,7 +98,8 @@ void Texture::setTextureParam(Texture::Parameter texParam) const
 Texture::~Texture()
 {
 #ifdef _DEBUG
-	std::cout << "Deleting texture " << m_RendererID << " of\n" << m_FilePath << "\n";
+	if(m_FilePath != "")
+		std::cout << "Deleting texture [" << m_RendererID << "] of " << m_FilePath << "\n";
 #endif
 	glDeleteTextures(1, &m_RendererID);
 }
