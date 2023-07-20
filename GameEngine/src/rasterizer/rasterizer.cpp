@@ -5,6 +5,11 @@ static Pixel to_pixel(const glm::vec3& c)
 	return { (unsigned char)(c.x * 255), (unsigned char)(c.y * 255), (unsigned char)(c.z * 255) };
 }
 
+static Pixel to_pixel(const cgl::vec3& c)
+{
+	return { (unsigned char)(c.x * 255), (unsigned char)(c.y * 255), (unsigned char)(c.z * 255) };
+}
+
 void Rasterizer::DrawSoftwareRasterized(
 	const Model& model, 
 	const cgl::Camera& camera, 
@@ -40,7 +45,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
 	{
 		std::vector<cgl::vec4> cglVertices;
-		std::vector<Pixel> cglColors;
+		std::vector<cgl::vec3> cglColors;
 
 		cglVertices.reserve(model.meshes[i].vertices.size());
 
@@ -93,9 +98,9 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglVertices.push_back(v2);
 
 			// Get vertices colors
-			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 0].Color));
-			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 1].Color));
-			cglColors.push_back(to_pixel(model.meshes[i].vertices[j + 2].Color));
+			cglColors.push_back(model.meshes[i].vertices[j + 0].Color);
+			cglColors.push_back(model.meshes[i].vertices[j + 1].Color);
+			cglColors.push_back(model.meshes[i].vertices[j + 2].Color);
 		}
 		Rasterize(cglVertices, cglColors, drawPrimitive);
 	}
@@ -122,7 +127,7 @@ void Rasterizer::ClearZBuffer()
 void Rasterizer::Scanline(unsigned int y, 
 	int x_left, int x_right,
 	float z_left, float z_right,
-	Pixel& color_left, Pixel& color_right, 
+	cgl::vec3 color_left, cgl::vec3 color_right, 
 	DrawPrimitive drawPrimitive)
 {
 	// TODO: why????
@@ -133,10 +138,8 @@ void Rasterizer::Scanline(unsigned int y,
 		std::swap(color_right, color_left);
 	}
 
-	Slope z_buf(z_left, z_right, x_right - x_left);
-	Slope r(color_left.r, color_right.r, x_right - x_left);
-	Slope g(color_left.g, color_right.g, x_right - x_left);
-	Slope b(color_left.b, color_right.b, x_right - x_left);
+	Slope<float> z_buf(z_left, z_right, x_right - x_left);
+	Slope<cgl::vec3> color(color_left, color_right, x_right - x_left);
 
 	if (drawPrimitive == DrawPrimitive::Triangle)
 	{
@@ -144,21 +147,22 @@ void Rasterizer::Scanline(unsigned int y,
 		{
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
-				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, {(unsigned char)r.get(), (unsigned char)g.get(), (unsigned char)b.get()});
+				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel(color.get()));
 				m_ZBuffer.set(m_ZBuffer.height() - 1 - y, x, z_buf.get());
 				z_buf.advance();
-				r.advance(); g.advance(); b.advance();
+				color.advance();
 			}
 		}
 	}
 	else if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
-		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, { (unsigned char)r.get(), (unsigned char)g.get(), (unsigned char)b.get() });
-		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, { (unsigned char)r.get(), (unsigned char)g.get(), (unsigned char)b.get() });
+		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left,  to_pixel(color.get()));
+		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color.get()));
+		color.advance();
 	}
 }
 
-void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<Pixel>& pixelColors, DrawPrimitive drawPrimitive)
+void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec3>& pixelColors, DrawPrimitive drawPrimitive)
 {
 	for (unsigned int i = 0; i < pixelCoordinates.size(); i += 3)
 	{
@@ -169,7 +173,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		auto& c0 = pixelColors[i + 0];
 		auto& c1 = pixelColors[i + 1];
 		auto& c2 = pixelColors[i + 2];
-
+		 
 		auto x0 = (unsigned int)std::trunc(p0.x);
 		auto y0 = (unsigned int)std::trunc(p0.y);
 		auto x1 = (unsigned int)std::trunc(p1.x);
@@ -192,19 +196,15 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		bool shortside = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
 
 		// Criamos 2 retas: p0-p1 (menor) e p0-p2(maior)
-		std::array<std::unique_ptr<Slope>, 2> slope_x;
-		std::array<std::unique_ptr<Slope>, 2> slope_z;
+		std::array<std::unique_ptr<Slope<float>>, 2> slope_x;
+		std::array<std::unique_ptr<Slope<float>>, 2> slope_z;
 
-		std::array<std::unique_ptr<Slope>, 2> slope_r;
-		std::array<std::unique_ptr<Slope>, 2> slope_g;
-		std::array<std::unique_ptr<Slope>, 2> slope_b;
+		std::array<std::unique_ptr<Slope<cgl::vec3>>, 2> slope_color;
 
-		slope_x[!shortside] = std::make_unique<Slope>(p0.x, p2.x, p2.y - p0.y);
-		slope_z[!shortside] = std::make_unique<Slope>(p0.z, p2.z, p2.y - p0.y);
+		slope_x[!shortside] = std::make_unique<Slope<float>>(p0.x, p2.x, p2.y - p0.y);
+		slope_z[!shortside] = std::make_unique<Slope<float>>(p0.z, p2.z, p2.y - p0.y);
 
-		slope_r[!shortside] = std::make_unique<Slope>(c0.r, c2.r, p2.y - p0.y);
-		slope_g[!shortside] = std::make_unique<Slope>(c0.g, c2.g, p2.y - p0.y);
-		slope_b[!shortside] = std::make_unique<Slope>(c0.b, c2.b, p2.y - p0.y);
+		slope_color[!shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c2, p2.y - p0.y);
 
 		// ====================
 		// Main Rasterizer Loop
@@ -213,35 +213,25 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		// Check if not y0 == y1
 		if (y0 < y1)
 		{
-			slope_x[shortside] = std::make_unique<Slope>(p0.x, p1.x, p1.y - p0.y);
-			slope_z[shortside] = std::make_unique<Slope>(p0.z, p1.z, p1.y - p0.y);
+			slope_x[shortside] = std::make_unique<Slope<float>>(p0.x, p1.x, p1.y - p0.y);
+			slope_z[shortside] = std::make_unique<Slope<float>>(p0.z, p1.z, p1.y - p0.y);
 
-			slope_r[shortside] = std::make_unique<Slope>(c0.r, c1.r, p2.y - p0.y);
-			slope_g[shortside] = std::make_unique<Slope>(c0.g, c1.g, p2.y - p0.y);
-			slope_b[shortside] = std::make_unique<Slope>(c0.b, c1.b, p2.y - p0.y);
+			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c1, p1.y - p0.y);
 
 			for (auto y = y0; y < y1; ++y)
 			{
-				Pixel color_left = { (unsigned char)slope_r[0]->get(), (unsigned char)slope_g[0]->get(), (unsigned char)slope_b[0]->get() };
-				Pixel color_right = { (unsigned char)slope_r[1]->get(), (unsigned char)slope_g[1]->get(), (unsigned char)slope_b[1]->get() };
-
 				Scanline(y, 
-					slope_x[0]->get(), slope_x[1]->get(), 
-					slope_z[0]->get(), slope_z[1]->get(), 
-					color_left, color_right,
+					slope_x[0]->get(),     slope_x[1]->get(), 
+					slope_z[0]->get(),     slope_z[1]->get(), 
+					slope_color[0]->get(), slope_color[1]->get(),
 					drawPrimitive);
 				
 				slope_x[0]->advance();
 				slope_x[1]->advance();
 				slope_z[0]->advance();
 				slope_z[1]->advance();
-
-				slope_r[0]->advance();
-				slope_r[1]->advance();
-				slope_g[0]->advance();
-				slope_g[1]->advance();
-				slope_b[0]->advance();
-				slope_b[1]->advance();
+				slope_color[0]->advance();
+				slope_color[1]->advance();
 			}
 		}
 
@@ -249,22 +239,17 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		if (y1 < y2)
 		{
 			// Calcula a segunda reta para o lado menor
-			slope_x[shortside] = std::make_unique<Slope>(p1.x, p2.x, p2.y - p1.y);
-			slope_z[shortside] = std::make_unique<Slope>(p1.z, p2.z, p2.y - p1.y);
+			slope_x[shortside] = std::make_unique<Slope<float>>(p1.x, p2.x, p2.y - p1.y);
+			slope_z[shortside] = std::make_unique<Slope<float>>(p1.z, p2.z, p2.y - p1.y);
 
-			slope_r[shortside] = std::make_unique<Slope>(c1.r, c2.r, p2.y - p1.y);
-			slope_g[shortside] = std::make_unique<Slope>(c1.g, c2.g, p2.y - p1.y);
-			slope_b[shortside] = std::make_unique<Slope>(c1.b, c2.b, p2.y - p1.y);
+			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c1, c2, p2.y - p1.y);
 
 			for (auto y = y1; y < y2; ++y)
 			{
-				Pixel color_left = { (unsigned char)slope_r[0]->get(), (unsigned char)slope_g[0]->get(), (unsigned char)slope_b[0]->get() };
-				Pixel color_right = { (unsigned char)slope_r[1]->get(), (unsigned char)slope_g[1]->get(), (unsigned char)slope_b[1]->get() };
-
 				Scanline(y,
 					slope_x[0]->get(), slope_x[1]->get(),
 					slope_z[0]->get(), slope_z[1]->get(),
-					color_left, color_right,
+					slope_color[0]->get(), slope_color[1]->get(),
 					drawPrimitive);
 
 				slope_x[0]->advance();
@@ -272,12 +257,8 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 				slope_z[0]->advance();
 				slope_z[1]->advance();
 
-				slope_r[0]->advance();
-				slope_r[1]->advance();
-				slope_g[0]->advance();
-				slope_g[1]->advance();
-				slope_b[0]->advance();
-				slope_b[1]->advance();
+				slope_color[0]->advance();
+				slope_color[1]->advance();
 			}
 		}
 	}

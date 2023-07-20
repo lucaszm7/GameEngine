@@ -32,23 +32,24 @@ inline std::ostream& operator << (std::ostream& out, const Pixel& p)
 		<< (unsigned int)p.b;
 }
 
+template <typename _T>
 struct Slope
 {
-	float curr;
-	float step;
+	_T curr;
+	_T step;
 
 	// starting position + distance between start & end * how far we have traveled / how far we are going to travel
 	// x_start + (x_end - x_start) * [(y - y_start) / (y_end - y_start)]
 	// the multiplication gives the t value (percentage traveled)
 	// For this Y where is the X?
-	Slope(float begin, float end, int n_steps)
+	Slope(_T begin, _T end, int n_steps)
 	{
 		float inv_steps = 1.0f / (float)n_steps;
 		step = (end - begin) * inv_steps;
 		curr = begin;
 	}
 
-	float get() const { return curr; }
+	_T get() const { return curr; }
 	void advance() { curr += step; }
 };
 
@@ -74,11 +75,11 @@ public:
 private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
-	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<Pixel>& pixelColors, DrawPrimitive drawPrimitive);
+	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec3>& pixelColors, DrawPrimitive drawPrimitive);
 	static void Scanline(unsigned int y, 
 		int left_x, int right_x,
 		float left_z, float right_z,
-		Pixel& left_color, Pixel& right_color,
+		cgl::vec3 color_left, cgl::vec3 color_right,
 		DrawPrimitive drawPrimitive);
 
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
