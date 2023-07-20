@@ -49,8 +49,8 @@ namespace cgl
 			return matrix;
 		}
 
-		size_t row_size() const { return m_height; };
-		size_t collum_size() const { return m_width; };
+		size_t height() const { return m_height; };
+		size_t width() const { return m_width; };
 		size_t size() const { return m_height * m_width; };
 
 		// y - x
@@ -64,6 +64,18 @@ namespace cgl
 			}
 #endif
 			matrix[n_height * m_width + n_width] = p;
+		}
+
+		_Type get(unsigned int n_height, unsigned int n_width)
+		{
+#ifdef _DEBUG
+			if ((n_height * m_width + n_width) >= size())
+			{
+				std::cout << "Accesing data out of range in matrix...\n";
+				__cpp_static_assert;
+			}
+#endif
+			return matrix[n_height * m_width + n_width];
 		}
 
 		void clear(const _Type& def)
