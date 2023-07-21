@@ -44,9 +44,11 @@ SceneClose2GL::SceneClose2GL()
 
     VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
     VertexShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Phong");
+    VertexShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "None");
 
     FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Gouraud");
     FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Phong");
+    FragmentShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "None");
 
     FragmentColoringSolidIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "SolidColor");
     FragmentColoringTextureIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "TextureColor");
@@ -71,20 +73,30 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         spotlight.position = glm::vec3(oglCamera.Position.x, oglCamera.Position.y, oglCamera.Position.z);
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         
+        unsigned int fragShadingIndex;
+        if (shading == SHADING::GOURAUD)
+            fragShadingIndex = FragmentShadingGouraudIndex;
+        else if (shading == SHADING::PHONG)
+            fragShadingIndex = FragmentShadingPhongIndex;
+        else
+            fragShadingIndex = FragmentShadingNoneIndex;
+
+        unsigned int vertexSubroutineIndex = shading == SHADING::GOURAUD ? VertexShadingGouraudIndex : VertexShadingPhongIndex;
+
         std::array<unsigned int, 2> fragmentSubroutineIndex;
-        fragmentSubroutineIndex[0] = (isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex);
+        fragmentSubroutineIndex[0] = fragShadingIndex;
         fragmentSubroutineIndex[1] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
-        OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
         
-        if (isGouraudShading)
+        OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
+        OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &vertexSubroutineIndex);
+
+        if (shading == SHADING::GOURAUD)
         {
-            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingGouraudIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::VERTEX);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::VERTEX);
         }
-        else
+        else if (shading == SHADING::PHONG)
         {
-            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingPhongIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::FRAGMENT);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
         }
@@ -107,8 +119,7 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
         for (const auto& object : objects)
         {
-            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, *screenWidth, *screenHeight, drawPrimitive,
-                isEnableCullFace, isCullingClockWise);
+            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, drawPrimitive, isEnableCullFace, isCullingClockWise);
         }
     }
 
@@ -163,14 +174,19 @@ void SceneClose2GL::OnImGuiRender()
     }
 
     ImGui::Text("Shading Model");
-    if (ImGui::RadioButton("Gouraud Shading", isGouraudShading))
+    if (ImGui::RadioButton("No lighting", shading == SHADING::NONE))
     {
-        isGouraudShading = true;
+        shading = SHADING::NONE;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Phong Shading", !isGouraudShading))
+    if (ImGui::RadioButton("Gouraud Shading", shading == SHADING::GOURAUD))
     {
-        isGouraudShading = false;
+        shading = SHADING::GOURAUD;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Phong Shading", shading == SHADING::PHONG))
+    {
+        shading = SHADING::PHONG;
     }
 
     ImGui::Checkbox("Show Textures", &showTexture);

@@ -60,14 +60,22 @@ private:
 
 	unsigned int VertexShadingGouraudIndex;
 	unsigned int VertexShadingPhongIndex;
+	unsigned int VertexShadingNoneIndex;
 
 	unsigned int FragmentShadingGouraudIndex;
 	unsigned int FragmentShadingPhongIndex;
+	unsigned int FragmentShadingNoneIndex;
 
 	unsigned int FragmentColoringSolidIndex;
 	unsigned int FragmentColoringTextureIndex;
 
-	bool isGouraudShading = false;
+	enum class SHADING
+	{
+		GOURAUD,
+		PHONG,
+		NONE
+	};
+	SHADING shading = SHADING::PHONG;
 
 	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
 

@@ -50,6 +50,7 @@ subroutine vec3 Shading(vec3 pos, vec3 normal, vec3 viewDir);
 subroutine uniform Shading shadingSelected;
 vec3 Gouraud(vec3 pos, vec3 normal, vec3 viewDir);
 vec3 Phong(vec3 pos, vec3 normal, vec3 viewDir);
+vec3 None(vec3 pos, vec3 normal, vec3 viewDir);
 
 vec3 GouraudDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 GouraudSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir);
@@ -68,6 +69,12 @@ void main()
     outColor = shadingSelected(outFragPos, norm, viewDir);
 											   // local
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
+}
+
+subroutine (Shading) 
+vec3 None(vec3 pos, vec3 normal, vec3 viewDir)
+{
+    return aColor;
 }
 
 subroutine (Shading) 
