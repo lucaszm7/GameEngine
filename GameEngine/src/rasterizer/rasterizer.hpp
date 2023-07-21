@@ -4,13 +4,13 @@
 #include <string>
 #include <vector>
 
-#include "mesh.h"
 #include "mat.hpp"
 #include "mat4.h"
 #include "vec4.h"
 #include "ViewPort.hpp"
 #include "model.h"
 #include "camera.h"
+#include "shader.h"
 
 
 struct Pixel
@@ -57,11 +57,13 @@ class Rasterizer
 {
 public:
 	static void DrawSoftwareRasterized(
-		const Model& model, 
+		const Model& model,
 		const cgl::Camera& camera,
 		DrawPrimitive primitive = DrawPrimitive::Triangle,
 		bool isCulling = false,
-		bool isCullingClockWise = false);
+		bool isCullingClockWise = false,
+		SHADING shading = SHADING::NONE,
+		cgl::vec3 lightDirectionDir = { 0,0,0 });
 
 	static void SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
 	static void ClearFrameBuffer();
@@ -72,12 +74,22 @@ public:
 private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
-	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec4>& pixelColors, DrawPrimitive drawPrimitive);
+
+	static void Rasterize(
+		std::vector<cgl::vec4>& pixelCoordinates, 
+		std::vector<cgl::vec4>& pixelColors, 
+		std::vector<cgl::vec4>& pixelNormals);
+
 	static void Scanline(unsigned int y, 
 		int left_x, int right_x,
 		float left_z, float right_z,
 		cgl::vec4 color_left, cgl::vec4 color_right,
-		DrawPrimitive drawPrimitive);
+		cgl::vec4 normal_left, cgl::vec4 normal_right);
+
+	inline static SHADING m_Shading;
+	inline static DrawPrimitive m_Primitive;
+
+	inline static cgl::vec3 m_LightDirectionalDir;
 
 	inline static unsigned int m_screenWidth;
 	inline static unsigned int m_screenHeight;

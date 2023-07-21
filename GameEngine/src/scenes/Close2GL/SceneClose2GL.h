@@ -69,12 +69,6 @@ private:
 	unsigned int FragmentColoringSolidIndex;
 	unsigned int FragmentColoringTextureIndex;
 
-	enum class SHADING
-	{
-		GOURAUD,
-		PHONG,
-		NONE
-	};
 	SHADING shading = SHADING::PHONG;
 
 	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
