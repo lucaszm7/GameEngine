@@ -59,9 +59,7 @@ public:
 	static void DrawSoftwareRasterized(
 		const Model& model, 
 		const cgl::Camera& camera,
-		unsigned int screenWidth,
-		unsigned int screenHeight,
-		DrawPrimitive drawPrimitive = DrawPrimitive::Triangle,
+		DrawPrimitive primitive = DrawPrimitive::Triangle,
 		bool isCulling = false,
 		bool isCullingClockWise = false);
 
@@ -74,12 +72,15 @@ public:
 private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
-	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec3>& pixelColors, DrawPrimitive drawPrimitive);
+	static void Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec4>& pixelColors, DrawPrimitive drawPrimitive);
 	static void Scanline(unsigned int y, 
 		int left_x, int right_x,
 		float left_z, float right_z,
-		cgl::vec3 color_left, cgl::vec3 color_right,
+		cgl::vec4 color_left, cgl::vec4 color_right,
 		DrawPrimitive drawPrimitive);
+
+	inline static unsigned int m_screenWidth;
+	inline static unsigned int m_screenHeight;
 
 	inline static std::unique_ptr<Texture> m_TextureToDrawOn;
 	inline static std::unique_ptr<ViewPort> m_ViewportToDrawOn;

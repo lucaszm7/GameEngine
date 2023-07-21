@@ -14,6 +14,9 @@ void Rasterizer::SetViewPort(const unsigned int screenWidth, const unsigned int 
 {
 	m_FrameBuffer.resize(screenHeight, screenWidth);
 	m_ZBuffer.resize(screenHeight, screenWidth);
+
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
 }
 
 void Rasterizer::ClearFrameBuffer()
@@ -29,9 +32,7 @@ void Rasterizer::ClearZBuffer()
 void Rasterizer::DrawSoftwareRasterized(
 	const Model& model, 
 	const cgl::Camera& camera, 
-	unsigned int screenWidth,
-	unsigned int screenHeight,
-	DrawPrimitive drawPrimitive,
+	DrawPrimitive primitive,
 	bool isCulling,
 	bool isCullingClockWise)
 {
@@ -47,10 +48,10 @@ void Rasterizer::DrawSoftwareRasterized(
 	cgl::mat4 view = camera.GetViewMatrix();
 
 	// Build Projection Matrix
-	cgl::mat4 projection = camera.GetProjectionMatrix((float)screenWidth / (float)screenHeight);
+	cgl::mat4 projection = camera.GetProjectionMatrix((float)m_screenWidth / (float)m_screenHeight);
 
 	// Buil ViewPort Matrix
-	cgl::mat4 viewport = cgl::mat4::viewport(screenWidth, screenHeight);
+	cgl::mat4 viewport = cgl::mat4::viewport(m_screenWidth, m_screenHeight);
 
 	// ================
 	// Build MVP Matrix
@@ -60,9 +61,10 @@ void Rasterizer::DrawSoftwareRasterized(
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
 	{
 		std::vector<cgl::vec4> cglVertices;
-		std::vector<cgl::vec3> cglColors;
+		std::vector<cgl::vec4> cglColors;
 
 		cglVertices.reserve(model.meshes[i].vertices.size());
+		cglColors.reserve(model.meshes[i].vertices.size());
 
 		for (unsigned int j = 0; j < model.meshes[i].vertices.size(); j += 3)
 		{
@@ -95,7 +97,12 @@ void Rasterizer::DrawSoftwareRasterized(
 			// Go To Normalized Device Coordinates
 			// ===================================
 
-			// Perspective division
+			// Save w for perspective correct interpolation
+			float v0w = v0.w;
+			float v1w = v1.w;
+			float v2w = v2.w;
+
+			// Perspective division of all coordinates (x,y,z,w)
 			v0 /= v0.w;
 			v1 /= v1.w;
 			v2 /= v2.w;
@@ -108,22 +115,35 @@ void Rasterizer::DrawSoftwareRasterized(
 			v1 = viewport * v1;
 			v2 = viewport * v2;
 
+			// Save w for perspective correct interpolation
+			v0.w = v0w;
+			v1.w = v1w;
+			v2.w = v2w;
+
 			cglVertices.push_back(v0);
 			cglVertices.push_back(v1);
 			cglVertices.push_back(v2);
 
-			// Get vertices colors
-			cglColors.push_back(model.meshes[i].vertices[j + 0].Color);
-			cglColors.push_back(model.meshes[i].vertices[j + 1].Color);
-			cglColors.push_back(model.meshes[i].vertices[j + 2].Color);
+			// ==============
+			// Get Attributes
+			// ==============
+
+			// Perspective Correct Interpolation
+			auto colorPerspectiveCorrect0 = cgl::vec4(model.meshes[i].vertices[j + 0].Color, 1) * (1 / v0.w);
+			auto colorPerspectiveCorrect1 = cgl::vec4(model.meshes[i].vertices[j + 1].Color, 1) * (1 / v1.w);
+			auto colorPerspectiveCorrect2 = cgl::vec4(model.meshes[i].vertices[j + 2].Color, 1) * (1 / v2.w);
+
+			cglColors.push_back(colorPerspectiveCorrect0);
+			cglColors.push_back(colorPerspectiveCorrect1);
+			cglColors.push_back(colorPerspectiveCorrect2);
 		}
-		Rasterize(cglVertices, cglColors, drawPrimitive);
+		Rasterize(cglVertices, cglColors, primitive);
 	}
 
 	if (!m_TextureToDrawOn)
-		m_TextureToDrawOn = std::make_unique<Texture>(&m_FrameBuffer.data()->r, screenWidth, screenHeight);
+		m_TextureToDrawOn = std::make_unique<Texture>(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight);
 	else
-		m_TextureToDrawOn->Update(&m_FrameBuffer.data()->r, screenWidth, screenHeight);
+		m_TextureToDrawOn->Update(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight);
 
 	if (!m_ViewportToDrawOn)
 		m_ViewportToDrawOn = std::make_unique<ViewPort>();
@@ -131,7 +151,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	m_ViewportToDrawOn->OnRenderTexture(*m_TextureToDrawOn);
 }
 
-void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec3>& pixelColors, DrawPrimitive drawPrimitive)
+void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec4>& pixelColors, DrawPrimitive drawPrimitive)
 {
 	for (unsigned int i = 0; i < pixelCoordinates.size(); i += 3)
 	{
@@ -168,12 +188,12 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 		std::array<std::unique_ptr<Slope<float>>, 2> slope_x;
 		std::array<std::unique_ptr<Slope<float>>, 2> slope_z;
 
-		std::array<std::unique_ptr<Slope<cgl::vec3>>, 2> slope_color;
+		std::array<std::unique_ptr<Slope<cgl::vec4>>, 2> slope_color;
 
 		slope_x[!shortside] = std::make_unique<Slope<float>>(p0.x, p2.x, p2.y - p0.y);
 		slope_z[!shortside] = std::make_unique<Slope<float>>(p0.z, p2.z, p2.y - p0.y);
 
-		slope_color[!shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c2, p2.y - p0.y);
+		slope_color[!shortside] = std::make_unique<Slope<cgl::vec4>>(c0, c2, p2.y - p0.y);
 
 		// ====================
 		// Main Rasterizer Loop
@@ -188,7 +208,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 			slope_x[shortside] = std::make_unique<Slope<float>>(p0.x, p1.x, n_steps);
 			slope_z[shortside] = std::make_unique<Slope<float>>(p0.z, p1.z, n_steps);
 
-			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c1, n_steps );
+			slope_color[shortside] = std::make_unique<Slope<cgl::vec4>>(c0, c1, n_steps );
 
 			for (auto y = y0; y < y1; ++y)
 			{
@@ -216,7 +236,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 			slope_x[shortside] = std::make_unique<Slope<float>>(p1.x, p2.x, n_steps);
 			slope_z[shortside] = std::make_unique<Slope<float>>(p1.z, p2.z, n_steps);
 
-			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c1, c2, n_steps);
+			slope_color[shortside] = std::make_unique<Slope<cgl::vec4>>(c1, c2, n_steps);
 
 			for (auto y = y1; y < y2; ++y)
 			{
@@ -241,7 +261,7 @@ void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector
 void Rasterizer::Scanline(unsigned int y, 
 	int x_left, int x_right,
 	float z_left, float z_right,
-	cgl::vec3 color_left, cgl::vec3 color_right, 
+	cgl::vec4 color_left, cgl::vec4 color_right, 
 	DrawPrimitive drawPrimitive)
 {
 	// TODO: why????
@@ -253,7 +273,7 @@ void Rasterizer::Scanline(unsigned int y,
 	}
 
 	Slope<float> z_buf(z_left, z_right, x_right - x_left);
-	Slope<cgl::vec3> color(color_left, color_right, x_right - x_left);
+	Slope<cgl::vec4> color(color_left, color_right, x_right - x_left);
 
 	if (drawPrimitive == DrawPrimitive::Triangle)
 	{
@@ -261,7 +281,7 @@ void Rasterizer::Scanline(unsigned int y,
 		{
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
-				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel(color.get()));
+				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel((color.get() * (1 / color.get().w)).to_vec3())); // *z_buf.get()));
 				m_ZBuffer.set(m_ZBuffer.height() - 1 - y, x, z_buf.get());
 				z_buf.advance();
 				color.advance();
@@ -271,17 +291,17 @@ void Rasterizer::Scanline(unsigned int y,
 	else if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
 		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_left))
-			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left));
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left.to_vec3()));
 		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_right))
-			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right));
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right.to_vec3()));
 	}
 
 	else if (drawPrimitive == DrawPrimitive::Point)
 	{
 		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_left))
-			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left));
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left.to_vec3()));
 		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_right))
-			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right));
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right.to_vec3()));
 	}
 }
 
