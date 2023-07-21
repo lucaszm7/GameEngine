@@ -64,6 +64,7 @@ namespace cgl
 		friend vec4 operator - (const vec4& u, const vec4& v);
 		friend vec4 operator * (const vec4& u, const vec4& v);
 		friend vec4 operator * (float t, const vec4& v);
+		friend vec4 operator * (const vec4& v, float t);
 
 		inline std::array<float, 4> get_array() const { return e; }
 		float lenght() const;
