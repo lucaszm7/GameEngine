@@ -43,8 +43,6 @@ private:
 	std::vector<std::unique_ptr<Model>> objects;
 	std::vector<std::string> lookAtObjects;
 
-	ViewPort rasterizerViewPort;
-
 	int selectedObjectToAdd = 0;
 	int selectedTriOrientation = 1;
 

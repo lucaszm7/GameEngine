@@ -59,7 +59,6 @@ public:
 	static void DrawSoftwareRasterized(
 		const Model& model, 
 		const cgl::Camera& camera,
-		const ViewPort& drawTextureOn,
 		unsigned int screenWidth,
 		unsigned int screenHeight,
 		DrawPrimitive drawPrimitive = DrawPrimitive::Triangle,
@@ -81,6 +80,9 @@ private:
 		float left_z, float right_z,
 		cgl::vec3 color_left, cgl::vec3 color_right,
 		DrawPrimitive drawPrimitive);
+
+	inline static std::unique_ptr<Texture> m_TextureToDrawOn;
+	inline static std::unique_ptr<ViewPort> m_ViewportToDrawOn;
 
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
 	inline static cgl::mat<Pixel> m_FrameBuffer;

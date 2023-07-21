@@ -10,10 +10,25 @@ static Pixel to_pixel(const cgl::vec3& c)
 	return { (unsigned char)(c.x * 255), (unsigned char)(c.y * 255), (unsigned char)(c.z * 255) };
 }
 
+void Rasterizer::SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
+{
+	m_FrameBuffer.resize(screenHeight, screenWidth);
+	m_ZBuffer.resize(screenHeight, screenWidth);
+}
+
+void Rasterizer::ClearFrameBuffer()
+{
+	m_FrameBuffer.clear(m_ClearColor);
+}
+
+void Rasterizer::ClearZBuffer()
+{
+	m_ZBuffer.clear(std::numeric_limits<float>::max());
+}
+
 void Rasterizer::DrawSoftwareRasterized(
 	const Model& model, 
 	const cgl::Camera& camera, 
-	const ViewPort& drawTextureOn,
 	unsigned int screenWidth,
 	unsigned int screenHeight,
 	DrawPrimitive drawPrimitive,
@@ -104,24 +119,123 @@ void Rasterizer::DrawSoftwareRasterized(
 		}
 		Rasterize(cglVertices, cglColors, drawPrimitive);
 	}
-	Texture texCGL(&m_FrameBuffer.data()->r, screenWidth, screenHeight);
-	drawTextureOn.OnRenderTexture(texCGL);
+
+	if (!m_TextureToDrawOn)
+		m_TextureToDrawOn = std::make_unique<Texture>(&m_FrameBuffer.data()->r, screenWidth, screenHeight);
+	else
+		m_TextureToDrawOn->Update(&m_FrameBuffer.data()->r, screenWidth, screenHeight);
+
+	if (!m_ViewportToDrawOn)
+		m_ViewportToDrawOn = std::make_unique<ViewPort>();
+
+	m_ViewportToDrawOn->OnRenderTexture(*m_TextureToDrawOn);
 }
 
-void Rasterizer::SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
+void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec3>& pixelColors, DrawPrimitive drawPrimitive)
 {
-	m_FrameBuffer.resize(screenHeight, screenWidth);
-	m_ZBuffer.resize(screenHeight, screenWidth);
-}
+	for (unsigned int i = 0; i < pixelCoordinates.size(); i += 3)
+	{
+		auto& p0 = pixelCoordinates[i + 0];
+		auto& p1 = pixelCoordinates[i + 1];
+		auto& p2 = pixelCoordinates[i + 2];
 
-void Rasterizer::ClearFrameBuffer()
-{
-	m_FrameBuffer.clear(m_ClearColor);
-}
+		auto& c0 = pixelColors[i + 0];
+		auto& c1 = pixelColors[i + 1];
+		auto& c2 = pixelColors[i + 2];
 
-void Rasterizer::ClearZBuffer()
-{
-	m_ZBuffer.clear(std::numeric_limits<float>::max());
+		auto x0 = (unsigned int)std::trunc(p0.x);
+		auto y0 = (unsigned int)std::trunc(p0.y);
+		auto x1 = (unsigned int)std::trunc(p1.x);
+		auto y1 = (unsigned int)std::trunc(p1.y);
+		auto x2 = (unsigned int)std::trunc(p2.x);
+		auto y2 = (unsigned int)std::trunc(p2.y);
+
+		// Ordena de forma decrescente em Y (top to bottom)
+		if (std::tie(y1, x1) < std::tie(y0, x0)) { std::swap(x0, x1); std::swap(y0, y1); std::swap(p0, p1); std::swap(c0, c1); }
+		if (std::tie(y2, x2) < std::tie(y0, x0)) { std::swap(x0, x2); std::swap(y0, y2); std::swap(p0, p2); std::swap(c0, c2); }
+		if (std::tie(y2, x2) < std::tie(y1, x1)) { std::swap(x1, x2); std::swap(y1, y2); std::swap(p1, p2); std::swap(c1, c2); }
+
+		// triangulo não tem área. Pois y1 já está abaixo de y0, então se y0 == y2, eles estão todos juntos
+		/*if (y0 == y2)
+			return;*/
+
+			// Determina se o lado menor está na esquerda ou direita
+			// verdadeiro = direito
+			// falso = esquerdo
+		bool shortside = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
+
+		// Criamos 2 retas: p0-p1 (menor) e p0-p2(maior)
+		std::array<std::unique_ptr<Slope<float>>, 2> slope_x;
+		std::array<std::unique_ptr<Slope<float>>, 2> slope_z;
+
+		std::array<std::unique_ptr<Slope<cgl::vec3>>, 2> slope_color;
+
+		slope_x[!shortside] = std::make_unique<Slope<float>>(p0.x, p2.x, p2.y - p0.y);
+		slope_z[!shortside] = std::make_unique<Slope<float>>(p0.z, p2.z, p2.y - p0.y);
+
+		slope_color[!shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c2, p2.y - p0.y);
+
+		// ====================
+		// Main Rasterizer Loop
+		// ====================
+
+		// Check if not y0 == y1
+		if (y0 < y1)
+		{
+			// Calcula a segunda reta para o lado menor
+			int n_steps = p1.y - p0.y;
+
+			slope_x[shortside] = std::make_unique<Slope<float>>(p0.x, p1.x, n_steps);
+			slope_z[shortside] = std::make_unique<Slope<float>>(p0.z, p1.z, n_steps);
+
+			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c1, n_steps );
+
+			for (auto y = y0; y < y1; ++y)
+			{
+				Scanline(y,
+					slope_x[0]->get(), slope_x[1]->get(),
+					slope_z[0]->get(), slope_z[1]->get(),
+					slope_color[0]->get(), slope_color[1]->get(),
+					drawPrimitive);
+
+				slope_x[0]->advance();
+				slope_x[1]->advance();
+				slope_z[0]->advance();
+				slope_z[1]->advance();
+				slope_color[0]->advance();
+				slope_color[1]->advance();
+			}
+		}
+
+		// Check if not y1 == y2
+		if (y1 < y2)
+		{
+			// Calcula a terceira reta
+			int n_steps = p2.y - p1.y;
+
+			slope_x[shortside] = std::make_unique<Slope<float>>(p1.x, p2.x, n_steps);
+			slope_z[shortside] = std::make_unique<Slope<float>>(p1.z, p2.z, n_steps);
+
+			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c1, c2, n_steps);
+
+			for (auto y = y1; y < y2; ++y)
+			{
+				Scanline(y,
+					slope_x[0]->get(), slope_x[1]->get(),
+					slope_z[0]->get(), slope_z[1]->get(),
+					slope_color[0]->get(), slope_color[1]->get(),
+					drawPrimitive);
+
+				slope_x[0]->advance();
+				slope_x[1]->advance();
+				slope_z[0]->advance();
+				slope_z[1]->advance();
+
+				slope_color[0]->advance();
+				slope_color[1]->advance();
+			}
+		}
+	}
 }
 
 void Rasterizer::Scanline(unsigned int y, 
@@ -156,110 +270,18 @@ void Rasterizer::Scanline(unsigned int y,
 	}
 	else if (drawPrimitive == DrawPrimitive::WireFrame)
 	{
-		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left,  to_pixel(color.get()));
-		m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color.get()));
-		color.advance();
+		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_left))
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left));
+		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_right))
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right));
 	}
-}
 
-void Rasterizer::Rasterize(std::vector<cgl::vec4>& pixelCoordinates, std::vector<cgl::vec3>& pixelColors, DrawPrimitive drawPrimitive)
-{
-	for (unsigned int i = 0; i < pixelCoordinates.size(); i += 3)
+	else if (drawPrimitive == DrawPrimitive::Point)
 	{
-		auto& p0 = pixelCoordinates[i + 0];
-		auto& p1 = pixelCoordinates[i + 1];
-		auto& p2 = pixelCoordinates[i + 2];
-
-		auto& c0 = pixelColors[i + 0];
-		auto& c1 = pixelColors[i + 1];
-		auto& c2 = pixelColors[i + 2];
-		 
-		auto x0 = (unsigned int)std::trunc(p0.x);
-		auto y0 = (unsigned int)std::trunc(p0.y);
-		auto x1 = (unsigned int)std::trunc(p1.x);
-		auto y1 = (unsigned int)std::trunc(p1.y);
-		auto x2 = (unsigned int)std::trunc(p2.x);
-		auto y2 = (unsigned int)std::trunc(p2.y);
-
-		// Ordena de forma decrescente em Y (top to bottom)
-		if (std::tie(y1, x1) < std::tie(y0, x0)) { std::swap(x0, x1); std::swap(y0, y1); std::swap(p0, p1); std::swap(c0, c1); }
-		if (std::tie(y2, x2) < std::tie(y0, x0)) { std::swap(x0, x2); std::swap(y0, y2); std::swap(p0, p2); std::swap(c0, c2); }
-		if (std::tie(y2, x2) < std::tie(y1, x1)) { std::swap(x1, x2); std::swap(y1, y2); std::swap(p1, p2); std::swap(c1, c2); }
-
-		// triangulo não tem área. Pois y1 já está abaixo de y0, então se y0 == y2, eles estão todos juntos
-		/*if (y0 == y2)
-			return;*/
-
-		// Determina se o lado menor está na esquerda ou direita
-		// verdadeiro = direito
-		// falso = esquerdo
-		bool shortside = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
-
-		// Criamos 2 retas: p0-p1 (menor) e p0-p2(maior)
-		std::array<std::unique_ptr<Slope<float>>, 2> slope_x;
-		std::array<std::unique_ptr<Slope<float>>, 2> slope_z;
-
-		std::array<std::unique_ptr<Slope<cgl::vec3>>, 2> slope_color;
-
-		slope_x[!shortside] = std::make_unique<Slope<float>>(p0.x, p2.x, p2.y - p0.y);
-		slope_z[!shortside] = std::make_unique<Slope<float>>(p0.z, p2.z, p2.y - p0.y);
-
-		slope_color[!shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c2, p2.y - p0.y);
-
-		// ====================
-		// Main Rasterizer Loop
-		// ====================
-
-		// Check if not y0 == y1
-		if (y0 < y1)
-		{
-			slope_x[shortside] = std::make_unique<Slope<float>>(p0.x, p1.x, p1.y - p0.y);
-			slope_z[shortside] = std::make_unique<Slope<float>>(p0.z, p1.z, p1.y - p0.y);
-
-			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c0, c1, p1.y - p0.y);
-
-			for (auto y = y0; y < y1; ++y)
-			{
-				Scanline(y, 
-					slope_x[0]->get(),     slope_x[1]->get(), 
-					slope_z[0]->get(),     slope_z[1]->get(), 
-					slope_color[0]->get(), slope_color[1]->get(),
-					drawPrimitive);
-				
-				slope_x[0]->advance();
-				slope_x[1]->advance();
-				slope_z[0]->advance();
-				slope_z[1]->advance();
-				slope_color[0]->advance();
-				slope_color[1]->advance();
-			}
-		}
-
-		// Check if not y1 == y2
-		if (y1 < y2)
-		{
-			// Calcula a segunda reta para o lado menor
-			slope_x[shortside] = std::make_unique<Slope<float>>(p1.x, p2.x, p2.y - p1.y);
-			slope_z[shortside] = std::make_unique<Slope<float>>(p1.z, p2.z, p2.y - p1.y);
-
-			slope_color[shortside] = std::make_unique<Slope<cgl::vec3>>(c1, c2, p2.y - p1.y);
-
-			for (auto y = y1; y < y2; ++y)
-			{
-				Scanline(y,
-					slope_x[0]->get(), slope_x[1]->get(),
-					slope_z[0]->get(), slope_z[1]->get(),
-					slope_color[0]->get(), slope_color[1]->get(),
-					drawPrimitive);
-
-				slope_x[0]->advance();
-				slope_x[1]->advance();
-				slope_z[0]->advance();
-				slope_z[1]->advance();
-
-				slope_color[0]->advance();
-				slope_color[1]->advance();
-			}
-		}
+		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_left))
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left));
+		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_right))
+			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right));
 	}
 }
+
