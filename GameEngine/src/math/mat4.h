@@ -27,6 +27,8 @@ namespace cgl
 		mat4(const glm::mat4& glmMat4);
 		mat4(const vec4& l0, const vec4& l1, const vec4& l2, const vec4& l3);
 		
+		glm::mat4 to_glm();
+
 		static mat4 translate(const vec4& t);
 		static mat4 rotateX(float degrees);
 		static mat4 rotateY(float degrees);
@@ -45,6 +47,7 @@ namespace cgl
 		void set_collum(int i, const vec4& v);
 
 		mat4 transpose() const;
+		mat4 inverse() const;
 		float determinant() const;
 		static mat4 identity();
 		static mat4 viewport(unsigned int screenWidth, unsigned int screenHeight);
