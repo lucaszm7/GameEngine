@@ -62,9 +62,9 @@ void Rasterizer::DrawSoftwareRasterized(
 	// ================
 	// Build MVP Matrix
 	// ================
-	cgl::mat4 mvp = projection.transpose() * view.transpose() * modelM;
+	cgl::mat4 mvp = projection * view * modelM;
 
-	cgl::mat4 mv = view.transpose() * modelM;
+	cgl::mat4 mv = view * modelM;
 	cgl::mat4 mv_transposed_inversed = cgl::mat4(glm::inverse(mv.to_glm())).transpose();
 
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
