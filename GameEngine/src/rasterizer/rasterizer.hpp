@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "mesh.h"
 #include "mat.hpp"
 #include "mat4.h"
 #include "vec4.h"
