@@ -10,6 +10,8 @@ struct Light
 
 	glm::vec3 lightColor;
 
+	Light() = default;
+
 	Light(glm::vec3 lightColor)
 		:lightColor(lightColor)
 	{
@@ -29,7 +31,7 @@ struct Light
 		this->specular = this->lightColor * glm::vec3(1.0f);
 	}
 
-	inline glm::vec3 GetLightColor() const
+	glm::vec3 GetLightColor() const
 	{
 		return this->specular;
 	}
@@ -38,6 +40,8 @@ struct Light
 struct DirectionalLight : public Light
 {
 	glm::vec3 direction;
+
+	DirectionalLight() = default;
 
 	DirectionalLight(glm::vec3 lightColor, glm::vec3 dir)
 		: Light(lightColor), direction(dir) {}

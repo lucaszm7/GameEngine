@@ -72,7 +72,7 @@ private:
 
 	SHADING shading = SHADING::PHONG;
 
-	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
+	PRIMITIVE drawPrimitive = PRIMITIVE::Triangle;
 
 	float imguiClearColor[3] = { 1.0f,1.0f,1.0f };
 

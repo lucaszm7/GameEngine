@@ -30,17 +30,17 @@ void Rasterizer::ClearZBuffer()
 }
 
 void Rasterizer::DrawSoftwareRasterized(
-	const Model& model, 
-	const cgl::Camera& camera, 
-	DrawPrimitive primitive,
+	const Model& model,
+	const cgl::Camera& camera,
+	DirectionalLight& DirectionalLight,
+	PRIMITIVE primitive,
 	bool isCulling,
 	bool isCullingClockWise,
-	SHADING shading,
-	cgl::vec3 lightDirectionDir)
+	SHADING shading)
 {
 	m_Shading = shading;
 	m_Primitive = primitive;
-	m_LightDirectionalDir = lightDirectionDir;
+	m_DirectionalLight = DirectionalLight;
 
 	// Build Model Matrix
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(model.transform.position, 1.0f));
@@ -158,9 +158,9 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglColors.push_back(colorPerspectiveCorrect2);
 
 			// Normals
-			auto normal0 = mv_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 0].Normal, 1);
-			auto normal1 = mv_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 1].Normal, 1);
-			auto normal2 = mv_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 2].Normal, 1);
+			auto normal0 = mv * cgl::vec4(model.meshes[i].vertices[j + 0].Normal, 1);
+			auto normal1 = mv * cgl::vec4(model.meshes[i].vertices[j + 1].Normal, 1);
+			auto normal2 = mv * cgl::vec4(model.meshes[i].vertices[j + 2].Normal, 1);
 
 			auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
 			auto normalPerspectiveCorrect1 = normal1 * (1 / v1.w);
@@ -219,9 +219,9 @@ void Rasterizer::Rasterize(
 		/*if (y0 == y2)
 			return;*/
 
-			// Determina se o lado menor está na esquerda ou direita
-			// verdadeiro = direito
-			// falso = esquerdo
+		// Determina se o lado menor está na esquerda ou direita
+		// verdadeiro = direito
+		// falso = esquerdo
 		bool shortside = (y1 - y0) * (x2 - x0) < (x1 - x0) * (y2 - y0);
 
 		// Criamos 2 retas: p0-p1 (menor) e p0-p2(maior)
@@ -328,20 +328,29 @@ void Rasterizer::Scanline(unsigned int y,
 	Slope<cgl::vec4> color(color_left, color_right, x_right - x_left);
 	Slope<cgl::vec4> normal(normal_left, normal_right, x_right - x_left);
 
-	if (m_Primitive == DrawPrimitive::Triangle)
+	if (m_Primitive == PRIMITIVE::Triangle)
 	{
 		for (int x = x_left; x < x_right; ++x)
 		{
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
 				cgl::vec3 pixelColor = (color.get() * (1 / color.get().w)).to_vec3();
-				cgl::vec3 pixelNormal = (normal.get() * (1 / normal.get().w)).to_vec3();
-				auto diff = std::max(m_LightDirectionalDir.normalized().dot(pixelNormal.normalized()), 0.0f);
-				cgl::vec3 diffuse = pixelColor * diff;
-				auto ambient = pixelColor * 0.1f;
-				pixelColor = ambient + diffuse;
+				cgl::vec3 pixelNormal = (normal.get() * (1 / normal.get().w)).to_vec3().normalized();
+
+				if (m_Shading == SHADING::PHONG)
+				{
+					auto dirLight = cgl::vec3(-(glm::normalize(m_DirectionalLight.direction)));
+					auto diff = std::max(0.0f, dirLight.dot(pixelNormal));
+					auto diffuse = m_DirectionalLight.diffuse * pixelColor * diff;
+					auto ambient = m_DirectionalLight.ambient * pixelColor;
+					pixelColor = ambient + diffuse;
+				}
+
+				// else if (m_Shading == SHADING::NONE)
+
 				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel(pixelColor)); // *z_buf.get()));
 				m_ZBuffer.set(m_ZBuffer.height() - 1 - y, x, z_buf.get());
+
 				z_buf.advance();
 				color.advance();
 				normal.advance();
@@ -349,7 +358,7 @@ void Rasterizer::Scanline(unsigned int y,
 		}
 	}
 
-	else if (m_Primitive == DrawPrimitive::WireFrame)
+	else if (m_Primitive == PRIMITIVE::WireFrame)
 	{
 		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_left))
 			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left.to_vec3()));
@@ -357,7 +366,7 @@ void Rasterizer::Scanline(unsigned int y,
 			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_right, to_pixel(color_right.to_vec3()));
 	}
 
-	else if (m_Primitive == DrawPrimitive::Point)
+	else if (m_Primitive == PRIMITIVE::Point)
 	{
 		if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x_left))
 			m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x_left, to_pixel(color_left.to_vec3()));

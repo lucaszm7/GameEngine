@@ -12,6 +12,7 @@
 #include "model.h"
 #include "camera.h"
 #include "shader.h"
+#include "light.h"
 
 
 struct Pixel
@@ -60,11 +61,12 @@ public:
 	static void DrawSoftwareRasterized(
 		const Model& model,
 		const cgl::Camera& camera,
-		DrawPrimitive primitive = DrawPrimitive::Triangle,
+		DirectionalLight& DirectionalLight,
+		PRIMITIVE primitive = PRIMITIVE::Triangle,
 		bool isCulling = false,
 		bool isCullingClockWise = false,
-		SHADING shading = SHADING::NONE,
-		cgl::vec3 lightDirectionDir = { 0,0,0 });
+		SHADING shading = SHADING::NONE
+	);
 
 	static void SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
 	static void ClearFrameBuffer();
@@ -88,9 +90,9 @@ private:
 		cgl::vec4 normal_left, cgl::vec4 normal_right);
 
 	inline static SHADING m_Shading;
-	inline static DrawPrimitive m_Primitive;
+	inline static PRIMITIVE m_Primitive;
 
-	inline static cgl::vec3 m_LightDirectionalDir;
+	inline static DirectionalLight m_DirectionalLight;
 
 	inline static unsigned int m_screenWidth;
 	inline static unsigned int m_screenHeight;

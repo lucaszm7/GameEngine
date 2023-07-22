@@ -119,8 +119,8 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
         for (const auto& object : objects)
         {
-            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, drawPrimitive, 
-                isEnableCullFace, isCullingClockWise, shading, dirLight.direction);
+            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, dirLight, drawPrimitive,
+                isEnableCullFace, isCullingClockWise, shading);
         }
     }
 
@@ -159,19 +159,19 @@ void SceneClose2GL::OnImGuiRender()
     }
 
     ImGui::Text("Drawing Primitive");
-    if (ImGui::RadioButton("Triangle", drawPrimitive == DrawPrimitive::Triangle))
+    if (ImGui::RadioButton("Triangle", drawPrimitive == PRIMITIVE::Triangle))
     {
-        drawPrimitive = DrawPrimitive::Triangle;
+        drawPrimitive = PRIMITIVE::Triangle;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Point", drawPrimitive == DrawPrimitive::Point))
+    if (ImGui::RadioButton("Point", drawPrimitive == PRIMITIVE::Point))
     {
-        drawPrimitive = DrawPrimitive::Point;
+        drawPrimitive = PRIMITIVE::Point;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("WireFrame", drawPrimitive == DrawPrimitive::WireFrame))
+    if (ImGui::RadioButton("WireFrame", drawPrimitive == PRIMITIVE::WireFrame))
     {
-        drawPrimitive = DrawPrimitive::WireFrame;
+        drawPrimitive = PRIMITIVE::WireFrame;
     }
 
     ImGui::Text("SHADING Model");
