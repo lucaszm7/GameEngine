@@ -102,7 +102,7 @@ namespace cgl
 			(this->e[3] * v.e[3]);
 	}
 
-	inline vec4 vec4::unit_vector() const
+	vec4 vec4::unit_vector() const
 	{
 		return *this / this->lenght();
 	}

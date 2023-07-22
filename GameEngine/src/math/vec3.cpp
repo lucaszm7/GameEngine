@@ -38,12 +38,12 @@ namespace cgl
 		return t * v;
 	}
 
-	inline vec3 operator / (vec3 v, float t)
+	vec3 operator / (vec3 v, float t)
 	{
 		return (1 / t) * v;
 	}
 
-	inline float vec3::dot(const vec3& v) const
+	float vec3::dot(const vec3& v) const
 	{
 		return this->e[0] * v.e[0] +
 			   this->e[1] * v.e[1] +
@@ -57,7 +57,7 @@ namespace cgl
 			        this->e[0] * v.e[1] - this->e[1] * v.e[0]);
 	}
 
-	inline vec3 vec3::unit_vector() const
+	vec3 vec3::unit_vector() const
 	{
 		return *this / this->lenght();
 	}
