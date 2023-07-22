@@ -5,7 +5,7 @@ static glm::vec3 _random_normalized_color()
 	return { rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0) };
 }
 
-void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
+void Model::Draw(Shader& shader, PRIMITIVE drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);

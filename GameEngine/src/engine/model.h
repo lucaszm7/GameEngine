@@ -29,7 +29,7 @@ public:
 	}
 
 	void Draw(Shader& shader, 
-		DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
+		PRIMITIVE drawPrimitive = PRIMITIVE::Triangle) const;
 	
 	cgl::mat4 GetModelMatrix() const;
 	void OnImGui() const;
