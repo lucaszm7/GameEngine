@@ -3,6 +3,7 @@
 #include <string>
 
 // Engine
+#include "shader.h"
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
