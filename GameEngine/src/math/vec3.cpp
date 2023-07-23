@@ -18,6 +18,11 @@ namespace cgl
 		}
 	}
 
+	cgl::vec3 reflect(const cgl::vec3& ray, const cgl::vec3& normal)
+	{
+		return ray - 2 * (ray.dot(normal)) * ray;
+	}
+
 	vec3 operator - (vec3 u, vec3 v)
 	{
 		return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
