@@ -18,6 +18,11 @@ namespace cgl
 		}
 	}
 
+	glm::vec3 vec3::to_glm() const
+	{
+		return glm::vec3(x, y, z);
+	}
+
 	cgl::vec3 reflect(const cgl::vec3& ray, const cgl::vec3& normal)
 	{
 		return ray - 2 * (ray.dot(normal)) * ray;

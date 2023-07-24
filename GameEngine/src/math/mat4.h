@@ -53,7 +53,7 @@ namespace cgl
 		static mat4 viewport(unsigned int screenWidth, unsigned int screenHeight);
 
 		float* get_pointer() const { return (float*)(&(mat[0][0])); };
-		inline vec4 operator [] (int i) const { return vec4(mat[i]); }
-		inline std::array<float, 4>& operator [] (int i) { return mat[i]; }
+		vec4 operator [] (int i) const { return vec4(mat[i]); }
+		std::array<float, 4>& operator [] (int i) { return mat[i]; }
 	};
 }

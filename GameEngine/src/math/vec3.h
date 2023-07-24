@@ -39,6 +39,8 @@ namespace cgl
 
 		vec3(const std::array<float, 3>& v) : e(v) {};
 
+		glm::vec3 to_glm() const;
+
 		inline float operator [] (int i) const { return e[i]; }
 		inline float& operator [] (int i) { return e[i]; }
 
