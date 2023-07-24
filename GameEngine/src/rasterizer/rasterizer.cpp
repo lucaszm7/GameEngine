@@ -64,8 +64,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	// ================
 	cgl::mat4 mvp = projection * view * modelM;
 
-	cgl::mat4 mv = view * modelM;
-	cgl::mat4 mv_transposed_inversed = cgl::mat4(glm::inverse(mv.to_glm())).transpose();
+	cgl::mat4 model_transposed_inversed = modelM.inverse();
 
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
 	{
@@ -139,6 +138,19 @@ void Rasterizer::DrawSoftwareRasterized(
 			// Get Attributes
 			// ==============
 
+			// Normals
+			auto normal0 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 0].Normal, 1);
+			auto normal1 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 1].Normal, 1);
+			auto normal2 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 2].Normal, 1);
+
+			/*auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
+			auto normalPerspectiveCorrect1 = normal1 * (1 / v1.w);
+			auto normalPerspectiveCorrect2 = normal2 * (1 / v2.w);*/
+
+			cglNormals.push_back(normal0);
+			cglNormals.push_back(normal1);
+			cglNormals.push_back(normal2);
+
 			// =================================
 			// Perspective Correct Interpolation
 			// =================================
@@ -156,19 +168,6 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglColors.push_back(colorPerspectiveCorrect0);
 			cglColors.push_back(colorPerspectiveCorrect1);
 			cglColors.push_back(colorPerspectiveCorrect2);
-
-			// Normals
-			auto normal0 = mv * cgl::vec4(model.meshes[i].vertices[j + 0].Normal, 1);
-			auto normal1 = mv * cgl::vec4(model.meshes[i].vertices[j + 1].Normal, 1);
-			auto normal2 = mv * cgl::vec4(model.meshes[i].vertices[j + 2].Normal, 1);
-
-			auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
-			auto normalPerspectiveCorrect1 = normal1 * (1 / v1.w);
-			auto normalPerspectiveCorrect2 = normal2 * (1 / v2.w);
-
-			cglNormals.push_back(normalPerspectiveCorrect0);
-			cglNormals.push_back(normalPerspectiveCorrect1);
-			cglNormals.push_back(normalPerspectiveCorrect2);
 		}
 		Rasterize(cglVertices, cglColors, cglNormals);
 	}
