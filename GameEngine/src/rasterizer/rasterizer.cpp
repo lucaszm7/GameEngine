@@ -230,12 +230,12 @@ void Rasterizer::Rasterize(
 		auto& n1 = pixelNormals[i + 1];
 		auto& n2 = pixelNormals[i + 2];
 
-		auto x0 = (unsigned int)std::trunc(p0.x);
-		auto y0 = (unsigned int)std::trunc(p0.y);
-		auto x1 = (unsigned int)std::trunc(p1.x);
-		auto y1 = (unsigned int)std::trunc(p1.y);
-		auto x2 = (unsigned int)std::trunc(p2.x);
-		auto y2 = (unsigned int)std::trunc(p2.y);
+		auto x0 = (unsigned int)std::round(p0.x);
+		auto y0 = (unsigned int)std::round(p0.y);
+		auto x1 = (unsigned int)std::round(p1.x);
+		auto y1 = (unsigned int)std::round(p1.y);
+		auto x2 = (unsigned int)std::round(p2.x);
+		auto y2 = (unsigned int)std::round(p2.y);
 
 		// Ordena de forma decrescente em Y (top to bottom)
 		if (std::tie(y1, x1) < std::tie(y0, x0)) { std::swap(x0, x1); std::swap(y0, y1); std::swap(p0, p1); std::swap(c0, c1); std::swap(n0, n1); }
@@ -283,7 +283,7 @@ void Rasterizer::Rasterize(
 			for (auto y = y0; y < y1; ++y)
 			{
 				Scanline(y,
-					slope_x[0]->get(), slope_x[1]->get(),
+					std::round(slope_x[0]->get()), std::round(slope_x[1]->get()),
 					slope_z[0]->get(), slope_z[1]->get(),
 					slope_color[0]->get(), slope_color[1]->get(),
 					slope_normal[0]->get(), slope_normal[1]->get());
@@ -316,7 +316,7 @@ void Rasterizer::Rasterize(
 			for (auto y = y1; y < y2; ++y)
 			{
 				Scanline(y,
-					slope_x[0]->get(), slope_x[1]->get(),
+					std::round(slope_x[0]->get()), std::round(slope_x[1]->get()),
 					slope_z[0]->get(), slope_z[1]->get(),
 					slope_color[0]->get(), slope_color[1]->get(),
 					slope_normal[0]->get(), slope_normal[1]->get());
