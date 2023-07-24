@@ -124,6 +124,9 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         }
     }
 
+    if(isLightFixedToCamera)
+        dirLight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
+
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 }, glm::vec3{1.0f, 0.0f, 0.0f});
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 }, glm::vec3{0.0f, 1.0f, 0.0f});
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,0,1000 }, glm::vec3{0.0f, 0.0f, 1.0f});
@@ -191,6 +194,8 @@ void SceneClose2GL::OnImGuiRender()
     }
 
     ImGui::Checkbox("Show Textures", &showTexture);
+    ImGui::SameLine();
+    ImGui::Checkbox("Fix directional light to Camera", &isLightFixedToCamera);
 
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))

@@ -58,6 +58,7 @@ private:
 	bool isLoadingClockWise = false;
 
 	bool showTexture = false;
+	bool isLightFixedToCamera = true;
 
 	unsigned int VertexShadingGouraudIndex;
 	unsigned int VertexShadingPhongIndex;
