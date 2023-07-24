@@ -155,15 +155,43 @@ void Rasterizer::DrawSoftwareRasterized(
 			// Perspective Correct Interpolation
 			// =================================
 			
-			/*if (shading == SHADING::GOURAUD)
-			{
-
-			}*/
-
 			// Colors
-			auto colorPerspectiveCorrect0 = cgl::vec4(model.meshes[i].vertices[j + 0].Color, 1) * (1 / v0.w);
-			auto colorPerspectiveCorrect1 = cgl::vec4(model.meshes[i].vertices[j + 1].Color, 1) * (1 / v1.w);
-			auto colorPerspectiveCorrect2 = cgl::vec4(model.meshes[i].vertices[j + 2].Color, 1) * (1 / v2.w);
+			auto color0 = cgl::vec4(model.meshes[i].vertices[j + 0].Color, 1);
+			auto color1 = cgl::vec4(model.meshes[i].vertices[j + 1].Color, 1);
+			auto color2 = cgl::vec4(model.meshes[i].vertices[j + 2].Color, 1);
+
+			if (shading == SHADING::GOURAUD)
+			{
+				auto dirLight = cgl::vec3(-m_DirectionalLight.direction).normalized();
+
+				// vertex 0
+				{
+					auto diff = std::max(0.0f, dirLight.dot(normal0.to_vec3()));
+					auto diffuse = m_DirectionalLight.diffuse * color0.to_vec3() * diff;
+					auto ambient = m_DirectionalLight.ambient * color0.to_vec3();
+					color0 = cgl::vec4(ambient + diffuse, 1.0f);
+				}
+
+				// vertex 1
+			{
+					auto diff = std::max(0.0f, dirLight.dot(normal1.to_vec3()));
+					auto diffuse = m_DirectionalLight.diffuse * color1.to_vec3() * diff;
+					auto ambient = m_DirectionalLight.ambient * color1.to_vec3();
+					color1 = cgl::vec4(ambient + diffuse, 1.0f);
+				}
+
+				// vertex 2
+				{
+					auto diff = std::max(0.0f, dirLight.dot(normal2.to_vec3()));
+					auto diffuse = m_DirectionalLight.diffuse * color2.to_vec3() * diff;
+					auto ambient = m_DirectionalLight.ambient * color2.to_vec3();
+					color2 = cgl::vec4(ambient + diffuse, 1.0f);
+				}
+			}
+
+			auto colorPerspectiveCorrect0 = color0 * (1 / v0.w);
+			auto colorPerspectiveCorrect1 = color1 * (1 / v1.w);
+			auto colorPerspectiveCorrect2 = color2 * (1 / v2.w);
 
 			cglColors.push_back(colorPerspectiveCorrect0);
 			cglColors.push_back(colorPerspectiveCorrect1);
