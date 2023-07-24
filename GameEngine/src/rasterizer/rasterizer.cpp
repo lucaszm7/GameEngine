@@ -143,13 +143,13 @@ void Rasterizer::DrawSoftwareRasterized(
 			auto normal1 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 1].Normal, 1);
 			auto normal2 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 2].Normal, 1);
 
-			/*auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
+			auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
 			auto normalPerspectiveCorrect1 = normal1 * (1 / v1.w);
-			auto normalPerspectiveCorrect2 = normal2 * (1 / v2.w);*/
+			auto normalPerspectiveCorrect2 = normal2 * (1 / v2.w);
 
-			cglNormals.push_back(normal0);
-			cglNormals.push_back(normal1);
-			cglNormals.push_back(normal2);
+			cglNormals.push_back(normalPerspectiveCorrect0);
+			cglNormals.push_back(normalPerspectiveCorrect1);
+			cglNormals.push_back(normalPerspectiveCorrect2);
 
 			// =================================
 			// Perspective Correct Interpolation
@@ -362,7 +362,7 @@ void Rasterizer::Scanline(unsigned int y,
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
 				cgl::vec3 pixelColor = (color.get() * (1 / color.get().w)).to_vec3();
-				cgl::vec3 pixelNormal = (normal.get()).to_vec3().normalized();
+				cgl::vec3 pixelNormal = (normal.get() * (1 / normal.get().w)).to_vec3().normalized();
 
 				if (m_Shading == SHADING::PHONG)
 				{
