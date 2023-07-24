@@ -118,7 +118,8 @@ namespace cgl
 	{
 		return x <= w && x >= -w
 			&& y <= w && y >= -w
-			&& z <= w && z >= -w;
+			&& z <= w && z >= -w
+			&& w > 0;
 	}
 
 	float vec4::lenght_squared() const
