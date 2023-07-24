@@ -39,6 +39,8 @@ namespace cgl
 
 		vec3(const std::array<float, 3>& v) : e(v) {};
 
+		glm::vec3 to_glm() const;
+
 		inline float operator [] (int i) const { return e[i]; }
 		inline float& operator [] (int i) { return e[i]; }
 
@@ -73,6 +75,8 @@ namespace cgl
 	{
 		return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
 	}
+
+	cgl::vec3 reflect(const cgl::vec3& ray, const cgl::vec3& normal);
 
 	// Type aliases for vec3
 	using point3 = vec3;

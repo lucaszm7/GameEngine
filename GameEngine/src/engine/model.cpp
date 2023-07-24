@@ -5,7 +5,7 @@ static glm::vec3 _random_normalized_color()
 	return { rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0) };
 }
 
-void Model::Draw(Shader& shader, DrawPrimitive drawPrimitive) const
+void Model::Draw(Shader& shader, PRIMITIVE drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -147,8 +147,9 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		Vertex v1;
 		Vertex v2;
 
-		glm::vec3 color = _random_normalized_color();
-		v0.Color = v1.Color = v2.Color = color;
+		v0.Color = {1, 0, 0};
+		v1.Color = {0, 1, 0};
+		v2.Color = {0, 0, 1};
 
 		std::getline(stream, line);
 		ss.str(std::string());

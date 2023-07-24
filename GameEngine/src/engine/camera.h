@@ -192,7 +192,7 @@ namespace cgl
 
             cgl::mat4 perspectiveProjection = PI * S * H;
 
-            return perspectiveProjection.transpose();
+            return perspectiveProjection;
         }
 
         // processes input received from any keyboard-like input system. 
@@ -268,7 +268,7 @@ namespace cgl
             cameraTranslation.mat[1][3] = -(eye.y);
             cameraTranslation.mat[2][3] = -(eye.z);
 
-            return (cameraBasis * cameraTranslation).transpose();
+            return (cameraBasis * cameraTranslation);
         }
 
         // calculates the front vector from the Camera's (updated) Euler Angles

@@ -44,9 +44,11 @@ SceneClose2GL::SceneClose2GL()
 
     VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
     VertexShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Phong");
+    VertexShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "None");
 
     FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Gouraud");
     FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Phong");
+    FragmentShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "None");
 
     FragmentColoringSolidIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "SolidColor");
     FragmentColoringTextureIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "TextureColor");
@@ -71,20 +73,30 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         spotlight.position = glm::vec3(oglCamera.Position.x, oglCamera.Position.y, oglCamera.Position.z);
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         
+        unsigned int fragShadingIndex;
+        if (shading == SHADING::GOURAUD)
+            fragShadingIndex = FragmentShadingGouraudIndex;
+        else if (shading == SHADING::PHONG)
+            fragShadingIndex = FragmentShadingPhongIndex;
+        else
+            fragShadingIndex = FragmentShadingNoneIndex;
+
+        unsigned int vertexSubroutineIndex = shading == SHADING::GOURAUD ? VertexShadingGouraudIndex : VertexShadingPhongIndex;
+
         std::array<unsigned int, 2> fragmentSubroutineIndex;
-        fragmentSubroutineIndex[0] = (isGouraudShading ? FragmentShadingGouraudIndex : FragmentShadingPhongIndex);
+        fragmentSubroutineIndex[0] = fragShadingIndex;
         fragmentSubroutineIndex[1] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
-        OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
         
-        if (isGouraudShading)
+        OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
+        OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &vertexSubroutineIndex);
+
+        if (shading == SHADING::GOURAUD)
         {
-            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingGouraudIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::VERTEX);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::VERTEX);
         }
-        else
+        else if (shading == SHADING::PHONG)
         {
-            OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &VertexShadingPhongIndex);
             OpenGLShader.SetUniformLight(dirLight, ShaderStage::FRAGMENT);
             OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
         }
@@ -107,10 +119,13 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
         for (const auto& object : objects)
         {
-            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, rasterizerViewPort, *screenWidth, *screenHeight,
-                drawPrimitive, isEnableCullFace, isCullingClockWise);
+            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, dirLight, drawPrimitive,
+                isEnableCullFace, isCullingClockWise, shading);
         }
     }
+
+    if(isLightFixedToCamera)
+        dirLight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
 
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 1000,0,0 }, glm::vec3{1.0f, 0.0f, 0.0f});
     Debug::Line::Draw(glm::vec3{ 0,0,0 }, glm::vec3{ 0,1000,0 }, glm::vec3{0.0f, 1.0f, 0.0f});
@@ -147,33 +162,40 @@ void SceneClose2GL::OnImGuiRender()
     }
 
     ImGui::Text("Drawing Primitive");
-    if (ImGui::RadioButton("Triangle", drawPrimitive == DrawPrimitive::Triangle))
+    if (ImGui::RadioButton("Triangle", drawPrimitive == PRIMITIVE::Triangle))
     {
-        drawPrimitive = DrawPrimitive::Triangle;
+        drawPrimitive = PRIMITIVE::Triangle;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Point", drawPrimitive == DrawPrimitive::Point))
+    if (ImGui::RadioButton("Point", drawPrimitive == PRIMITIVE::Point))
     {
-        drawPrimitive = DrawPrimitive::Point;
+        drawPrimitive = PRIMITIVE::Point;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("WireFrame", drawPrimitive == DrawPrimitive::WireFrame))
+    if (ImGui::RadioButton("WireFrame", drawPrimitive == PRIMITIVE::WireFrame))
     {
-        drawPrimitive = DrawPrimitive::WireFrame;
+        drawPrimitive = PRIMITIVE::WireFrame;
     }
 
-    ImGui::Text("Shading Model");
-    if (ImGui::RadioButton("Gouraud Shading", isGouraudShading))
+    ImGui::Text("SHADING Model");
+    if (ImGui::RadioButton("No lighting", shading == SHADING::NONE))
     {
-        isGouraudShading = true;
+        shading = SHADING::NONE;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Phong Shading", !isGouraudShading))
+    if (ImGui::RadioButton("Gouraud SHADING", shading == SHADING::GOURAUD))
     {
-        isGouraudShading = false;
+        shading = SHADING::GOURAUD;
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Phong SHADING", shading == SHADING::PHONG))
+    {
+        shading = SHADING::PHONG;
     }
 
     ImGui::Checkbox("Show Textures", &showTexture);
+    ImGui::SameLine();
+    ImGui::Checkbox("Fix directional light to Camera", &isLightFixedToCamera);
 
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))

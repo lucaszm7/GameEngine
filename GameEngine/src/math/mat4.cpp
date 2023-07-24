@@ -19,6 +19,19 @@ namespace cgl
 		mat[3] = l3.get_array();
 	}
 
+	glm::mat4 mat4::to_glm()
+	{
+		glm::mat4 glmMat4;
+		for (int i = 0; i < 4; ++i)
+		{
+			for (int j = 0; j < 4; ++j)
+			{
+				glmMat4[i][j] = (*this)[i][j];
+			}
+		}
+		return glmMat4;
+	}
+
 	mat4 mat4::translate(const vec4& t)
 	{
 		mat4 tra = mat4::identity();
@@ -117,6 +130,19 @@ namespace cgl
 			get_collum(2),
 			get_collum(3)
 		);
+	}
+
+	mat4 mat4::inverse() const
+	{
+		mat4 matrix;
+		matrix[0][0] =   mat[0][0];  matrix[0][1] = mat[1][0];  matrix[0][2] = mat[2][0];  matrix[0][3] = 0.0f;
+		matrix[1][0] =   mat[0][1];  matrix[1][1] = mat[1][1];  matrix[1][2] = mat[2][1];  matrix[1][3] = 0.0f;
+		matrix[2][0] =   mat[0][2];  matrix[2][1] = mat[1][2];  matrix[2][2] = mat[2][2];  matrix[2][3] = 0.0f;
+		matrix[3][0] = -(mat[3][0] * matrix[0][0] + mat[3][1] * matrix[1][0] + mat[3][2] * matrix[2][0]);
+		matrix[3][1] = -(mat[3][0] * matrix[0][1] + mat[3][1] * matrix[1][1] + mat[3][2] * matrix[2][1]);
+		matrix[3][2] = -(mat[3][0] * matrix[0][2] + mat[3][1] * matrix[1][2] + mat[3][2] * matrix[2][2]);
+		matrix[3][3] = 1.0f;
+		return matrix;
 	}
 
 	float mat4::determinant() const

@@ -39,22 +39,22 @@ namespace cgl
 		return vec4(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2], u.e[3] - v.e[3]);
 	}
 
-	inline vec4 operator * (const vec4& u, const vec4& v)
+	vec4 operator * (const vec4& u, const vec4& v)
 	{
 		return vec4(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2], u.e[3] * v.e[3]);
 	}
 
-	inline vec4 operator * (float t, const vec4& v)
+	vec4 operator * (float t, const vec4& v)
 	{
 		return vec4(v.e[0] * t, v.e[1] * t, v.e[2] * t, v.e[3] * t);
 	}
 
-	inline vec4 operator * (const vec4& v, float t)
+	vec4 operator * (const vec4& v, float t)
 	{
 		return t * v;
 	}
 
-	inline vec4 operator / (const vec4& v, float t)
+	vec4 operator / (const vec4& v, float t)
 	{
 		return (1 / t) * v;
 	}
@@ -102,7 +102,7 @@ namespace cgl
 			(this->e[3] * v.e[3]);
 	}
 
-	inline vec4 vec4::unit_vector() const
+	vec4 vec4::unit_vector() const
 	{
 		return *this / this->lenght();
 	}
@@ -118,7 +118,8 @@ namespace cgl
 	{
 		return x <= w && x >= -w
 			&& y <= w && y >= -w
-			&& z <= w && z >= -w;
+			&& z <= w && z >= -w
+			&& w > 0;
 	}
 
 	float vec4::lenght_squared() const

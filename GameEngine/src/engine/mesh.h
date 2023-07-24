@@ -34,7 +34,7 @@ struct Transform
 	glm::vec3 scale = glm::vec3(1.0f);
 };
 
-enum class DrawPrimitive
+enum class PRIMITIVE
 {
 	Triangle = GL_FILL,
 	Point = GL_POINT,
@@ -50,7 +50,7 @@ public:
 
 	Mesh() = default;
 	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text);
-	void Draw(Shader& shader, DrawPrimitive drawPrimitive = DrawPrimitive::Triangle) const;
+	void Draw(Shader& shader, PRIMITIVE drawPrimitive = PRIMITIVE::Triangle) const;
 	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text);
 
 private:

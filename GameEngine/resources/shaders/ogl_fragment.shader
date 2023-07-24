@@ -69,6 +69,7 @@ subroutine uniform Shading shadingSelected;
 
 vec3 Gouraud(vec3 normal, vec3 viewDir);
 vec3 Phong(vec3 normal, vec3 viewDir);
+vec3 None(vec3 normal, vec3 viewDir);
 
 vec3 PhongDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 PhongPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
@@ -96,6 +97,12 @@ void main()
     vec3 result = shadingSelected(norm, viewDir);
 
 	FragColor = vec4(result, 1.0);
+}
+
+subroutine (Shading) 
+vec3 None(vec3 normal, vec3 viewDir)
+{
+    return outColor;
 }
 
 subroutine (Shading) 

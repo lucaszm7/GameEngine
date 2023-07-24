@@ -18,6 +18,16 @@ namespace cgl
 		}
 	}
 
+	glm::vec3 vec3::to_glm() const
+	{
+		return glm::vec3(x, y, z);
+	}
+
+	cgl::vec3 reflect(const cgl::vec3& ray, const cgl::vec3& normal)
+	{
+		return ray - 2 * (ray.dot(normal)) * ray;
+	}
+
 	vec3 operator - (vec3 u, vec3 v)
 	{
 		return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
@@ -38,12 +48,12 @@ namespace cgl
 		return t * v;
 	}
 
-	inline vec3 operator / (vec3 v, float t)
+	vec3 operator / (vec3 v, float t)
 	{
 		return (1 / t) * v;
 	}
 
-	inline float vec3::dot(const vec3& v) const
+	float vec3::dot(const vec3& v) const
 	{
 		return this->e[0] * v.e[0] +
 			   this->e[1] * v.e[1] +
@@ -57,7 +67,7 @@ namespace cgl
 			        this->e[0] * v.e[1] - this->e[1] * v.e[0]);
 	}
 
-	inline vec3 vec3::unit_vector() const
+	vec3 vec3::unit_vector() const
 	{
 		return *this / this->lenght();
 	}

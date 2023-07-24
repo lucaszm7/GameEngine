@@ -20,6 +20,13 @@ enum class ShaderStage
 	FRAGMENT = GL_FRAGMENT_SHADER
 };
 
+enum class SHADING
+{
+	GOURAUD,
+	PHONG,
+	NONE
+};
+
 class Shader
 {
 private:

@@ -3,6 +3,7 @@
 #include <string>
 
 // Engine
+#include "shader.h"
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
@@ -43,8 +44,6 @@ private:
 	std::vector<std::unique_ptr<Model>> objects;
 	std::vector<std::string> lookAtObjects;
 
-	ViewPort rasterizerViewPort;
-
 	int selectedObjectToAdd = 0;
 	int selectedTriOrientation = 1;
 
@@ -59,19 +58,22 @@ private:
 	bool isLoadingClockWise = false;
 
 	bool showTexture = false;
+	bool isLightFixedToCamera = true;
 
 	unsigned int VertexShadingGouraudIndex;
 	unsigned int VertexShadingPhongIndex;
+	unsigned int VertexShadingNoneIndex;
 
 	unsigned int FragmentShadingGouraudIndex;
 	unsigned int FragmentShadingPhongIndex;
+	unsigned int FragmentShadingNoneIndex;
 
 	unsigned int FragmentColoringSolidIndex;
 	unsigned int FragmentColoringTextureIndex;
 
-	bool isGouraudShading = false;
+	SHADING shading = SHADING::PHONG;
 
-	DrawPrimitive drawPrimitive = DrawPrimitive::Triangle;
+	PRIMITIVE drawPrimitive = PRIMITIVE::Triangle;
 
 	float imguiClearColor[3] = { 1.0f,1.0f,1.0f };
 
