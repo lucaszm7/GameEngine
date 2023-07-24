@@ -42,10 +42,10 @@ namespace cgl
 	mat4 mat4::rotateZ(float radians)
 	{
 		mat4 rot = mat4::identity();
-		rot[0][0] *= glm::cos(radians);
-		rot[0][1] *= -glm::sin(radians);
-		rot[1][1] *= glm::cos(radians);
-		rot[1][0] *= glm::sin(radians);
+		rot[0][0] =  cosf(radians);
+		rot[0][1] = -sinf(radians);
+		rot[1][0] =  sinf(radians);
+		rot[1][1] =  cosf(radians);
 		return rot;
 	}
 
@@ -53,10 +53,10 @@ namespace cgl
 	{
 		mat4 rot = mat4::identity();
 
-		rot[0][0] *= glm::cos(radians);
-		rot[0][2] *= glm::sin(radians);
-		rot[2][0] *= -glm::sin(radians);
-		rot[2][2] *= glm::cos(radians);
+		rot[0][0] =  cosf(radians);
+		rot[0][2] =  sinf(radians);
+		rot[2][0] = -sinf(radians);
+		rot[2][2] =  cosf(radians);
 		return rot;
 	}
 
@@ -64,10 +64,10 @@ namespace cgl
 	{
 		mat4 rot = mat4::identity();
 
-		rot[1][1] *= glm::cos(radians);
-		rot[1][2] *= glm::sin(radians);
-		rot[2][1] *= glm::cos(radians);
-		rot[2][2] *= glm::sin(radians);
+		rot[1][1] =  cosf(radians);
+		rot[1][2] = -sinf(radians);
+		rot[2][1] =  sinf(radians);
+		rot[2][2] =  cosf(radians);
 		return rot;
 	}
 
@@ -224,7 +224,7 @@ namespace cgl
 	{
 		vec4 r;
 		for (int i = 0; i < 4; ++i)
-		{
+		{ 
 			r[i] = vec4(mat[i]).dot(v4);
 		}
 		return r;

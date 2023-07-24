@@ -44,11 +44,11 @@ void Rasterizer::DrawSoftwareRasterized(
 
 	// Build Model Matrix
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(model.transform.position, 1.0f));
-	// model = model * cgl::mat4::rotateX(transform.rotation.x);
-	// model = model * cgl::mat4::rotateY(transform.rotation.y);
-	// model = model * cgl::mat4::rotateZ(transform.rotation.z);
+	cgl::mat4 rotation = cgl::mat4::rotateX(model.transform.rotation.x);
+	rotation = rotation * cgl::mat4::rotateY(model.transform.rotation.y);
+	rotation = rotation * cgl::mat4::rotateZ(model.transform.rotation.z);
 	cgl::mat4 scale = cgl::mat4::scale(model.transform.scale);
-	cgl::mat4 modelM = translate * scale;
+	cgl::mat4 modelM = translate * rotation * scale;
 
 	// Build View Matrix
 	cgl::mat4 view = camera.GetViewMatrix();
@@ -64,7 +64,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	// ================
 	cgl::mat4 mvp = projection * view * modelM;
 
-	cgl::mat4 model_transposed_inversed = modelM.inverse();
+	cgl::mat4 model_transposed_inversed = modelM.inverse().transpose();
 
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
 	{
@@ -143,13 +143,13 @@ void Rasterizer::DrawSoftwareRasterized(
 			auto normal1 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 1].Normal, 1);
 			auto normal2 = model_transposed_inversed * cgl::vec4(model.meshes[i].vertices[j + 2].Normal, 1);
 
-			/*auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
+			auto normalPerspectiveCorrect0 = normal0 * (1 / v0.w);
 			auto normalPerspectiveCorrect1 = normal1 * (1 / v1.w);
-			auto normalPerspectiveCorrect2 = normal2 * (1 / v2.w);*/
+			auto normalPerspectiveCorrect2 = normal2 * (1 / v2.w);
 
-			cglNormals.push_back(normal0);
-			cglNormals.push_back(normal1);
-			cglNormals.push_back(normal2);
+			cglNormals.push_back(normalPerspectiveCorrect0);
+			cglNormals.push_back(normalPerspectiveCorrect1);
+			cglNormals.push_back(normalPerspectiveCorrect2);
 
 			// =================================
 			// Perspective Correct Interpolation
@@ -362,7 +362,7 @@ void Rasterizer::Scanline(unsigned int y,
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
 				cgl::vec3 pixelColor = (color.get() * (1 / color.get().w)).to_vec3();
-				cgl::vec3 pixelNormal = (normal.get()).to_vec3().normalized();
+				cgl::vec3 pixelNormal = (normal.get() * (1 / normal.get().w)).to_vec3().normalized();
 
 				if (m_Shading == SHADING::PHONG)
 				{
