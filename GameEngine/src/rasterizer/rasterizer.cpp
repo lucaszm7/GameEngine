@@ -334,20 +334,22 @@ void Rasterizer::Scanline(unsigned int y,
 			if (z_buf.get() < m_ZBuffer.get(m_ZBuffer.height() - 1 - y, x))
 			{
 				cgl::vec3 pixelColor = (color.get() * (1 / color.get().w)).to_vec3();
-				cgl::vec3 pixelNormal = (normal.get() * (1 / normal.get().w)).to_vec3().normalized();
+				cgl::vec3 pixelNormal = (normal.get()).to_vec3().normalized();
 
 				if (m_Shading == SHADING::PHONG)
 				{
-					auto dirLight = cgl::vec3(-(glm::normalize(m_DirectionalLight.direction)));
+					auto dirLight = cgl::vec3(-m_DirectionalLight.direction).normalized();
 					auto diff = std::max(0.0f, dirLight.dot(pixelNormal));
 					auto diffuse = m_DirectionalLight.diffuse * pixelColor * diff;
+
 					auto ambient = m_DirectionalLight.ambient * pixelColor;
+
 					pixelColor = ambient + diffuse;
 				}
 
 				// else if (m_Shading == SHADING::NONE)
 
-				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel(pixelColor)); // *z_buf.get()));
+				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel(pixelColor));
 				m_ZBuffer.set(m_ZBuffer.height() - 1 - y, x, z_buf.get());
 
 				z_buf.advance();
