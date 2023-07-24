@@ -173,7 +173,7 @@ void Rasterizer::DrawSoftwareRasterized(
 				}
 
 				// vertex 1
-			{
+				{
 					auto diff = std::max(0.0f, dirLight.dot(normal1.to_vec3()));
 					auto diffuse = m_DirectionalLight.diffuse * color1.to_vec3() * diff;
 					auto ambient = m_DirectionalLight.ambient * color1.to_vec3();

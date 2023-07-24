@@ -13,6 +13,7 @@
 #include "camera.h"
 #include "shader.h"
 #include "light.h"
+#include "Lines.hpp"
 
 
 struct Pixel
