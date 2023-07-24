@@ -43,8 +43,8 @@ namespace cgl
 	{
 		mat4 rot = mat4::identity();
 		rot[0][0] =  cosf(radians);
-		rot[0][1] =  sinf(radians);
-		rot[1][0] = -sinf(radians);
+		rot[0][1] = -sinf(radians);
+		rot[1][0] =  sinf(radians);
 		rot[1][1] =  cosf(radians);
 		return rot;
 	}
@@ -65,8 +65,8 @@ namespace cgl
 		mat4 rot = mat4::identity();
 
 		rot[1][1] =  cosf(radians);
-		rot[1][2] =  sinf(radians);
-		rot[2][1] = -sinf(radians);
+		rot[1][2] = -sinf(radians);
+		rot[2][1] =  sinf(radians);
 		rot[2][2] =  cosf(radians);
 		return rot;
 	}

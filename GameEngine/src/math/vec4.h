@@ -75,7 +75,7 @@ namespace cgl
 
 		// Verify if is in [-1, 1] space
 		bool is_canonic_cube() const;
-		// Verify if is in [-w, w] space
+		// Verify if is in [-w, w] space, and remove w < 0
 		bool is_in_range(const float w) const;
 		friend inline std::ostream& operator << (std::ostream& out, const vec4& v);
 	};
