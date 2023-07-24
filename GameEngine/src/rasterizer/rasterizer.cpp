@@ -43,12 +43,14 @@ void Rasterizer::DrawSoftwareRasterized(
 	m_DirectionalLight = DirectionalLight;
 
 	// Build Model Matrix
-	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(model.transform.position, 1.0f));
-	// model = model * cgl::mat4::rotateX(transform.rotation.x);
-	// model = model * cgl::mat4::rotateY(transform.rotation.y);
-	// model = model * cgl::mat4::rotateZ(transform.rotation.z);
+	auto position = cgl::vec4(model.transform.position, 1.0f);
+
+	cgl::mat4 translate = cgl::mat4::translate(position);
+	cgl::mat4 rotation = cgl::mat4::rotateX(-model.transform.rotation.x);
+	rotation = rotation * cgl::mat4::rotateY(model.transform.rotation.y);
+	rotation = rotation * cgl::mat4::rotateZ(-model.transform.rotation.z);
 	cgl::mat4 scale = cgl::mat4::scale(model.transform.scale);
-	cgl::mat4 modelM = translate * scale;
+	cgl::mat4 modelM = translate * rotation * scale;
 
 	// Build View Matrix
 	cgl::mat4 view = camera.GetViewMatrix();
@@ -64,7 +66,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	// ================
 	cgl::mat4 mvp = projection * view * modelM;
 
-	cgl::mat4 model_transposed_inversed = modelM.inverse();
+	cgl::mat4 model_transposed_inversed = modelM;
 
 	for (unsigned int i = 0; i < model.meshes.size(); ++i)
 	{

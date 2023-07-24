@@ -30,9 +30,9 @@ namespace cgl
 		glm::mat4 to_glm();
 
 		static mat4 translate(const vec4& t);
-		static mat4 rotateX(float degrees);
-		static mat4 rotateY(float degrees);
-		static mat4 rotateZ(float degrees);
+		static mat4 rotateX(float radians);
+		static mat4 rotateY(float radians);
+		static mat4 rotateZ(float radians);
 		static mat4 scale(const vec3& s);
 
 		bool operator == (const mat4& m4) const;
