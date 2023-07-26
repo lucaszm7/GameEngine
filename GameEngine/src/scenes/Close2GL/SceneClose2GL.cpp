@@ -201,10 +201,29 @@ void SceneClose2GL::OnImGuiRender()
         shading = SHADING::PHONG;
     }
 
+    ImGui::Separator();
     ImGui::Checkbox("Show Textures", &showTexture);
-    ImGui::SameLine();
-    ImGui::Checkbox("Fix directional light to Camera", &isLightFixedToCamera);
+    if (showTexture)
+    {
+        ImGui::Text("TEXTURE FILTER");
+        if (ImGui::RadioButton("Nearest Neighbor", textureFilter == Texture::Filtering::NEAREST_NEIGHBOR))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::NEAREST_NEIGHBOR;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Bilinear", textureFilter == Texture::Filtering::BILINEAR))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::BILINEAR;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Trilinear", textureFilter == Texture::Filtering::TRILLINEAR))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::TRILLINEAR;
+        }
+    }
 
+    ImGui::Separator();
+    ImGui::Checkbox("Fix directional light to Camera", &isLightFixedToCamera);
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))
     {

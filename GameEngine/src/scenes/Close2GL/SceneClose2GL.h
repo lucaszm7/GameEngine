@@ -58,7 +58,7 @@ private:
 	bool isLoadingClockWise = false;
 
 	bool showTexture = false;
-	bool isLightFixedToCamera = true;
+	bool isLightFixedToCamera = false;
 
 	unsigned int VertexShadingGouraudIndex;
 	unsigned int VertexShadingPhongIndex;
@@ -74,6 +74,8 @@ private:
 	SHADING shading = SHADING::PHONG;
 
 	PRIMITIVE drawPrimitive = PRIMITIVE::Triangle;
+
+	Texture::Filtering textureFilter = Texture::Filtering::NEAREST_NEIGHBOR;
 
 	float imguiClearColor[3] = { 1.0f,1.0f,1.0f };
 

@@ -228,7 +228,7 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 	}
 
 	std::shared_ptr<Texture> tex;
-	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR, true);
+	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::DIFFUSE, Texture::Wrap::MIRROR, Texture::Filtering::NEAREST_NEIGHBOR, true);
 	textures.push_back(tex);
 
 	meshes.emplace_back(vertices, indices, textures);
@@ -349,7 +349,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTexture(aiMaterial* mat
 		if (!skip)
 		{
 			std::shared_ptr<Texture> texture;
-			texture = std::make_shared<Texture>(m_Path.substr(0, m_Path.find_last_of('/')) + "/" + std::string(str.C_Str()), textureType, Texture::Parameter::REPEAT);
+			texture = std::make_shared<Texture>(m_Path.substr(0, m_Path.find_last_of('/')) + "/" + std::string(str.C_Str()), textureType, Texture::Wrap::REPEAT, Texture::Filtering::TRILLINEAR);
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
 		}
