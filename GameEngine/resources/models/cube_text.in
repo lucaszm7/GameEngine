@@ -5,7 +5,7 @@ ambient color 0.7 0.7 0.7
 diffuse color 0.5 0.5 0.5
 specular color 0.5 0.5 0.5
 material shine 10.0
-Texture = NO
+Texture = YES
 -- 3*[pos(x,y,z) normal(x,y,z) color_index text_coord] face_normal(x,y,z)
 v0 -1.0 -1.0 -2.0 0.0 0.0 1.0 0 0.0 0.0
 v1  1.0 -1.0 -2.0 0.0 0.0 1.0 0 1.0 0.0
