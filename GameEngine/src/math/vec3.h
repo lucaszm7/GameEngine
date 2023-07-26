@@ -13,6 +13,8 @@
 #include <GLM/glm.hpp>
 #include "math_utils.h"
 
+#include "vec2.h"
+
 namespace cgl
 {
 	struct vec3
@@ -31,6 +33,9 @@ namespace cgl
 		vec3() = default;
 		vec3(float v);
 
+		vec3(const cgl::vec2& v) : e{ v.x, v.y, 0.0f } {};
+		vec3(const cgl::vec2& v, float z) : e{ v.x, v.y, z } {};
+
 		vec3(const vec3& v) = default;
 		vec3(const glm::vec3& v);
 
@@ -40,6 +45,7 @@ namespace cgl
 		vec3(const std::array<float, 3>& v) : e(v) {};
 
 		glm::vec3 to_glm() const;
+		cgl::vec2 to_vec2() const;
 
 		inline float operator [] (int i) const { return e[i]; }
 		inline float& operator [] (int i) { return e[i]; }
