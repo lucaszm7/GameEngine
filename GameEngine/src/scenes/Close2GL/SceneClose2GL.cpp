@@ -119,8 +119,16 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
         for (const auto& object : objects)
         {
-            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, dirLight, drawPrimitive,
-                isEnableCullFace, isCullingClockWise, shading);
+            Rasterizer::DrawSoftwareRasterized(
+                *object, 
+                cglCamera, 
+                dirLight, 
+                drawPrimitive,
+                shading,
+                showTexture,
+                isEnableCullFace, 
+                isCullingClockWise
+            );
         }
     }
 

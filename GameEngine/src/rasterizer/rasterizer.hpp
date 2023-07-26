@@ -64,9 +64,10 @@ public:
 		const cgl::Camera& camera,
 		DirectionalLight& DirectionalLight,
 		PRIMITIVE primitive = PRIMITIVE::Triangle,
+		SHADING shading = SHADING::NONE,
+		bool showTextures = false,
 		bool isCulling = false,
-		bool isCullingClockWise = false,
-		SHADING shading = SHADING::NONE
+		bool isCullingClockWise = false
 	);
 
 	static void SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
@@ -82,16 +83,19 @@ private:
 	static void Rasterize(
 		std::vector<cgl::vec4>& pixelCoordinates, 
 		std::vector<cgl::vec4>& pixelColors, 
-		std::vector<cgl::vec4>& pixelNormals);
+		std::vector<cgl::vec4>& pixelNormals,
+		std::vector<cgl::vec3>& pixelUVs);
 
 	static void Scanline(unsigned int y, 
 		int left_x, int right_x,
 		float left_z, float right_z,
 		cgl::vec4 color_left, cgl::vec4 color_right,
-		cgl::vec4 normal_left, cgl::vec4 normal_right);
+		cgl::vec4 normal_left, cgl::vec4 normal_right,
+		cgl::vec3 uv_left, cgl::vec3 uv_right);
 
 	inline static SHADING m_Shading;
 	inline static PRIMITIVE m_Primitive;
+	inline static bool m_ShowTexture;
 
 	inline static DirectionalLight m_DirectionalLight;
 
