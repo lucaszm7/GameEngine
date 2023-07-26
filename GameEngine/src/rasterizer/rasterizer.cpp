@@ -80,6 +80,10 @@ void Rasterizer::DrawSoftwareRasterized(
 		cglNormals.reserve(model.meshes[i].vertices.size());
 		cglUVs.reserve(model.meshes[i].vertices.size());
 
+
+		if (m_ShowTexture)
+			m_CurrentTexture = model.meshes[i].textures[0];
+
 		for (unsigned int j = 0; j < model.meshes[i].vertices.size(); j += 3)
 		{
 			// ===============================
@@ -408,12 +412,15 @@ void Rasterizer::Scanline(unsigned int y,
 				cgl::vec3 pixelNormal = (normal.get() * (1 / normal.get().w)).to_vec3().normalized();
 				cgl::vec2 pixelUV     = (uv.get()     * (1 / uv.get().z)).to_vec2();
 
-				float u = std::clamp(pixelUV.x, 0.0f, 1.0f);
-				float v = std::clamp(pixelUV.y, 0.0f, 1.0f);
 
 				if (m_ShowTexture)
 				{
-					pixelColor = { u, v, 0.0f };
+					unsigned int u = std::round(std::clamp(pixelUV.x, 0.0f, 1.0f) * m_CurrentTexture->GetWidth());
+					unsigned int v = std::round(std::clamp(pixelUV.y, 0.0f, 1.0f) * m_CurrentTexture->GetHeight());
+
+					auto textureBuffer = m_CurrentTexture->GetLocalBuffer();
+					auto currentPixelColor = &textureBuffer[((v * m_CurrentTexture->GetWidth()) + u) * 3];
+					pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
 				}
 
 				if (m_Shading == SHADING::PHONG)

@@ -26,6 +26,7 @@ public:
 	Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam = Texture::Parameter::LINEAR);
 
 	void Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam = Texture::Parameter::LINEAR);
+	unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
 
 	~Texture();
 
@@ -53,6 +54,13 @@ public:
 		SPECULAR,
 		EMISSION,
 		RAW
+	};
+
+	enum class Filtering
+	{
+		NEAREST_NEIGHBOR = GL_NEAREST,
+		BILINEAR = GL_LINEAR,
+		TRILLINEAR
 	};
 
 	static std::string to_string(Texture::Type type)

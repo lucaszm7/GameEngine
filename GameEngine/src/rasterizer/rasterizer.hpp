@@ -97,6 +97,8 @@ private:
 	inline static PRIMITIVE m_Primitive;
 	inline static bool m_ShowTexture;
 
+	inline static std::shared_ptr<Texture> m_CurrentTexture;
+
 	inline static DirectionalLight m_DirectionalLight;
 
 	inline static unsigned int m_screenWidth;
