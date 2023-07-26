@@ -1,10 +1,9 @@
 #include "Texture.h"
 #include "STB/stb_image.h"
 
-Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam)
+Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam, bool keepLocalBuffer)
 	:m_FilePath(path), type(type)
 {
-	unsigned char* m_LocalBuffer = nullptr;
 	stbi_set_flip_vertically_on_load(true);
 	glGenTextures(1, &m_RendererID);
 	m_LocalBuffer = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &nrComponents, 0);
@@ -24,7 +23,8 @@ Texture::Texture(const std::string& path, Texture::Type type, Texture::Parameter
 		glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_LocalBuffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		setTextureParam(texParam);
-		stbi_image_free(m_LocalBuffer);
+		if(!keepLocalBuffer)
+			stbi_image_free(m_LocalBuffer);
 	}
 	else
 	{

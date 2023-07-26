@@ -228,7 +228,7 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 	}
 
 	std::shared_ptr<Texture> tex;
-	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR);
+	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::SPECULAR, Texture::Parameter::LINEAR, true);
 	textures.push_back(tex);
 
 	meshes.emplace_back(vertices, indices, textures);

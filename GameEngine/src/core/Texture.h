@@ -15,13 +15,14 @@ private:
 	std::string m_FilePath = "";
 	int m_Width = 0;
 	int m_Height = 0;
+	unsigned char* m_LocalBuffer = nullptr;
 	int nrComponents = 0;
 public:
 	enum class Parameter;
 	enum class Type;
 	Texture::Type type;
 
-	Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam = Texture::Parameter::LINEAR);
+	Texture(const std::string& path, Texture::Type type, Texture::Parameter texParam = Texture::Parameter::LINEAR, bool keepLocalBuffer = false);
 	Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam = Texture::Parameter::LINEAR);
 
 	void Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Parameter texParam = Texture::Parameter::LINEAR);
