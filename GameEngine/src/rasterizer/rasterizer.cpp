@@ -82,7 +82,7 @@ void Rasterizer::DrawSoftwareRasterized(
 
 
 		if (m_ShowTexture)
-			m_CurrentTexture = model.meshes[i].textures[0];
+			m_CurrentTexture = !model.meshes[i].textures.empty() ? model.meshes[i].textures[0] : nullptr;
 
 		for (unsigned int j = 0; j < model.meshes[i].vertices.size(); j += 3)
 		{
@@ -222,7 +222,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	}
 
 	if (!m_TextureToDrawOn)
-		m_TextureToDrawOn = std::make_unique<Texture>(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight);
+		m_TextureToDrawOn = std::make_unique<Texture>(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight, Texture::Filtering::NEAREST_NEIGHBOR);
 	else
 		m_TextureToDrawOn->Update(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight);
 
@@ -413,7 +413,7 @@ void Rasterizer::Scanline(unsigned int y,
 				cgl::vec2 pixelUV     = (uv.get()     * (1 / uv.get().z)).to_vec2();
 
 
-				if (m_ShowTexture)
+				if (m_ShowTexture && m_CurrentTexture)
 				{
 					unsigned int u = std::round(std::clamp(pixelUV.x, 0.0f, 1.0f) * m_CurrentTexture->GetWidth());
 					unsigned int v = std::round(std::clamp(pixelUV.y, 0.0f, 1.0f) * m_CurrentTexture->GetHeight());
