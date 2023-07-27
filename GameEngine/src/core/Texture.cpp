@@ -6,7 +6,7 @@ Texture::Texture(const std::string& path,
 	Texture::Wrap texParam, 
 	Texture::Filtering filtering,
 	bool keepLocalBuffer)
-	:m_FilePath(path), type(type)
+	:m_FilePath(path), type(type), filtering(filtering)
 {
 	stbi_set_flip_vertically_on_load(true);
 	glGenTextures(1, &m_RendererID);
@@ -27,7 +27,7 @@ Texture::Texture(const std::string& path,
 		glTexImage2D(GL_TEXTURE_2D, 0, format, m_Width, m_Height, 0, format, GL_UNSIGNED_BYTE, m_LocalBuffer);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		SetFiltering(filtering, texParam);
+		SetGlobalFiltering(filtering, texParam);
 
 		if(!keepLocalBuffer)
 			stbi_image_free(m_LocalBuffer);
@@ -40,15 +40,14 @@ Texture::Texture(const std::string& path,
 }
 
 Texture::Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Filtering filtering, Texture::Wrap texParam)
-	:type(Texture::Type::RAW), m_Width(width), m_Height(height)
+	:type(Texture::Type::RAW), m_Width(width), m_Height(height), filtering(filtering)
 {
 	if (data)
 	{
 		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		SetFiltering(filtering, texParam);
+		SetGlobalFiltering(filtering, texParam);
 	}
 	else
 	{
@@ -95,10 +94,19 @@ void Texture::Unbind() const
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::SetFiltering(Texture::Filtering filtering, Texture::Wrap texParam)
+void Texture::SetGlobalFiltering(Texture::Filtering filtering, Texture::Wrap texParam)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)texParam);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)texParam);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filtering);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filtering);
+}
+
+void Texture::SetFiltering() const
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)Texture::Wrap::REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLint)Texture::Wrap::REPEAT);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filtering);

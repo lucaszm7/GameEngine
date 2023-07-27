@@ -17,11 +17,15 @@ private:
 	int m_Height = 0;
 	unsigned char* m_LocalBuffer = nullptr;
 	int nrComponents = 0;
+
 public:
+
 	enum class Wrap;
 	enum class Type;
 	enum class Filtering;
 	inline static Texture::Filtering globalFilter;
+
+	Texture::Filtering filtering;
 
 	Texture::Type type;
 
@@ -31,7 +35,9 @@ public:
 		Texture::Filtering filtering = Texture::Filtering::TRILLINEAR,
 		bool keepLocalBuffer = false);
 
-	Texture(const unsigned char* data, unsigned int width, unsigned int height, Texture::Filtering filtering = Texture::Filtering::TRILLINEAR, Texture::Wrap texParam = Texture::Wrap::MIRROR);
+	Texture(const unsigned char* data, unsigned int width, unsigned int height, 
+		Texture::Filtering filtering = Texture::Filtering::NEAREST_NEIGHBOR, 
+		Texture::Wrap texParam = Texture::Wrap::MIRROR);
 
 	void Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Wrap texParam = Texture::Wrap::MIRROR);
 	unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
@@ -41,14 +47,17 @@ public:
 	void Bind(unsigned int slot = 0) const;
 	void Unbind() const;
 
-	static void SetFiltering(Texture::Filtering filtering, Texture::Wrap texParam = Texture::Wrap::MIRROR);
+	static void SetGlobalFiltering(Texture::Filtering filtering, Texture::Wrap texParam = Texture::Wrap::MIRROR);
+
+	void SetFiltering() const;
 
 	int GetWidth() const { return m_Width; };
 	int GetHeight() const { return m_Height; };
 	int GetID() const { return m_RendererID; };
 	std::string GetPath() const { return this->m_FilePath; };
 
-public:
+
+
 	enum class Wrap
 	{
 		MIRROR = GL_MIRRORED_REPEAT,

@@ -39,6 +39,7 @@ void Mesh::Draw(Shader& shader, PRIMITIVE drawPrimitive) const
 	for (int i = 0; i < textures.size(); ++i)
 	{
 		textures[i]->Bind(i);
+		Texture::SetGlobalFiltering(Texture::globalFilter);
 		std::string uniformName = std::format("material.{}", Texture::to_string(textures[i]->type));
 		shader.SetUniform1i(uniformName, i);
 	}

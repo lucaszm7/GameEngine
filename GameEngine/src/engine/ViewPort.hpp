@@ -76,6 +76,7 @@ public:
         viewportShader->Bind();
         quadVAO.Bind();
         tex.Bind();
+        tex.SetFiltering();
         viewportShader->SetUniform1i("screenTexture", 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -140,8 +141,8 @@ private:
         glGenTextures(1, &textureColorbuffer);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, *pScreenWidth, *pScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
         // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
         unsigned int rbo;
