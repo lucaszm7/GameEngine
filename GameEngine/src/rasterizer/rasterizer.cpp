@@ -37,12 +37,14 @@ void Rasterizer::DrawSoftwareRasterized(
 	SHADING shading,
 	bool showTextures,
 	bool isCulling,
-	bool isCullingClockWise)
+	bool isCullingClockWise,
+	Texture::Filtering textureFiltering)
 {
 	m_Shading = shading;
 	m_Primitive = primitive;
 	m_DirectionalLight = DirectionalLight;
 	m_ShowTexture = showTextures;
+	m_Filtering = textureFiltering;
 
 	// Build Model Matrix
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(model.transform.position, 1.0f));
@@ -415,12 +417,44 @@ void Rasterizer::Scanline(unsigned int y,
 
 				if (m_ShowTexture && m_CurrentTexture)
 				{
-					unsigned int u = std::round(std::clamp(pixelUV.x, 0.0f, 1.0f) * m_CurrentTexture->GetWidth());
-					unsigned int v = std::round(std::clamp(pixelUV.y, 0.0f, 1.0f) * m_CurrentTexture->GetHeight());
-
 					auto textureBuffer = m_CurrentTexture->GetLocalBuffer();
-					auto currentPixelColor = &textureBuffer[((v * m_CurrentTexture->GetWidth()) + u) * 3];
-					pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+
+					if (m_Filtering == Texture::Filtering::NEAREST_NEIGHBOR)
+					{
+						unsigned int u = std::round(std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth()));
+						unsigned int v = std::round(std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight()));
+						auto currentPixelColor = &textureBuffer[(((v * m_CurrentTexture->GetWidth()) + u)) * 3];
+						pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+					}
+
+					if (m_Filtering == Texture::Filtering::BILINEAR)
+					{
+						float u = std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth() - 1);
+						float v = std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight() - 1);
+
+						cgl::vec2 texelPos(u, v);
+
+						// x, y, weight
+						std::array<cgl::vec2, 4> samples;
+
+						samples[0] = cgl::vec2(std::trunc(u + 0), std::trunc(v + 0));
+						samples[1] = cgl::vec2(std::trunc(u + 1), std::trunc(v + 1));
+						samples[2] = cgl::vec2(std::trunc(u + 2), std::trunc(v + 2));
+						samples[3] = cgl::vec2(std::trunc(u + 3), std::trunc(v + 3));
+
+						float totalDistance = 0.0f;
+						totalDistance += (texelPos - samples[0]).lenght_squared();
+						totalDistance += (texelPos - samples[1]).lenght_squared();
+						totalDistance += (texelPos - samples[2]).lenght_squared();
+						totalDistance += (texelPos - samples[3]).lenght_squared();
+
+						auto sampleColor = &textureBuffer[((((unsigned int)samples[0].y * m_CurrentTexture->GetWidth()) + (unsigned int)samples[0].x)) * 3];
+						// pixelColor += 
+
+						// auto currentPixelColor = &textureBuffer[(((v * m_CurrentTexture->GetWidth()) + u)) * 3];
+						// pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+					}
+
 				}
 
 				if (m_Shading == SHADING::PHONG)

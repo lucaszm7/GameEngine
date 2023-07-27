@@ -127,7 +127,8 @@ void SceneClose2GL::OnUpdate(float deltaTime)
                 shading,
                 showTexture,
                 isEnableCullFace, 
-                isCullingClockWise
+                isCullingClockWise,
+                textureFilter
             );
         }
     }

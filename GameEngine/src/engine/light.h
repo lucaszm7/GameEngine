@@ -39,7 +39,7 @@ struct Light
 
 struct DirectionalLight : public Light
 {
-	glm::vec3 direction;
+	glm::vec3 direction = { 0.0f, 0.0f, 1.0f };
 
 	DirectionalLight() = default;
 

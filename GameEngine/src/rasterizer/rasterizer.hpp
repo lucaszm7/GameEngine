@@ -67,7 +67,8 @@ public:
 		SHADING shading = SHADING::NONE,
 		bool showTextures = false,
 		bool isCulling = false,
-		bool isCullingClockWise = false
+		bool isCullingClockWise = false,
+		Texture::Filtering textureFiltering = Texture::Filtering::NEAREST_NEIGHBOR
 	);
 
 	static void SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight);
@@ -95,6 +96,7 @@ private:
 
 	inline static SHADING m_Shading;
 	inline static PRIMITIVE m_Primitive;
+	inline static Texture::Filtering m_Filtering;
 	inline static bool m_ShowTexture;
 
 	inline static std::shared_ptr<Texture> m_CurrentTexture;
