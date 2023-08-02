@@ -220,7 +220,9 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglColors.push_back(colorPerspectiveCorrect1);
 			cglColors.push_back(colorPerspectiveCorrect2);
 		}
+		timer_fragment_shader.reset_soft();
 		Rasterize(cglVertices, cglColors, cglNormals, cglUVs);
+		timer_fragment_shader.stop();
 	}
 
 	if (!m_TextureToDrawOn)

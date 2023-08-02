@@ -177,6 +177,7 @@ void SceneClose2GL::OnImGuiRender()
 
     if (!isOpenGLRendered)
     {
+        ImGui::TextColored(ImVec4(0.51f, 0.82f, 0.345f, 1.0f), "Fragment Shader take %.2f ms", Rasterizer::GetTexturingTime() * 1000);
         ImGui::ColorEdit3(std::string("Close2GL Clear Color").c_str(), imguiClearColor);
     }
 

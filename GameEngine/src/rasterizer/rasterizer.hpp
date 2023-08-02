@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "light.h"
 #include "Lines.hpp"
+#include "Timer.hpp"
 
 
 struct Pixel
@@ -77,6 +78,8 @@ public:
 	static void ClearZBuffer();
 	static cgl::mat<Pixel>* GetFrameBuffer() { return &m_FrameBuffer; };
 
+	static double GetTexturingTime() { return timer_fragment_shader.duration(); };
+
 private:
 	Rasterizer();
 	Rasterizer(const Rasterizer&);
@@ -112,4 +115,6 @@ private:
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
 	inline static cgl::mat<Pixel> m_FrameBuffer;
 	inline static cgl::mat<float> m_ZBuffer;
+
+	inline static Timer timer_fragment_shader;
 };
