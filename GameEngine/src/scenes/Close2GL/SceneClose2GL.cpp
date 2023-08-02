@@ -36,7 +36,7 @@ SceneClose2GL::SceneClose2GL()
     :
     OpenGLShader("resources/shaders/ogl_vertex.shader", "resources/shaders/ogl_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
-    dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
+    dirLight({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, oglCamera.Position, oglCamera.Right)
 {
     objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
