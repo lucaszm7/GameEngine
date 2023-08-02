@@ -40,7 +40,7 @@ public:
 		Texture::Wrap texParam = Texture::Wrap::MIRROR);
 
 	void Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Wrap texParam = Texture::Wrap::MIRROR);
-	unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
+	const unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
 
 	~Texture();
 

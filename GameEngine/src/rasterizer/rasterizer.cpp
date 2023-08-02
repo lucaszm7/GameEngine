@@ -382,7 +382,8 @@ void Rasterizer::Rasterize(
 	}
 }
 
-void Rasterizer::Scanline(unsigned int y, 
+void Rasterizer::Scanline(
+	unsigned int y, 
 	int x_left, int x_right,
 	float z_left, float z_right,
 	cgl::vec4 color_left, cgl::vec4 color_right, 
@@ -417,57 +418,43 @@ void Rasterizer::Scanline(unsigned int y,
 
 				if (m_ShowTexture && m_CurrentTexture)
 				{
-					auto textureBuffer = m_CurrentTexture->GetLocalBuffer();
+					const unsigned char* const textureBuffer = m_CurrentTexture->GetLocalBuffer();
 					pixelColor = { 0.0f,0.0f,0.0f };
+
+					const auto GetPixelColorFromTextureBuffer = [textureBuffer](const unsigned int u, const unsigned int v) -> cgl::vec3
+					{
+						auto currentPixelColor = &textureBuffer[(((v * m_CurrentTexture->GetWidth()) + u)) * 3];
+						return { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+					};
 
 					if (m_Filtering == Texture::Filtering::NEAREST_NEIGHBOR)
 					{
-						unsigned int u = std::trunc(std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth() - 1));
-						unsigned int v = std::trunc(std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight() - 1));
-						auto currentPixelColor = &textureBuffer[(((v * m_CurrentTexture->GetWidth()) + u)) * 3];
-						pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+						unsigned int u = std::floor(std::clamp(pixelUV.x, 0.0f, 1.0f) * (float)(m_CurrentTexture->GetWidth()  - 1.0f));
+						unsigned int v = std::floor(std::clamp(pixelUV.y, 0.0f, 1.0f) * (float)(m_CurrentTexture->GetHeight() - 1.0f));
+						pixelColor = GetPixelColorFromTextureBuffer(u, v);
 					}
 
-					if (m_Filtering == Texture::Filtering::BILINEAR)
+					else if (m_Filtering == Texture::Filtering::BILINEAR)
 					{
-						float u = std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth() - 1);
-						float v = std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight() - 1);
+						float u = std::clamp(pixelUV.x, 0.0f, 1.0f) * (float)(m_CurrentTexture->GetWidth()  - 1.0f);
+						float v = std::clamp(pixelUV.y, 0.0f, 1.0f) * (float)(m_CurrentTexture->GetHeight() - 1.0f);
 
 						cgl::vec2 texelPos(u, v);
+						cgl::vec2 cellPos(std::floor(u), std::floor(v));
 
-						// x, y, weight
-						std::array<cgl::vec2, 4> samples;
+						auto t = texelPos - cellPos;
 
-						samples[0] = cgl::vec2(std::trunc(u + 0), std::trunc(v + 0));
-						samples[1] = cgl::vec2(std::trunc(u + 1), std::trunc(v + 0));
-						samples[2] = cgl::vec2(std::trunc(u + 0), std::trunc(v + 1));
-						samples[3] = cgl::vec2(std::trunc(u + 1), std::trunc(v + 1));
+						// Samples
+						cgl::vec3 pixelTL = GetPixelColorFromTextureBuffer(cellPos.x + 0, cellPos.y + 0);
+						cgl::vec3 pixelTR = GetPixelColorFromTextureBuffer(cellPos.x + 1, cellPos.y + 0);
+						cgl::vec3 pixelBL = GetPixelColorFromTextureBuffer(cellPos.x + 0, cellPos.y + 1);
+						cgl::vec3 pixelBR = GetPixelColorFromTextureBuffer(cellPos.x + 1, cellPos.y + 1);
 
-						float totalDistance = 0.0f;
-						totalDistance += (texelPos - samples[0]).lenght_squared();
-						totalDistance += (texelPos - samples[1]).lenght_squared();
-						totalDistance += (texelPos - samples[2]).lenght_squared();
-						totalDistance += (texelPos - samples[3]).lenght_squared();
+						cgl::vec3 pixelTX = pixelTR * t.x + pixelTL * (1.0f - t.x);
+						cgl::vec3 pixelBX = pixelBR * t.x + pixelBL * (1.0f - t.x);
 
-						if (u != 1.0f && v != 0)
-						{
-							for (auto& sample : samples)
-							{
-								auto samplePtr = &textureBuffer[((((unsigned int)sample.y * m_CurrentTexture->GetWidth()) + (unsigned int)sample.x)) * 3];
-								glm::vec3 sampleColor = { ((float)samplePtr[0]) / 255.0f, ((float)samplePtr[1]) / 255.0f, ((float)samplePtr[2]) / 255.0f };
-								float weight = (texelPos - sample).lenght_squared();
-								pixelColor += (sampleColor * (weight / totalDistance));
-							}
-						}
-						else
-						{
-							unsigned int final_u = std::trunc(std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth() - 1));
-							unsigned int final_v = std::trunc(std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight() - 1));
-							auto currentPixelColor = &textureBuffer[(((final_v * m_CurrentTexture->GetWidth()) + final_u)) * 3];
-							pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
-						}
+						pixelColor = pixelBX * t.y + pixelTX * (1.0f - t.y);
 					}
-
 				}
 
 				if (m_Shading == SHADING::PHONG)
