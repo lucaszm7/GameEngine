@@ -119,8 +119,17 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
         for (const auto& object : objects)
         {
-            Rasterizer::DrawSoftwareRasterized(*object, cglCamera, dirLight, drawPrimitive,
-                isEnableCullFace, isCullingClockWise, shading);
+            Rasterizer::DrawSoftwareRasterized(
+                *object, 
+                cglCamera, 
+                dirLight, 
+                drawPrimitive,
+                shading,
+                showTexture,
+                isEnableCullFace, 
+                isCullingClockWise,
+                textureFilter
+            );
         }
     }
 
@@ -134,7 +143,17 @@ void SceneClose2GL::OnUpdate(float deltaTime)
 
 void SceneClose2GL::OnImGuiRender()
 {
-    ImGui::Text("Render API");
+
+    constexpr auto textCentered = [](std::string text, ImVec4 color = { 44.0f/255.0f, 209.0f/255.0f, 195.0f/255.0f, 1.0f }) -> void {
+        auto windowWidth = ImGui::GetWindowSize().x;
+        auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+        ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
+        ImGui::TextColored(color, text.c_str());
+    };
+
+    ImGui::Separator();
+    textCentered("Render API");
 
     if (ImGui::RadioButton("Close 2 GL", !isOpenGLRendered))
     { 
@@ -161,7 +180,9 @@ void SceneClose2GL::OnImGuiRender()
         ImGui::ColorEdit3(std::string("Close2GL Clear Color").c_str(), imguiClearColor);
     }
 
-    ImGui::Text("Drawing Primitive");
+    ImGui::Separator();
+    textCentered("Drawing Primitive");
+
     if (ImGui::RadioButton("Triangle", drawPrimitive == PRIMITIVE::Triangle))
     {
         drawPrimitive = PRIMITIVE::Triangle;
@@ -177,7 +198,9 @@ void SceneClose2GL::OnImGuiRender()
         drawPrimitive = PRIMITIVE::WireFrame;
     }
 
-    ImGui::Text("SHADING Model");
+    ImGui::Separator();
+    textCentered("SHADING Model");
+
     if (ImGui::RadioButton("No lighting", shading == SHADING::NONE))
     {
         shading = SHADING::NONE;
@@ -193,10 +216,33 @@ void SceneClose2GL::OnImGuiRender()
         shading = SHADING::PHONG;
     }
 
-    ImGui::Checkbox("Show Textures", &showTexture);
+    ImGui::Separator();
+    textCentered("TEXTURE");
     ImGui::SameLine();
-    ImGui::Checkbox("Fix directional light to Camera", &isLightFixedToCamera);
+    ImGui::Checkbox(" ", &showTexture);
+    if (showTexture)
+    {
+        textCentered("FILTERING");
+        if (ImGui::RadioButton("Nearest Neighbor", textureFilter == Texture::Filtering::NEAREST_NEIGHBOR))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::NEAREST_NEIGHBOR;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Bilinear", textureFilter == Texture::Filtering::BILINEAR))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::BILINEAR;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Trilinear", textureFilter == Texture::Filtering::TRILLINEAR))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::TRILLINEAR;
+        }
+    }
 
+    ImGui::Separator();
+    textCentered("OTHER CONFIGURATIONS");
+    ImGui::Separator();
+    ImGui::Checkbox("Fix directional light to Camera", &isLightFixedToCamera);
     ImGui::Separator();
     if (ImGui::Checkbox("Culling BackFace", &isEnableCullFace))
     {
@@ -220,6 +266,8 @@ void SceneClose2GL::OnImGuiRender()
         }
     }
 
+    ImGui::Separator();
+    textCentered("ADD OBJECTS");
     const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK", "TEAPOT", "DRAGON"};
     if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 5))
         AddObject(std::string(possibleObjects[selectedObjectToAdd]));
@@ -234,9 +282,11 @@ void SceneClose2GL::OnImGuiRender()
         isLoadingClockWise = false;
     }
 
+    ImGui::Separator();
     ImGui::Checkbox("Look At", &isLookAt);
 
     ImGui::Separator();
+    textCentered("OBJECTS");
     int i = 0;
     for (auto it = objects.begin(); it != objects.end();)
     {

@@ -166,7 +166,7 @@ void Spline::GenerateSplineMesh(const std::string& texPath, TriangleOrientation 
 
 	std::vector<std::shared_ptr<Texture>> textures;
 	std::shared_ptr<Texture> tex;
-	tex = std::make_shared<Texture>(texPath, Texture::Type::DIFFUSE, Texture::Parameter::REPEAT);
+	tex = std::make_shared<Texture>(texPath, Texture::Type::DIFFUSE, Texture::Wrap::REPEAT);
 	textures.push_back(tex);
 	mesh.SetupMesh(vertices, indices, textures);
 }

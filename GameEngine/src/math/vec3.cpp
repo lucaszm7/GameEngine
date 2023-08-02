@@ -23,6 +23,11 @@ namespace cgl
 		return glm::vec3(x, y, z);
 	}
 
+	cgl::vec2 vec3::to_vec2() const
+	{
+		return cgl::vec2(x, y);
+	}
+
 	cgl::vec3 reflect(const cgl::vec3& ray, const cgl::vec3& normal)
 	{
 		return ray - 2 * (ray.dot(normal)) * ray;
