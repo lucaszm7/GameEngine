@@ -7,7 +7,7 @@ static Pixel to_pixel(const glm::vec3& c)
 
 static Pixel to_pixel(const cgl::vec3& c)
 {
-	return { (unsigned char)(c.x * 255), (unsigned char)(c.y * 255), (unsigned char)(c.z * 255) };
+	return { (unsigned char)(c.x * 255.0f), (unsigned char)(c.y * 255.0f), (unsigned char)(c.z * 255.0f) };
 }
 
 void Rasterizer::SetViewPort(const unsigned int screenWidth, const unsigned int screenHeight)
@@ -418,11 +418,12 @@ void Rasterizer::Scanline(unsigned int y,
 				if (m_ShowTexture && m_CurrentTexture)
 				{
 					auto textureBuffer = m_CurrentTexture->GetLocalBuffer();
+					pixelColor = { 0.0f,0.0f,0.0f };
 
 					if (m_Filtering == Texture::Filtering::NEAREST_NEIGHBOR)
 					{
-						unsigned int u = std::round(std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth()));
-						unsigned int v = std::round(std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight()));
+						unsigned int u = std::trunc(std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth() - 1));
+						unsigned int v = std::trunc(std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight() - 1));
 						auto currentPixelColor = &textureBuffer[(((v * m_CurrentTexture->GetWidth()) + u)) * 3];
 						pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
 					}
@@ -438,9 +439,9 @@ void Rasterizer::Scanline(unsigned int y,
 						std::array<cgl::vec2, 4> samples;
 
 						samples[0] = cgl::vec2(std::trunc(u + 0), std::trunc(v + 0));
-						samples[1] = cgl::vec2(std::trunc(u + 1), std::trunc(v + 1));
-						samples[2] = cgl::vec2(std::trunc(u + 2), std::trunc(v + 2));
-						samples[3] = cgl::vec2(std::trunc(u + 3), std::trunc(v + 3));
+						samples[1] = cgl::vec2(std::trunc(u + 1), std::trunc(v + 0));
+						samples[2] = cgl::vec2(std::trunc(u + 0), std::trunc(v + 1));
+						samples[3] = cgl::vec2(std::trunc(u + 1), std::trunc(v + 1));
 
 						float totalDistance = 0.0f;
 						totalDistance += (texelPos - samples[0]).lenght_squared();
@@ -448,11 +449,23 @@ void Rasterizer::Scanline(unsigned int y,
 						totalDistance += (texelPos - samples[2]).lenght_squared();
 						totalDistance += (texelPos - samples[3]).lenght_squared();
 
-						auto sampleColor = &textureBuffer[((((unsigned int)samples[0].y * m_CurrentTexture->GetWidth()) + (unsigned int)samples[0].x)) * 3];
-						// pixelColor += 
-
-						// auto currentPixelColor = &textureBuffer[(((v * m_CurrentTexture->GetWidth()) + u)) * 3];
-						// pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+						if (u != 1.0f && v != 0)
+						{
+							for (auto& sample : samples)
+							{
+								auto samplePtr = &textureBuffer[((((unsigned int)sample.y * m_CurrentTexture->GetWidth()) + (unsigned int)sample.x)) * 3];
+								glm::vec3 sampleColor = { ((float)samplePtr[0]) / 255.0f, ((float)samplePtr[1]) / 255.0f, ((float)samplePtr[2]) / 255.0f };
+								float weight = (texelPos - sample).lenght_squared();
+								pixelColor += (sampleColor * (weight / totalDistance));
+							}
+						}
+						else
+						{
+							unsigned int final_u = std::trunc(std::clamp(pixelUV.x, 0.0f, 1.0f) * (m_CurrentTexture->GetWidth() - 1));
+							unsigned int final_v = std::trunc(std::clamp(pixelUV.y, 0.0f, 1.0f) * (m_CurrentTexture->GetHeight() - 1));
+							auto currentPixelColor = &textureBuffer[(((final_v * m_CurrentTexture->GetWidth()) + final_u)) * 3];
+							pixelColor = { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+						}
 					}
 
 				}
