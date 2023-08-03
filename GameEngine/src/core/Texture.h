@@ -6,7 +6,23 @@
 #include <GL/glew.h>
 #include <iostream>
 #include <string>
+#include <vector>
+#include "vec3.h"
+#include "vec2.h"
 
+struct MipMap
+{
+	unsigned char* m_Buffer;
+	unsigned int m_Width, m_Height;
+	std::vector<unsigned char*> m_MipMapLevels;
+	
+	MipMap(unsigned char* buf, unsigned int width, unsigned int height)
+		:m_Buffer(buf), m_Width(width), m_Height(height) {}
+
+	void MakeMipMap();
+	unsigned char* GetLevel(unsigned int level) { return m_MipMapLevels[level]; };
+	static float GetMipMapLevel(float dx, float dy, unsigned int width, unsigned int height);
+};
 
 class Texture
 {
@@ -17,6 +33,8 @@ private:
 	int m_Height = 0;
 	unsigned char* m_LocalBuffer = nullptr;
 	int nrComponents = 0;
+
+	std::shared_ptr<MipMap> m_MipMap;
 
 public:
 
@@ -57,6 +75,7 @@ public:
 	std::string GetPath() const { return this->m_FilePath; };
 
 
+	std::shared_ptr<MipMap> GetMipMap() const { return m_MipMap; }
 
 	enum class Wrap
 	{

@@ -1,5 +1,8 @@
 #include "Texture.h"
-#include "STB/stb_image.h"
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+#include <format>
 
 Texture::Texture(const std::string& path, 
 	Texture::Type type, 
@@ -29,8 +32,13 @@ Texture::Texture(const std::string& path,
 
 		SetGlobalFiltering(filtering, texParam);
 
-		if(!keepLocalBuffer)
+		if (!keepLocalBuffer)
 			stbi_image_free(m_LocalBuffer);
+		else
+		{
+			m_MipMap = std::make_shared<MipMap>(m_LocalBuffer, m_Width, m_Height);
+			m_MipMap->MakeMipMap();
+	}
 	}
 	else
 	{
@@ -110,4 +118,42 @@ void Texture::SetFiltering() const
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filtering);
+}
+
+void MipMap::MakeMipMap()
+{
+	unsigned int layer_width = m_Width;
+	unsigned int layer_height = m_Height;
+
+	m_MipMapLevels.push_back(m_Buffer);
+
+	while ((layer_width > 2 && layer_height > 2) && m_MipMapLevels.size() < 7)
+	{
+#ifdef _DEBUG
+		stbi_write_jpg(std::format("mipmap_level_{}.jpg", m_MipMapLevels.size() - 1).c_str(), layer_width, layer_height, 3, m_MipMapLevels.back(), 100);
+#endif
+
+		layer_width  = std::floor((float)layer_width  / 2.0f);
+		layer_height = std::floor((float)layer_height / 2.0f);
+
+		auto current_buffer = m_MipMapLevels.back();
+		unsigned char* new_layer_buffer = new unsigned char[layer_width * layer_height * 3];
+
+		for (unsigned int j = 0; j < (layer_height * 2); j += 2)
+		{
+			for (unsigned int i = 0; i < (layer_width * 2); i += 2)
+			{
+				cgl::vec3 pixelColor = Texture::BilinearFiltering(current_buffer, layer_width * 2, (float)i + 0.5f, (float)j + 0.5f);
+				new_layer_buffer[((j/2) * layer_height + (i/2)) * 3 + 0] = (unsigned char)(pixelColor.x * 255.0f);
+				new_layer_buffer[((j/2) * layer_height + (i/2)) * 3 + 1] = (unsigned char)(pixelColor.y * 255.0f);
+				new_layer_buffer[((j/2) * layer_height + (i/2)) * 3 + 2] = (unsigned char)(pixelColor.z * 255.0f);
+			}
+		}
+		m_MipMapLevels.push_back(new_layer_buffer);
+	}
+}
+
+float MipMap::GetMipMapLevel(float dx, float dy, unsigned int width, unsigned int height)
+{
+	return 0.0f;
 }
