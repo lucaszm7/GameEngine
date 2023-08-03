@@ -38,7 +38,7 @@ Texture::Texture(const std::string& path,
 		{
 			m_MipMap = std::make_shared<MipMap>(m_LocalBuffer, m_Width, m_Height);
 			m_MipMap->MakeMipMap();
-	}
+		}
 	}
 	else
 	{
@@ -100,6 +100,31 @@ void Texture::Bind(unsigned int slot) const
 void Texture::Unbind() const
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+cgl::vec3 Texture::GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v)
+{
+	auto currentPixelColor = &textureBuffer[(v * buffer_width + u) * 3];
+	return { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+}
+
+cgl::vec3 Texture::BilinearFiltering(const unsigned char* const buffer, unsigned int buffer_width, float u, float v)
+{
+	cgl::vec2 texelPos(u, v);
+	cgl::vec2 cellPos(std::floor(u), std::floor(v));
+
+	auto t = texelPos - cellPos;
+
+	// Samples
+	cgl::vec3 pixelTL = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 0, cellPos.y + 0);
+	cgl::vec3 pixelTR = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 1, cellPos.y + 0);
+	cgl::vec3 pixelBL = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 0, cellPos.y + 1);
+	cgl::vec3 pixelBR = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 1, cellPos.y + 1);
+
+	cgl::vec3 pixelTX = pixelTR * t.x + pixelTL * (1.0f - t.x);
+	cgl::vec3 pixelBX = pixelBR * t.x + pixelBL * (1.0f - t.x);
+
+	return pixelBX * t.y + pixelTX * (1.0f - t.y);
 }
 
 void Texture::SetGlobalFiltering(Texture::Filtering filtering, Texture::Wrap texParam)

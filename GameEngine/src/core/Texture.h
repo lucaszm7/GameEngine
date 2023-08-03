@@ -74,6 +74,8 @@ public:
 	int GetID() const { return m_RendererID; };
 	std::string GetPath() const { return this->m_FilePath; };
 
+	static cgl::vec3 BilinearFiltering(const unsigned char* const buffer, unsigned int buffer_width, float u, float v);
+	static cgl::vec3 GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v);
 
 	std::shared_ptr<MipMap> GetMipMap() const { return m_MipMap; }
 
