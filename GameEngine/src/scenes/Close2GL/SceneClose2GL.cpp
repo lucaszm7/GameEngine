@@ -273,8 +273,8 @@ void SceneClose2GL::OnImGuiRender()
 
     ImGui::Separator();
     textCentered("ADD OBJECTS");
-    const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK", "TEAPOT", "DRAGON", "AXIS"};
-    if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 5))
+    const char* possibleObjects[]{ "CUBE", "COW", "BACKPACK", "TEAPOT", "DRAGON", "BUNNY", "SPONZA", "SPONZA_CRYTEK"};
+    if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 8))
         AddObject(std::string(possibleObjects[selectedObjectToAdd]));
 
     if (ImGui::RadioButton("Load Clock Wise", isLoadingClockWise))
@@ -340,8 +340,12 @@ void SceneClose2GL::AddObject(std::string_view label)
         objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", tri));
     else if (label == "DRAGON")
         objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", tri));
-    else if (label == "AXIS")
-        objects.emplace_back(std::make_unique<Model>("resources/models/axis.obj", tri));
+    else if (label == "BUNNY")
+        objects.emplace_back(std::make_unique<Model>("resources/models/bunny.obj", tri));
+    else if (label == "SPONZA")
+        objects.emplace_back(std::make_unique<Model>("resources/models/sponza/sponza.obj", tri));
+    else if (label == "SPONZA_CRYTEK")
+        objects.emplace_back(std::make_unique<Model>("resources/models/sponza_cry/sponza.obj", tri));
 
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());
