@@ -233,6 +233,10 @@ void SceneClose2GL::OnImGuiRender()
         {
             textureFilter = Texture::globalFilter = Texture::Filtering::BILINEAR;
         }
+        if (ImGui::RadioButton("Bicubic", textureFilter == Texture::Filtering::BICUBIC))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::BICUBIC;
+        }
         ImGui::SameLine();
         if (ImGui::RadioButton("Trilinear", textureFilter == Texture::Filtering::TRILLINEAR))
         {
@@ -269,7 +273,7 @@ void SceneClose2GL::OnImGuiRender()
 
     ImGui::Separator();
     textCentered("ADD OBJECTS");
-    const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK", "TEAPOT", "DRAGON"};
+    const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK", "TEAPOT", "DRAGON", "AXIS"};
     if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 5))
         AddObject(std::string(possibleObjects[selectedObjectToAdd]));
 
@@ -336,6 +340,8 @@ void SceneClose2GL::AddObject(std::string_view label)
         objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", tri));
     else if (label == "DRAGON")
         objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", tri));
+    else if (label == "AXIS")
+        objects.emplace_back(std::make_unique<Model>("resources/models/axis.obj", tri));
 
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());

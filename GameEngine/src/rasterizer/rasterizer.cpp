@@ -439,27 +439,46 @@ void Rasterizer::Scanline(
 						pixelColor = Texture::BilinearFiltering(textureBuffer, m_CurrentTexture->GetWidth(), u, v);
 					}
 
+					else if (m_Filtering == Texture::Filtering::BICUBIC)
+					{
+						float u = std::clamp(pixelUV.x, 0.0f, 1.0f) * (float)(m_CurrentTexture->GetWidth() - 1.0f);
+						float v = std::clamp(pixelUV.y, 0.0f, 1.0f) * (float)(m_CurrentTexture->GetHeight() - 1.0f);
+
+						pixelColor = Texture::BicubicFiltering(textureBuffer, m_CurrentTexture->GetWidth(), m_CurrentTexture->GetHeight(), u, v);
+					}
+
 					else if (m_Filtering == Texture::Filtering::TRILLINEAR)
 					{
 						float u = std::clamp(pixelUV.x, 0.0f, 1.0f);
 						float v = std::clamp(pixelUV.y, 0.0f, 1.0f);
 
-						float mipmap_level = MipMap::GetMipMapLevel(1, 1, 100, 100);
+						auto st = uv;
+						st.advance();
+						auto pixelST = (st.get() * (1 / st.get().z)).to_vec2();
+
+						float next_s = std::clamp(pixelST.x, 0.0f, 1.0f);
+						float next_t = std::clamp(pixelST.y, 0.0f, 1.0f);
+
+						auto ds = (next_s - u) * m_CurrentTexture->GetWidth();
+						auto dt = (next_t - v) * m_CurrentTexture->GetHeight();
+
+						float mipmap_level = std::abs(MipMap::GetMipMapLevel(ds, dt));
+						mipmap_level = std::clamp(mipmap_level, 0.0f, 6.0f);
 
 						const auto mipmap = m_CurrentTexture->GetMipMap();
 
 						unsigned char* mipmaps_levels[2];
 
-						float t = mipmap_level - std::floor(mipmap_level);
+						float t = (mipmap_level - std::floor(mipmap_level));
 
 						auto level_0 = std::floor(mipmap_level);
 						auto level_1 = std::ceil(mipmap_level);
 
-						float width_0 = m_CurrentTexture->GetWidth() / (1 + level_0);
-						float width_1 = m_CurrentTexture->GetWidth() / (1 + level_1);
+						float width_0 = m_CurrentTexture->GetWidth() / (std::pow(2,level_0));
+						float width_1 = m_CurrentTexture->GetWidth() / (std::pow(2,level_1));
 
-						float height_0 = m_CurrentTexture->GetHeight() / (1 + level_0);
-						float height_1 = m_CurrentTexture->GetHeight() / (1 + level_1);
+						float height_0 = m_CurrentTexture->GetHeight() / (std::pow(2, level_0));
+						float height_1 = m_CurrentTexture->GetHeight() / (std::pow(2, level_1));
 
 						mipmaps_levels[0] = mipmap->GetLevel(level_0);
 						mipmaps_levels[1] = mipmap->GetLevel(level_1);
