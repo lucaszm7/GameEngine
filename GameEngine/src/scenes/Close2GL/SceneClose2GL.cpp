@@ -36,7 +36,7 @@ SceneClose2GL::SceneClose2GL()
     :
     OpenGLShader("resources/shaders/ogl_vertex.shader", "resources/shaders/ogl_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
-    dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
+    dirLight({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, oglCamera.Position, oglCamera.Right)
 {
     objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
@@ -177,6 +177,7 @@ void SceneClose2GL::OnImGuiRender()
 
     if (!isOpenGLRendered)
     {
+        ImGui::TextColored(ImVec4(0.51f, 0.82f, 0.345f, 1.0f), "Fragment Shader take %.2f ms", Rasterizer::GetTexturingTime() * 1000);
         ImGui::ColorEdit3(std::string("Close2GL Clear Color").c_str(), imguiClearColor);
     }
 
@@ -232,6 +233,10 @@ void SceneClose2GL::OnImGuiRender()
         {
             textureFilter = Texture::globalFilter = Texture::Filtering::BILINEAR;
         }
+        if (ImGui::RadioButton("Bicubic", textureFilter == Texture::Filtering::BICUBIC))
+        {
+            textureFilter = Texture::globalFilter = Texture::Filtering::BICUBIC;
+        }
         ImGui::SameLine();
         if (ImGui::RadioButton("Trilinear", textureFilter == Texture::Filtering::TRILLINEAR))
         {
@@ -268,8 +273,8 @@ void SceneClose2GL::OnImGuiRender()
 
     ImGui::Separator();
     textCentered("ADD OBJECTS");
-    const char* possibleObjects[]{ "COW", "CUBE", "BACKPACK", "TEAPOT", "DRAGON"};
-    if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 5))
+    const char* possibleObjects[]{ "CUBE", "COW", "BACKPACK", "TEAPOT", "DRAGON", "BUNNY", "SPONZA", "SPONZA_CRYTEK"};
+    if(ImGui::Combo("Object to Add", &selectedObjectToAdd, possibleObjects, 8))
         AddObject(std::string(possibleObjects[selectedObjectToAdd]));
 
     if (ImGui::RadioButton("Load Clock Wise", isLoadingClockWise))
@@ -335,6 +340,12 @@ void SceneClose2GL::AddObject(std::string_view label)
         objects.emplace_back(std::make_unique<Model>("resources/models/teapot.obj", tri));
     else if (label == "DRAGON")
         objects.emplace_back(std::make_unique<Model>("resources/models/dragon.obj", tri));
+    else if (label == "BUNNY")
+        objects.emplace_back(std::make_unique<Model>("resources/models/bunny.obj", tri));
+    else if (label == "SPONZA")
+        objects.emplace_back(std::make_unique<Model>("resources/models/sponza/sponza.obj", tri));
+    else if (label == "SPONZA_CRYTEK")
+        objects.emplace_back(std::make_unique<Model>("resources/models/sponza_cry/sponza.obj", tri));
 
     // Calculate AABB
     BoundingVolume aabb = CalculateEnclosingAABB(objects.back());

@@ -1,5 +1,6 @@
 #include "Texture.h"
-#include "STB/stb_image.h"
+#include "stb_image.h"
+#include <format>
 
 Texture::Texture(const std::string& path, 
 	Texture::Type type, 
@@ -29,8 +30,13 @@ Texture::Texture(const std::string& path,
 
 		SetGlobalFiltering(filtering, texParam);
 
-		if(!keepLocalBuffer)
+		if (!keepLocalBuffer)
 			stbi_image_free(m_LocalBuffer);
+		else
+		{
+			m_MipMap = std::make_shared<MipMap>(m_LocalBuffer, m_Width, m_Height);
+			m_MipMap->MakeMipMap();
+		}
 	}
 	else
 	{
@@ -94,6 +100,69 @@ void Texture::Unbind() const
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+cgl::vec3 Texture::GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v)
+{
+	auto currentPixelColor = &textureBuffer[(v * buffer_width + u) * 3];
+	return { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+}
+
+cgl::vec3 Texture::BilinearFiltering(const unsigned char* const buffer, unsigned int buffer_width, float u, float v)
+{
+	cgl::vec2 texelPos(u, v);
+	cgl::vec2 cellPos(std::floor(u), std::floor(v));
+
+	auto t = texelPos - cellPos;
+
+	// Samples
+	cgl::vec3 pixelTL = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 0, cellPos.y + 0);
+	cgl::vec3 pixelTR = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 1, cellPos.y + 0);
+	cgl::vec3 pixelBL = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 0, cellPos.y + 1);
+	cgl::vec3 pixelBR = GetPixelColorFromTextureBuffer(buffer, buffer_width, cellPos.x + 1, cellPos.y + 1);
+
+	cgl::vec3 pixelTX = pixelTR * t.x + pixelTL * (1.0f - t.x);
+	cgl::vec3 pixelBX = pixelBR * t.x + pixelBL * (1.0f - t.x);
+
+	return pixelBX * t.y + pixelTX * (1.0f - t.y);
+}
+
+cgl::vec3 Texture::BicubicFiltering(const unsigned char* const buffer, unsigned int buffer_width, unsigned int buffer_height, float u, float v)
+{
+	cgl::vec2 texelPos(u, v);
+	cgl::vec2 cellPos(std::floor(u), std::floor(v));
+
+	auto t = texelPos - cellPos;
+
+	std::array<std::array<cgl::vec3, 4>, 4> pixelSplines;
+
+	for (int y = 0; y < 4; ++y)
+	{
+		for (int x = 0; x < 4; ++x)
+		{
+			pixelSplines[y][x] = GetPixelColorFromTextureBuffer(buffer, buffer_width, std::clamp(cellPos.x + (x - 1), 0.0f, (float)buffer_width), std::clamp(cellPos.y + (y - 1), 0.0f, (float)buffer_height));
+		}
+	}
+
+	auto tt = t * t;
+	auto ttt = tt * t;
+
+	// Catmull-rom spline
+	auto q1 = 0.5f * (-ttt + 2.0f * tt - t);
+	auto q2 = 0.5f * (3.0f * ttt - 5.0f * tt + cgl::vec2{2.0f, 2.0f});
+	auto q3 = 0.5f * (-3.0f * ttt + 4.0f * tt + t);
+	auto q4 = 0.5f * (ttt - tt);
+
+	// First interpolation
+	std::array<cgl::vec3, 4> columnSplinePixels;
+	for (int i = 0; i < 4; ++i)
+	{
+		columnSplinePixels[i] = pixelSplines[i][0] * q1.x + pixelSplines[i][1] * q2.x + pixelSplines[i][2] * q3.x + pixelSplines[i][3] * q4.x;
+	}
+
+	auto finalPixelColor = columnSplinePixels[0] * q1.y + columnSplinePixels[1] * q2.y + columnSplinePixels[2] * q3.y + columnSplinePixels[3] * q4.y;
+
+	return { std::clamp(finalPixelColor.x, 0.0f, 1.0f), std::clamp(finalPixelColor.y, 0.0f, 1.0f), std::clamp(finalPixelColor.z, 0.0f, 1.0f) };
+}
+
 void Texture::SetGlobalFiltering(Texture::Filtering filtering, Texture::Wrap texParam)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)texParam);
@@ -110,4 +179,40 @@ void Texture::SetFiltering() const
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)filtering);
+}
+
+void MipMap::MakeMipMap()
+{
+	unsigned int layer_width = m_Width;
+	unsigned int layer_height = m_Height;
+
+	m_MipMapLevels.push_back(m_Buffer);
+
+	while ((layer_width > 2 && layer_height > 2) && m_MipMapLevels.size() < 7)
+	{
+		layer_width  = std::floor((float)layer_width  / 2.0f);
+		layer_height = std::floor((float)layer_height / 2.0f);
+
+		auto current_buffer = m_MipMapLevels.back();
+		unsigned char* new_layer_buffer = new unsigned char[layer_width * layer_height * 3];
+
+		for (unsigned int j = 0; j < (layer_height * 2); j += 2)
+		{
+			for (unsigned int i = 0; i < (layer_width * 2); i += 2)
+			{
+				cgl::vec3 pixelColor = Texture::BilinearFiltering(current_buffer, layer_width * 2, (float)i + 0.5f, (float)j + 0.5f);
+				new_layer_buffer[((j/2) * layer_height + (i/2)) * 3 + 0] = (unsigned char)(pixelColor.x * 255.0f);
+				new_layer_buffer[((j/2) * layer_height + (i/2)) * 3 + 1] = (unsigned char)(pixelColor.y * 255.0f);
+				new_layer_buffer[((j/2) * layer_height + (i/2)) * 3 + 2] = (unsigned char)(pixelColor.z * 255.0f);
+			}
+		}
+		m_MipMapLevels.push_back(new_layer_buffer);
+	}
+}
+
+float MipMap::GetMipMapLevel(float ds, float dt)
+{
+	auto dist = std::sqrt((ds * ds) + (dt * dt));
+	auto level = std::log2(std::max(dist, 1.0f));
+	return level;
 }

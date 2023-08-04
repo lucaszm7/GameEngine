@@ -6,7 +6,23 @@
 #include <GL/glew.h>
 #include <iostream>
 #include <string>
+#include <vector>
+#include "vec3.h"
+#include "vec2.h"
 
+struct MipMap
+{
+	unsigned char* m_Buffer;
+	unsigned int m_Width, m_Height;
+	std::vector<unsigned char*> m_MipMapLevels;
+	
+	MipMap(unsigned char* buf, unsigned int width, unsigned int height)
+		:m_Buffer(buf), m_Width(width), m_Height(height) {}
+
+	void MakeMipMap();
+	unsigned char* GetLevel(unsigned int level) { return m_MipMapLevels[level]; };
+	static float GetMipMapLevel(float ds, float dt);
+};
 
 class Texture
 {
@@ -17,6 +33,8 @@ private:
 	int m_Height = 0;
 	unsigned char* m_LocalBuffer = nullptr;
 	int nrComponents = 0;
+
+	std::shared_ptr<MipMap> m_MipMap;
 
 public:
 
@@ -40,7 +58,7 @@ public:
 		Texture::Wrap texParam = Texture::Wrap::MIRROR);
 
 	void Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Wrap texParam = Texture::Wrap::MIRROR);
-	unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
+	const unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
 
 	~Texture();
 
@@ -56,7 +74,12 @@ public:
 	int GetID() const { return m_RendererID; };
 	std::string GetPath() const { return this->m_FilePath; };
 
+	static cgl::vec3 BilinearFiltering(const unsigned char* const buffer, unsigned int buffer_width, float u, float v);
+	static cgl::vec3 BicubicFiltering(const unsigned char* const buffer, unsigned int buffer_width, unsigned int buffer_height, float u, float v);
 
+	static cgl::vec3 GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v);
+
+	std::shared_ptr<MipMap> GetMipMap() const { return m_MipMap; }
 
 	enum class Wrap
 	{
@@ -76,6 +99,7 @@ public:
 	{
 		NEAREST_NEIGHBOR = GL_NEAREST,
 		BILINEAR = GL_LINEAR,
+		BICUBIC = GL_NEAREST_MIPMAP_LINEAR,
 		TRILLINEAR = GL_LINEAR_MIPMAP_LINEAR
 	};
 

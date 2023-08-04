@@ -84,10 +84,10 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
     endoSplineModel = endo.GetSplineModelTransform();
     colonSplineModel = colon.GetSplineModelTransform();
 
-    collDetTimer.Reset();
+    collDetTimer.reset_hard();
     if (hasCollisionDetection)
         collDet.CollisionCheck(*(endoSplineModel.get()), *(colonSplineModel.get()));
-    collDetTimer.Stop();
+    collDetTimer.stop();
 
     view = pCamera.GetViewMatrix();
     projection = pCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
@@ -201,7 +201,7 @@ void SceneSplineCollisionDetection::OnImGuiRender()
         DisableCullFace();
 
     ImGui::Text("Collisions Count %d", collDet.collisionResults.collisionVectors.size());
-    ImGui::Text("Collisions Time Taken: %f ms", collDetTimer.ResultMs());
+    ImGui::Text("Collisions Time Taken: %f ms", collDetTimer.duration_ms());
 
     ImGui::Checkbox("Debug Collision Detection", &debugCollDet);
     ImGui::Checkbox("Debug Control Points Colon", &debugControlPointsColon);
