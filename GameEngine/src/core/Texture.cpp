@@ -1,7 +1,5 @@
 #include "Texture.h"
 #include "stb_image.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
 #include <format>
 
 Texture::Texture(const std::string& path, 
@@ -192,10 +190,6 @@ void MipMap::MakeMipMap()
 
 	while ((layer_width > 2 && layer_height > 2) && m_MipMapLevels.size() < 7)
 	{
-#ifdef _DEBUG
-		stbi_write_jpg(std::format("mipmap_level_{}.jpg", m_MipMapLevels.size() - 1).c_str(), layer_width, layer_height, 3, m_MipMapLevels.back(), 100);
-#endif
-
 		layer_width  = std::floor((float)layer_width  / 2.0f);
 		layer_height = std::floor((float)layer_height / 2.0f);
 
