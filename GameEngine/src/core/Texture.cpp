@@ -127,6 +127,44 @@ cgl::vec3 Texture::BilinearFiltering(const unsigned char* const buffer, unsigned
 	return pixelBX * t.y + pixelTX * (1.0f - t.y);
 }
 
+cgl::vec3 Texture::BicubicFiltering(const unsigned char* const buffer, unsigned int buffer_width, unsigned int buffer_height, float u, float v)
+{
+	cgl::vec2 texelPos(u, v);
+	cgl::vec2 cellPos(std::floor(u), std::floor(v));
+
+	auto t = texelPos - cellPos;
+
+	std::array<std::array<cgl::vec3, 4>, 4> pixelSplines;
+
+	for (int y = 0; y < 4; ++y)
+	{
+		for (int x = 0; x < 4; ++x)
+		{
+			pixelSplines[y][x] = GetPixelColorFromTextureBuffer(buffer, buffer_width, std::clamp(cellPos.x + (x - 1), 0.0f, (float)buffer_width), std::clamp(cellPos.y + (y - 1), 0.0f, (float)buffer_height));
+		}
+	}
+
+	auto tt = t * t;
+	auto ttt = tt * t;
+
+	// Catmull-rom spline
+	auto q1 = 0.5f * (-ttt + 2.0f * tt - t);
+	auto q2 = 0.5f * (3.0f * ttt - 5.0f * tt + cgl::vec2{2.0f, 2.0f});
+	auto q3 = 0.5f * (-3.0f * ttt + 4.0f * tt + t);
+	auto q4 = 0.5f * (ttt - tt);
+
+	// First interpolation
+	std::array<cgl::vec3, 4> columnSplinePixels;
+	for (int i = 0; i < 4; ++i)
+	{
+		columnSplinePixels[i] = pixelSplines[i][0] * q1.x + pixelSplines[i][1] * q2.x + pixelSplines[i][2] * q3.x + pixelSplines[i][3] * q4.x;
+	}
+
+	auto finalPixelColor = columnSplinePixels[0] * q1.y + columnSplinePixels[1] * q2.y + columnSplinePixels[2] * q3.y + columnSplinePixels[3] * q4.y;
+
+	return { std::clamp(finalPixelColor.x, 0.0f, 1.0f), std::clamp(finalPixelColor.y, 0.0f, 1.0f), std::clamp(finalPixelColor.z, 0.0f, 1.0f) };
+}
+
 void Texture::SetGlobalFiltering(Texture::Filtering filtering, Texture::Wrap texParam)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLint)texParam);
@@ -178,7 +216,9 @@ void MipMap::MakeMipMap()
 	}
 }
 
-float MipMap::GetMipMapLevel(float dx, float dy, unsigned int width, unsigned int height)
+float MipMap::GetMipMapLevel(float ds, float dt)
 {
-	return 0.0f;
+	auto dist = std::sqrt((ds * ds) + (dt * dt));
+	auto level = std::log2(std::max(dist, 1.0f));
+	return level;
 }

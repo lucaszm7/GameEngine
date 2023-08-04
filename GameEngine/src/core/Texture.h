@@ -21,7 +21,7 @@ struct MipMap
 
 	void MakeMipMap();
 	unsigned char* GetLevel(unsigned int level) { return m_MipMapLevels[level]; };
-	static float GetMipMapLevel(float dx, float dy, unsigned int width, unsigned int height);
+	static float GetMipMapLevel(float ds, float dt);
 };
 
 class Texture
@@ -75,6 +75,8 @@ public:
 	std::string GetPath() const { return this->m_FilePath; };
 
 	static cgl::vec3 BilinearFiltering(const unsigned char* const buffer, unsigned int buffer_width, float u, float v);
+	static cgl::vec3 BicubicFiltering(const unsigned char* const buffer, unsigned int buffer_width, unsigned int buffer_height, float u, float v);
+
 	static cgl::vec3 GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v);
 
 	std::shared_ptr<MipMap> GetMipMap() const { return m_MipMap; }
@@ -97,6 +99,7 @@ public:
 	{
 		NEAREST_NEIGHBOR = GL_NEAREST,
 		BILINEAR = GL_LINEAR,
+		BICUBIC = GL_NEAREST_MIPMAP_LINEAR,
 		TRILLINEAR = GL_LINEAR_MIPMAP_LINEAR
 	};
 
