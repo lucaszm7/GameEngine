@@ -208,6 +208,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\math\Quaternion.cpp" />
     <ClCompile Include="src\engine\Lines.cpp" />
     <ClCompile Include="src\engine\Timer.cpp" />
     <ClCompile Include="src\math\mat4.cpp" />
@@ -249,6 +250,7 @@
     <None Include="resources\shaders\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\math\Quaternion.h" />
     <ClInclude Include="src\engine\Lines.hpp" />
     <ClInclude Include="src\engine\ViewPort.hpp" />
     <ClInclude Include="src\math\mat.hpp" />

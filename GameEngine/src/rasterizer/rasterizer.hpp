@@ -15,6 +15,7 @@
 #include "light.h"
 #include "Lines.hpp"
 #include "Timer.hpp"
+#include "Quaternion.h"
 
 
 struct Pixel

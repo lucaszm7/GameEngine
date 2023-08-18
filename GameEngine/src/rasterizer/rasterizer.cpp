@@ -48,9 +48,9 @@ void Rasterizer::DrawSoftwareRasterized(
 
 	// Build Model Matrix
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(model.transform.position, 1.0f));
-	cgl::mat4 rotation = cgl::mat4::rotateX(model.transform.rotation.x);
-	rotation = rotation * cgl::mat4::rotateY(model.transform.rotation.y);
-	rotation = rotation * cgl::mat4::rotateZ(model.transform.rotation.z);
+	cgl::mat4 rotation =  Quaternion::rotation_matrix({1.0f, 0.0f, 0.0f}, model.transform.rotation.x);
+	rotation = rotation * Quaternion::rotation_matrix({0.0f, 1.0f, 0.0f}, model.transform.rotation.y);
+	rotation = rotation * Quaternion::rotation_matrix({0.0f, 0.0f, 1.0f}, model.transform.rotation.z);
 	cgl::mat4 scale = cgl::mat4::scale(model.transform.scale);
 	cgl::mat4 modelM = translate * rotation * scale;
 
