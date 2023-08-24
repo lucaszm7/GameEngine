@@ -4,6 +4,7 @@
 #include <IMGUI/imgui.h>
 #include <memory>
 #include <Shader.h>
+#include <Texture.h>
 
 class FrameBuffer
 {
@@ -14,7 +15,7 @@ private:
 	std::unique_ptr<Shader> viewportShader;
 
 	unsigned int framebuffer;
-	unsigned int textureColorbuffer;
+    std::unique_ptr<Texture> textureColorBuffer;
 
     VertexArray quadVAO;
     VertexBufferLayout quadVBL;
@@ -87,11 +88,13 @@ public:
 	void OnRender()
 	{
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+
+        // Draw to default frameBuffer e.g. the screen itself
         glClear(GL_COLOR_BUFFER_BIT);
         viewportShader->Bind();
         quadVAO.Bind();
         glDisable(GL_DEPTH_TEST);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer->GetID());
         glDrawArrays(GL_TRIANGLES, 0, 6);
         quadVAO.Unbind();
 	}
@@ -104,7 +107,7 @@ public:
 
         ImVec2 wsize = ImGui::GetWindowSize();
         // Because I use the texture from OpenGL, I need to invert the V from the UV.
-        ImGui::Image((ImTextureID)textureColorbuffer, wsize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((ImTextureID)textureColorBuffer->GetID(), wsize, ImVec2(0, 1), ImVec2(1, 0));
 
         if ((float)*pScreenWidth != ImGui::GetWindowWidth() || (float)*pScreenHeight != ImGui::GetWindowHeight())
         {
@@ -123,6 +126,11 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     }
 
+    void Unbind() const
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
     // Called when changed viewport size
     void Reset()
     {
@@ -135,16 +143,17 @@ private:
     {
         // framebuffer configuration
         // -------------------------
+
+        // Create FrameBuffer
         framebuffer = 0;
         glGenFramebuffers(1, &framebuffer);
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glGenTextures(1, &textureColorbuffer);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, *pScreenWidth, *pScreenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-        // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+
+        // Create Attachment (memory) to write the color on
+        textureColorBuffer = std::make_unique<Texture>(*pScreenWidth, *pScreenHeight);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer->GetID(), 0);
+
+        // Create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
         unsigned int rbo;
         glGenRenderbuffers(1, &rbo);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -155,6 +164,7 @@ private:
         // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        Unbind();
     }
 };

@@ -151,7 +151,7 @@ int main()
             }
             ImGui::End();
 
-            pFrameBuffer->OnRender();
+            pFrameBuffer->Unbind(); // back to default
             pFrameBuffer->OnImGuiRender();
 
             UpdateImGui();

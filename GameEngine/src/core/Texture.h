@@ -57,6 +57,8 @@ public:
 		Texture::Filtering filtering = Texture::Filtering::NEAREST_NEIGHBOR, 
 		Texture::Wrap texParam = Texture::Wrap::MIRROR);
 
+	Texture(unsigned int width, unsigned int height);
+
 	void Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Wrap texParam = Texture::Wrap::MIRROR);
 	const unsigned char* GetLocalBuffer() const { return m_LocalBuffer; }
 

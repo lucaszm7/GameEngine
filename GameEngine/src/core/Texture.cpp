@@ -62,6 +62,17 @@ Texture::Texture(const unsigned char* data, unsigned int width, unsigned int hei
 	}
 }
 
+Texture::Texture(unsigned int width, unsigned int height)
+{
+	glGenTextures(1, &m_RendererID);
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
 void Texture::Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Wrap texParam)
 {
 	if (data)
