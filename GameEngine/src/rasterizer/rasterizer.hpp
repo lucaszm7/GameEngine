@@ -8,7 +8,7 @@
 #include "mat.hpp"
 #include "mat4.h"
 #include "vec4.h"
-#include "ViewPort.hpp"
+#include "FrameBuffer.hpp"
 #include "model.h"
 #include "camera.h"
 #include "shader.h"
@@ -111,7 +111,7 @@ private:
 	inline static unsigned int m_screenHeight;
 
 	inline static std::unique_ptr<Texture> m_TextureToDrawOn;
-	inline static std::unique_ptr<ViewPort> m_ViewportToDrawOn;
+	inline static std::unique_ptr<FrameBuffer> m_ViewportToDrawOn;
 
 	inline static Pixel m_ClearColor = Pixel{ 255,255,255 };
 	inline static cgl::mat<Pixel> m_FrameBuffer;

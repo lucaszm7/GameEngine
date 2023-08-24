@@ -231,7 +231,7 @@ void Rasterizer::DrawSoftwareRasterized(
 		m_TextureToDrawOn->Update(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight);
 
 	if (!m_ViewportToDrawOn)
-		m_ViewportToDrawOn = std::make_unique<ViewPort>();
+		m_ViewportToDrawOn = std::make_unique<FrameBuffer>();
 
 	m_ViewportToDrawOn->OnRenderTexture(*m_TextureToDrawOn);
 }

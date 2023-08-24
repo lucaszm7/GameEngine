@@ -199,7 +199,7 @@
     <ClInclude Include="src\math\vec2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\ViewPort.hpp">
+    <ClInclude Include="src\engine\FrameBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\Lines.hpp">

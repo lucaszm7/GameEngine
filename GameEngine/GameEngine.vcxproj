@@ -252,7 +252,7 @@
   <ItemGroup>
     <ClInclude Include="src\math\Quaternion.h" />
     <ClInclude Include="src\engine\Lines.hpp" />
-    <ClInclude Include="src\engine\ViewPort.hpp" />
+    <ClInclude Include="src\engine\FrameBuffer.hpp" />
     <ClInclude Include="src\math\mat.hpp" />
     <ClInclude Include="src\math\mat4.h" />
     <ClInclude Include="src\math\math_utils.h" />

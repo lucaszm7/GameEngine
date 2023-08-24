@@ -5,7 +5,7 @@
 #include <memory>
 #include <Shader.h>
 
-class ViewPort
+class FrameBuffer
 {
 private:
 	std::shared_ptr<unsigned int> pScreenWidth;
@@ -21,7 +21,7 @@ private:
     std::unique_ptr<VertexBuffer> quadVBO;
 
 public:
-	ViewPort(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight)
+	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight)
 		:pScreenWidth(screenWidth), pScreenHeight(screenHeight)
 	{
 		viewportShader = std::make_unique<Shader>("resources/shaders/viewport_vertex.shader", "resources/shaders/viewport_fragment.shader");
@@ -47,7 +47,7 @@ public:
         _Init();
 	}
 
-    ViewPort()
+    FrameBuffer()
     {
         viewportShader = std::make_unique<Shader>("resources/shaders/viewport_vertex.shader", "resources/shaders/viewport_fragment.shader");
 

@@ -35,7 +35,7 @@
 // #include "engine/mesh.h"
 #include "model.h"
 #include "Timer.hpp"
-#include "ViewPort.hpp"
+#include "FrameBuffer.hpp"
 
 // Scenes
 #include "scenes/SplineCollDet/SceneSplineCollisionDetection.h"
@@ -64,7 +64,7 @@ inline std::shared_ptr<unsigned int> pScreenHeight;
 
 inline BaseCam* pCamera;
 
-inline std::unique_ptr<ViewPort> pViewport;
+inline std::unique_ptr<FrameBuffer> pFrameBuffer;
 
 static bool firstMouse = true;
 static float lastX = 0.0f;
@@ -83,7 +83,7 @@ int main()
 
     ResetEngine();
 
-    pViewport = std::make_unique<ViewPort>(pScreenWidth, pScreenHeight);
+    pFrameBuffer = std::make_unique<FrameBuffer>(pScreenWidth, pScreenHeight);
 
     Scene_t* m_CurrentScene = nullptr;
     Menu* m_MainMenu = new Menu(m_CurrentScene);
@@ -107,7 +107,7 @@ int main()
         {
             processInputs(pWindow, deltaTime);
 
-            pViewport->Bind();
+            pFrameBuffer->Bind();
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
@@ -151,8 +151,8 @@ int main()
             }
             ImGui::End();
 
-            pViewport->OnRender();
-            pViewport->OnImGuiRender();
+            pFrameBuffer->OnRender();
+            pFrameBuffer->OnImGuiRender();
 
             UpdateImGui();
 
@@ -190,7 +190,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     *pScreenWidth = width;
     *pScreenHeight = height;
     glViewport(0, 0, width, height);
-    pViewport->Reset();
+    pFrameBuffer->Reset();
 }
 
 void processInputs(GLFWwindow* window, double deltaTime)
