@@ -85,7 +85,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\;$(ProjectDir)src\core\;$(ProjectDir)src\engine\;$(ProjectDir)src\vendor\;$(SolutionDir)SplineCollDet\include\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include\;$(ProjectDir)src\math\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\;$(ProjectDir)src\core\;$(ProjectDir)src\engine\;$(ProjectDir)src\debug\;$(ProjectDir)src\vendor\;$(SolutionDir)SplineCollDet\include\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include\;$(ProjectDir)src\math\</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
     <CustomBuildBeforeTargets />
@@ -93,7 +93,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(Configuration)\$(Platform)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\;$(ProjectDir)src\core\;$(ProjectDir)src\engine\;$(ProjectDir)src\vendor\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include;$(ProjectDir)src\math\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)Dependencies\GLFW\include\;$(SolutionDir)Dependencies\GLEW\include\;$(SolutionDir)Dependencies;$(ProjectDir)src\;$(ProjectDir)src\core\;$(ProjectDir)src\engine\;$(ProjectDir)src\debug\;$(ProjectDir)src\vendor\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include;$(ProjectDir)src\math\</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(SolutionDir)Dependencies\GLFW\build\src\Release</LibraryPath>
     <ExternalIncludePath>C:\Users\Visagio\Desktop\GameEngine\Dependencies\IMGUI;$(ExternalIncludePath)</ExternalIncludePath>
     <CustomBuildBeforeTargets />
@@ -208,9 +208,10 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\Cubemap.cpp" />
     <ClCompile Include="src\math\Quaternion.cpp" />
-    <ClCompile Include="src\engine\Lines.cpp" />
-    <ClCompile Include="src\engine\Timer.cpp" />
+    <ClCompile Include="src\debug\Lines.cpp" />
+    <ClCompile Include="src\debug\Timer.cpp" />
     <ClCompile Include="src\math\mat4.cpp" />
     <ClCompile Include="src\math\vec3.cpp" />
     <ClCompile Include="src\math\vec4.cpp" />
@@ -250,8 +251,9 @@
     <None Include="resources\shaders\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\Cubemap.h" />
     <ClInclude Include="src\math\Quaternion.h" />
-    <ClInclude Include="src\engine\Lines.hpp" />
+    <ClInclude Include="src\debug\Lines.hpp" />
     <ClInclude Include="src\engine\FrameBuffer.hpp" />
     <ClInclude Include="src\math\mat.hpp" />
     <ClInclude Include="src\math\mat4.h" />
@@ -274,7 +276,7 @@
     <ClInclude Include="src\engine\mesh.h" />
     <ClInclude Include="src\engine\model.h" />
     <ClInclude Include="src\engine\Spline.hpp" />
-    <ClInclude Include="src\engine\Timer.hpp" />
+    <ClInclude Include="src\debug\Timer.hpp" />
     <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />
