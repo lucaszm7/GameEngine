@@ -83,7 +83,7 @@ int main()
 
     ResetEngine();
 
-    pFrameBuffer = std::make_unique<FrameBuffer>(pScreenWidth, pScreenHeight);
+    pFrameBuffer = std::make_unique<FrameBuffer>(pScreenWidth, pScreenHeight, FrameBuffer::Type::MULTISAMPLE);
 
     Scene_t* m_CurrentScene = nullptr;
     Menu* m_MainMenu = new Menu(m_CurrentScene);
@@ -131,7 +131,8 @@ int main()
                 ImGui::PopStyleColor(1);
 
                 ImGui::Separator();
-                ImGui::TextColored(ImVec4(0.51f, 0.82f, 0.345f, 1.0f), "FPS: %.2f\nTake %.2f ms", 1 / deltaTime, deltaTime * 1000);
+                ImGui::TextColored(ImVec4(0.51f, 0.82f, 0.345f, 1.0f), "FPS: %.2f\tTake %.2f ms", 1 / deltaTime, deltaTime * 1000);
+                ImGui::TextColored(ImVec4(0.0f, 0.82f, 0.0f, 1.0f), "MSAA 4x - Active");
                 ImGui::Separator();
                 pCamera->OnImGui();
                 ImGui::Separator();
@@ -183,6 +184,8 @@ void ResetEngine()
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+
+    glEnable(GL_MULTISAMPLE);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -251,6 +254,7 @@ GLFWwindow* InitGLFW(const char* name, unsigned int width, unsigned int height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
     // Tells OpenGL we want the core-profile (the good one, with just the newer stuff)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // glfwWindowHint(GLFW_SAMPLES, 4);
 
     GLFWwindow* window = glfwCreateWindow(width, height, name, nullptr, nullptr);
     if (!window)

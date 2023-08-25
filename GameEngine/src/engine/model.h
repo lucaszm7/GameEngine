@@ -14,7 +14,6 @@
 #include "mesh.h"
 #include "vec4.h"
 #include "mat.hpp"
-#include "FrameBuffer.hpp"
 
 struct Model
 {
