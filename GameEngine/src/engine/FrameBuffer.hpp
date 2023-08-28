@@ -33,7 +33,7 @@ public:
 	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight, FrameBuffer::Type type)
 		:pScreenWidth(screenWidth), pScreenHeight(screenHeight), m_Type(type)
 	{
-		m_FramebufferShader = std::make_unique<Shader>("resources/shaders/viewport_vertex.shader", "resources/shaders/viewport_fragment.shader");
+		m_FramebufferShader = std::make_unique<Shader>("../resources/shader/viewport_vertex.shader", "../resources/shader/viewport_fragment.shader");
         
         float quadVertices[] = {
             // positions   // texCoords
@@ -58,7 +58,7 @@ public:
 
     FrameBuffer()
     {
-        m_FramebufferShader = std::make_unique<Shader>("resources/shaders/viewport_vertex.shader", "resources/shaders/viewport_fragment.shader");
+        m_FramebufferShader = std::make_unique<Shader>("../resources/shader/viewport_vertex.shader", "../resources/shader/viewport_fragment.shader");
 
         m_Type = Type::MONOSAMPLE;
 
