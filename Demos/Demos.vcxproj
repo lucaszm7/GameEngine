@@ -148,11 +148,13 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="scenes\Close2GL\SceneClose2GL.cpp" />
     <ClCompile Include="scenes\SplineCollDet\SceneSplineCollisionDetection.cpp" />
+    <ClCompile Include="scenes\Solitude\SolitudeScene.cpp" />
     <ClCompile Include="src\Spline.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scenes\Close2GL\SceneClose2GL.h" />
     <ClInclude Include="scenes\SplineCollDet\SceneSplineCollisionDetection.h" />
+    <ClInclude Include="scenes\Solitude\SolitudeScene.h" />
     <ClInclude Include="src\Spline.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
