@@ -32,6 +32,9 @@ public:
 	
 	cgl::mat4 GetModelMatrix() const;
 	void OnImGui() const;
+	void AddTexture(const std::string& path);
+
+
 	std::vector<Mesh> meshes;
 	std::string name;
 	std::vector<std::shared_ptr<Texture>> textures_loaded;
