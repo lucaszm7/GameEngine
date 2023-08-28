@@ -24,7 +24,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
     if (vertexShaderSource.empty() || fragmentShaderSource.empty())
     {
         std::cout << "ERROR\nREADING SHADER FILE\n";
-        system("pause");
+        __cpp_static_assert;
     }
 
     m_RendererID = CreateShader(vertexShaderSource, fragmentShaderSource);
