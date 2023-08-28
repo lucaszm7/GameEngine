@@ -75,18 +75,18 @@ void main()
 	vec3 viewDir = normalize(viewPos - outFragPos);
 	vec3 result = vec3(0);
 
-	 // Directional Light
-     // result += CalculateDirectionalLight(fragmentDirectionalLight, norm, viewDir);
+	// Directional Light
+    result += CalculateDirectionalLight(fragmentDirectionalLight, norm, viewDir);
 
-	 // Point Light
-	 // for (int i = 0; i < NR_POINT_LIGHTS; ++i)
-	 // 	result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
+	// Point Light
+	for (int i = 0; i < 1; ++i)
+		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
 
-	 // Spotlight
-     result += CalculateSpotlight(fragmentSpotlight, norm, outFragPos, viewDir);
+	// Spotlight
+    result += CalculateSpotlight(fragmentSpotlight, norm, outFragPos, viewDir);
 
-	 // Emission map
-	 // result += texture(material.emission, outTexCoord).rgb;
+	// Emission map
+	// result += texture(material.emission, outTexCoord).rgb;
 
     FragColor = vec4(result, 1.0);
 }
