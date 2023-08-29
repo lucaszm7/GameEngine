@@ -78,8 +78,8 @@ void main()
     result += CalculateDirectionalLight(fragmentDirectionalLight, norm, viewDir);
 
 	// Point Light
-	for (int i = 0; i < NR_POINT_LIGHTS; ++i)
-		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
+	//for (int i = 0; i < NR_POINT_LIGHTS; ++i)
+	//	result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
 
 	// Spotlight
     result += CalculateSpotlight(fragmentSpotlight, norm, outFragPos, viewDir);

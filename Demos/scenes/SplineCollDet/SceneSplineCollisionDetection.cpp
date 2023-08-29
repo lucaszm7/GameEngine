@@ -7,74 +7,12 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     colon("resources/models/VolumetricSpline.txt"),
     endo("resources/models/VolumetricEndoscope.txt"),
     lightingShader("resources/shaders/vertex.shader", "resources/shaders/fragment.shader"),
-    lightSourceShader("resources/shaders/light_vertex.shader", "resources/shaders/light_fragment.shader"),
     dirLight({ 1.0f, 1.0f, 1.0f }, { -0.2f, -1.0f, -0.3f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, pCamera.Position, pCamera.Front)
 {
-    std::vector<float> cubeVertices =
-    {
-        // positions
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
-
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-    };
-
-    // Model backpack("resources/models/backpack/backpack.obj");
-
     colon.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
     endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::ClockWise);
 
-    lightVAO.Bind();
-    VertexBuffer lightVBO(&cubeVertices[0], static_cast<unsigned int>(cubeVertices.size() * sizeof(float)), GL_STATIC_DRAW);
-    VertexBufferLayout lightVBL;
-    lightVBL.Push<float>(3); // positions
-    lightVAO.AddBuffer(lightVBO, lightVBL);
-
-    pointLights =
-    {
-        { {0.3f, 0.3f, 0.3f}, { 0.7f,  0.2f,  2.0f}},
-        { {0.3f, 0.3f, 0.3f}, { 2.3f, -3.3f, -4.0f}},
-        { {0.3f, 0.3f, 0.3f}, {-4.0f,  2.0f, -12.0f}},
-        { {0.3f, 0.3f, 0.3f}, { 0.0f,  0.0f, -3.0f}}
-    };
 }
 
 SceneSplineCollisionDetection::~SceneSplineCollisionDetection() = default;
@@ -176,16 +114,12 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
     spotlight.position = pCamera.Position;
     spotlight.direction = pCamera.Front;
     lightingShader.SetUniformLight(spotlight);
-    lightingShader.SetUniformLight(pointLights);
-
-    // backpack.Draw(lightingShader);
 
     if (isDrawingMeshes)
     {
         colon.Draw(lightingShader);
         endo.Draw(lightingShader);
     }
-
 }
 
 void SceneSplineCollisionDetection::OnImGuiRender()
@@ -223,12 +157,6 @@ void SceneSplineCollisionDetection::OnImGuiRender()
         spotlight.SetLightColor();
         ImGui::DragFloat3("Spotlight", (float*)&spotlight.direction, 1.0f, -10.0f, 10.0f);
 
-        for (int i = 0; i < pointLights.size(); ++i)
-        {
-            ImGui::ColorEdit3(std::to_string(i).c_str(), (float*)&pointLights[i].lightColor);
-            pointLights[i].SetLightColor();
-            ImGui::DragFloat3(std::to_string(i).c_str(), (float*)&pointLights[i].position, 1.0f, -10.0f, 10.0f);
-        }
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Endo Control Points"))

@@ -31,10 +31,8 @@ private:
 
 	VertexArray lightVAO;
 	Shader lightingShader;
-	Shader lightSourceShader;
 
 	DirectionalLight dirLight;
-	std::vector<PointLight> pointLights;
 	SpotLight spotlight;
 	
 	bool debugCollDet = true;
