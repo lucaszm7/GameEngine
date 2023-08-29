@@ -7,7 +7,8 @@
 #include "model.h"
 #include "Timer.hpp"
 
-#include "Cube.h"
+#include "src/Player.h"
+#include "src/Cube.h"
 
 class SolitudeScene : public Scene_t
 {
@@ -17,13 +18,21 @@ public:
 
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
-	BaseCam* GetCamera() override { return (BaseCam*)&camera; }
+	void OnPhysics(float deltaTime);
+
+	BaseCam* GetCamera() override { return (BaseCam*)&*camera; }
 private:
 
-	ogl::Camera camera;
+	std::shared_ptr < Player> player;
+	std::shared_ptr<ogl::Camera> camera;
 	Shader shader;
 
+	Model scene;
 	std::vector<Model> scene_objects;
+
+	bool isGravity = false;
+	bool hasCollisions = false;
+	float totalTime = 0.0f;
 
 	DirectionalLight dirlight;
 	SpotLight spotlight;
