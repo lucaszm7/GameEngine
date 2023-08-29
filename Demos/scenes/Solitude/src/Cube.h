@@ -82,6 +82,8 @@ public:
 		shader->SetUniformMatrix4fv("projection", projection);
 
 		auto model = glm::translate(glm::mat4(1.0f), position);
+		model	   = glm::scale(model, glm::vec3(0.3f));
+
 		shader->SetUniformMatrix4fv("model", model);
 
 		shader->SetUniform3f("lightColor", color);
