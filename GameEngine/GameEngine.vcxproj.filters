@@ -90,6 +90,9 @@
     <ClCompile Include="src\engine\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
@@ -209,6 +212,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\physics\SphereCollider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\ShadowMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

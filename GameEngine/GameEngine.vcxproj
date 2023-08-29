@@ -222,6 +222,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\ShadowMap.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\engine\camera.cpp" />
     <ClCompile Include="src\math\Quaternion.cpp" />
@@ -263,6 +264,7 @@
     <None Include="resources\shaders\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\ShadowMap.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\math\Quaternion.h" />
     <ClInclude Include="src\debug\Lines.hpp" />
