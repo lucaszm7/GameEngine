@@ -41,7 +41,8 @@ void gen::GameEngine::Run()
 {
     while (!glfwWindowShouldClose(pWindow))
     {
-        processInputs(pWindow, deltaTime);
+        if(m_CurrentScene != m_MainMenu)
+            processInputs(pWindow, deltaTime);
 
         pFrameBuffer->Bind();
         glEnable(GL_DEPTH_TEST);
@@ -85,6 +86,11 @@ void gen::GameEngine::Run()
             m_CurrentScene->OnUpdate(deltaTime);
             m_CurrentScene->OnImGuiRender();
 
+#ifdef _DEBUG
+            Debug::Line::Draw({ 0.0f,0.0f,0.0f }, { 100.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f });
+            Debug::Line::Draw({ 0.0f,0.0f,0.0f }, { 0.0f, 100.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
+            Debug::Line::Draw({ 0.0f,0.0f,0.0f }, { 0.0f, 0.0f, 100.0f }, { 0.0f, 0.0f, 1.0f });
+#endif
             Debug::Line& m_LinesDrawer = Debug::Line::OnStart();
             m_LinesDrawer.OnUpdate(*m_DebugLineShader, ogl::Camera(pCamera->GetBaseInfo()), (float)*pScreenWidth / (float)*pScreenHeight);
         }
@@ -122,6 +128,8 @@ void gen::GameEngine::ResetEngine()
 
 void gen::GameEngine::processInputs(GLFWwindow* window, double deltaTime)
 {
+    if(pCamera)
+        pCamera->ProcessKeyboard(CamMovement::NONE, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         pCamera->ProcessKeyboard(CamMovement::FORWARD, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -260,6 +268,8 @@ void gen::GameEngine::ImGuiDockSpace()
 
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
+    static bool isVsync = true;
+
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
     // because it would be confusing to have two docking targets within each others.
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -301,6 +311,13 @@ void gen::GameEngine::ImGuiDockSpace()
     {
         if (ImGui::BeginMenu("Menu"))
         {
+            if (ImGui::MenuItem("Vsync"))
+            {
+                isVsync = !isVsync;
+                isVsync ? glfwSwapInterval(1) : glfwSwapInterval(0);
+            }
+
+            ImGui::Separator();
             // Disabling fullscreen would allow the window to be moved to the front of other windows,
             // which we can't undo at the moment without finer window depth/z control.
             ImGui::MenuItem("Print Screen", NULL);
@@ -341,7 +358,7 @@ GLFWwindow* gen::GameEngine::InitGLFW(const char* name, unsigned int width, unsi
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(0);
+    // glfwSwapInterval(0);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
