@@ -32,6 +32,8 @@ struct PointLight
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+
+	float intensity;
 };
 
 struct Spotlight
@@ -48,6 +50,8 @@ struct Spotlight
 	float constant;
 	float linear;
 	float quadratic;
+
+	float intensity;
 };
 
 in vec3 outNormal;
@@ -79,7 +83,7 @@ void main()
     result += CalculateDirectionalLight(fragmentDirectionalLight, norm, viewDir);
 
 	// Point Light
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 3; ++i)
 		result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
 
 	// Spotlight
@@ -133,7 +137,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewD
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
-	return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular) * light.intensity;
 }
 
 vec3 CalculateSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir)
@@ -164,5 +168,5 @@ vec3 CalculateSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir
 	diffuse  *= intensity * attenuation;
 	specular *= intensity * attenuation;
 
-	return (ambient + diffuse + specular);
+	return (ambient + diffuse + specular) * light.intensity;
 }
