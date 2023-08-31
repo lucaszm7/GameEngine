@@ -17,7 +17,6 @@ private:
 	std::shared_ptr<unsigned int> pScreenWidth;
 	std::shared_ptr<unsigned int> pScreenHeight;
 
-	std::unique_ptr<Shader> m_FramebufferShader;
 
 	unsigned int m_MultisampleFramebuffer;
     std::unique_ptr<Texture> m_MultisampleTextureColorBuffer;
@@ -30,6 +29,8 @@ private:
     std::unique_ptr<VertexBuffer> quadVBO;
 
 public:
+	std::unique_ptr<Shader> m_FramebufferShader;
+
 	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight, FrameBuffer::Type type)
 		:pScreenWidth(screenWidth), pScreenHeight(screenHeight), m_Type(type)
 	{
@@ -56,9 +57,9 @@ public:
         _Init();
 	}
 
-    FrameBuffer()
+    FrameBuffer(std::string vertex = "../resources/shader/viewport_vertex.shader", std::string fragment = "../resources/shader/viewport_fragment.shader")
     {
-        m_FramebufferShader = std::make_unique<Shader>("../resources/shader/viewport_vertex.shader", "../resources/shader/viewport_fragment.shader");
+        m_FramebufferShader = std::make_unique<Shader>(vertex, fragment);
 
         m_Type = Type::MONOSAMPLE;
 
@@ -89,6 +90,21 @@ public:
         tex.Bind();
         tex.SetFiltering();
         m_FramebufferShader->SetUniform1i("screenTexture", 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        quadVAO.Unbind();
+    }
+
+    void OnRenderTexture(const unsigned int tex) const
+    {
+        glDisable(GL_DEPTH_TEST);
+        m_FramebufferShader->Bind();
+        quadVAO.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        m_FramebufferShader->SetUniform1i("depthMap", 0);
+        m_FramebufferShader->SetUniform1f("near_plane", 1.0f);
+        m_FramebufferShader->SetUniform1f("far_plane", 7.5f);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         quadVAO.Unbind();
