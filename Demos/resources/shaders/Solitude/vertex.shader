@@ -9,10 +9,12 @@ out vec3 outNormal;
 out vec3 outFragPos;
 out vec3 outColor;
 out vec2 outTexCoord;
+out vec4 outFragPosLightSpace;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -20,6 +22,7 @@ void main()
 	outNormal = mat3(transpose(inverse(model))) * aNormal;
 	outTexCoord = aTexCoord;
     outColor = aColor;
+    outFragPosLightSpace = lightSpaceMatrix * vec4(outFragPos, 1.0);
 											   // local
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

@@ -58,11 +58,13 @@ in vec3 outNormal;
 in vec3 outFragPos;
 in vec2 outTexCoord;
 in vec3 outColor;
+in vec4 outFragPosLightSpace;
 
 out vec4 FragColor;
 
 uniform Material material;
 uniform vec3 viewPos;
+uniform sampler2D shadowMap;
 
 uniform DirectionalLight fragmentDirectionalLight;
 #define NR_POINT_LIGHTS 4  
@@ -72,6 +74,8 @@ uniform Spotlight fragmentSpotlight;
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 vec3 CalculateSpotlight (Spotlight  light, vec3 normal, vec3 FragPos, vec3 viewDir);
+
+float ShadowCalculation(vec4 fragPosLightSpace);
 
 void main()
 {
@@ -95,6 +99,19 @@ void main()
     FragColor = vec4(result, 1.0);
 }
 
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+	// get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+	// get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+    return shadow;
+}
+
 vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
 	// diffuse shading
@@ -110,7 +127,8 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, outTexCoord));
 	vec3 specular = light.specular * spec * vec3(texture(material.specular, outTexCoord));
 
-	return (ambient + diffuse + specular);
+    float shadow = ShadowCalculation(outFragPosLightSpace);
+	return ambient + (1.0 - shadow) * (diffuse + specular);
 }
 
 vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir)
@@ -137,7 +155,9 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewD
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
-    return (ambient + diffuse + specular) * light.intensity;
+	
+    float shadow = ShadowCalculation(outFragPosLightSpace);
+    return (ambient + (1.0 - shadow) * (diffuse + specular)) * light.intensity;
 }
 
 vec3 CalculateSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir)
@@ -168,5 +188,6 @@ vec3 CalculateSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir
 	diffuse  *= intensity * attenuation;
 	specular *= intensity * attenuation;
 
-	return (ambient + diffuse + specular) * light.intensity;
+    float shadow = ShadowCalculation(outFragPosLightSpace);
+    return (ambient + (1.0 - shadow) * (diffuse + specular)) * light.intensity;
 }
