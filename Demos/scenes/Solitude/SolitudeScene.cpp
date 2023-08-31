@@ -4,10 +4,12 @@ SolitudeScene::SolitudeScene()
 	:camera(), shader("resources/shaders/Solitude/vertex.shader", "resources/shaders/Solitude/fragment.shader"),
     dirlight({1.0f, 1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}),
     spotlight({1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}),
-    scene("resources/models/Solitude/Cave.obj"),
     shadowMap(pScreenWidth, pScreenHeight)
 {
+    scene_objects.emplace_back("resources/models/Solitude/Cave.obj");
     scene_objects.emplace_back("resources/models/cube_text.in");
+    scene_objects.emplace_back("resources/models/cube_text.in");
+
     camera = std::make_shared<ogl::Camera>();
     player = std::make_shared<Player>(camera);
     pointlights.push_back({ { 1.0f, 0.0f, 0.0f }, {   0.0f,  5.0f,  0.0f } });
@@ -24,35 +26,49 @@ SolitudeScene::~SolitudeScene()
 
 void SolitudeScene::OnUpdate(float deltaTime)
 {
+#ifdef _DEBUG
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+#else
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    hasCollisions = true;
+#endif
+
     OnPhysics(deltaTime);
 
-    shadowMap.OnUpdate(spotlight.position, scene_objects);
-    shadowMap.DebugShadowMap();
+    spotlight.position = glm::vec3(camera->Position.x, camera->Position.y, camera->Position.z);
+    spotlight.direction = glm::vec3(camera->Front.x, camera->Front.y, camera->Front.z);
+
+    shadowMap.OnUpdate(spotlight.position, spotlight.direction, spotlight.outerCutOff, scene_objects);
+
+    if (isDepthMap)
+    {
+        shadowMap.DebugShadowMap();
+        return;
+    }
 
     auto view = camera->GetViewMatrix();
     auto projection = camera->GetProjectionMatrix((float)*pScreenWidth / (float)*pScreenHeight);
 
+#ifdef _DEBUG
     for (const auto& pointLight : pointlights)
     {
         cube.Draw(pointLight.position, pointLight.lightColor, *camera, (float)*pScreenWidth / (float)*pScreenHeight);
     }
+#endif
 
     shader.Bind();
     shader.SetUniformMatrix4fv("view", view);
     shader.SetUniformMatrix4fv("projection", projection);
-    // shader.SetUniformMatrix4fv("lightSpaceMatrix", shadowMap.lightSpaceMatrix);
+    shader.SetUniformMatrix4fv("lightSpaceMatrix", shadowMap.lightSpaceMatrix);
     shader.SetUniform3f("viewPos", camera->Position);
-    // shadowMap.Bind(3);
-
-    spotlight.position = glm::vec3(camera->Position.x, camera->Position.y, camera->Position.z);
-    spotlight.direction = glm::vec3(camera->Front.x, camera->Front.y, camera->Front.z);
+    shadowMap.Bind(shader, 1);
 
     shader.SetUniformLight(spotlight);
     shader.SetUniformLight(pointlights);
 #ifdef _DEBUG
     shader.SetUniformLight(dirlight);
 #endif
-    scene.Draw(shader);
+
     for (const auto& obj : scene_objects)
     {
         obj.Draw(shader);
@@ -76,8 +92,8 @@ void SolitudeScene::OnPhysics(float deltaTime)
 
     if (hasCollisions)
     {
-        auto infos = Collider::CheckCollision(player->collider, scene.meshes);
-        for (unsigned int infoCounter = 0; infoCounter < infos.size(); ++infoCounter)
+        auto infos = Collider::CheckCollision(player->collider, scene_objects.front().meshes);
+        for (unsigned int infoCounter = 0; infoCounter < glm::min((int)5, (int)infos.size()); ++infoCounter)
         {
             player->OnPhysics(infos[infoCounter]);
         }
@@ -101,6 +117,7 @@ void SolitudeScene::OnImGuiRender()
 
     ImGui::Checkbox("Gravity", &isGravity);
     ImGui::Checkbox("Collisions", &hasCollisions);
+    ImGui::Checkbox("Depth Map", &isDepthMap);
 
     textCentered("LIGHTS");
     for (int i = 0; i < pointlights.size(); ++i)

@@ -28,9 +28,9 @@ private:
     VertexBufferLayout quadVBL;
     std::unique_ptr<VertexBuffer> quadVBO;
 
-public:
 	std::unique_ptr<Shader> m_FramebufferShader;
 
+public:
 	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight, FrameBuffer::Type type)
 		:pScreenWidth(screenWidth), pScreenHeight(screenHeight), m_Type(type)
 	{
@@ -63,7 +63,7 @@ public:
 
         m_Type = Type::MONOSAMPLE;
 
-        float quadVertices[] = {
+        constexpr float quadVertices[] = {
             // positions   // texCoords
             -1.0f,  1.0f,  0.0f, 1.0f,
             -1.0f, -1.0f,  0.0f, 0.0f,
@@ -104,7 +104,7 @@ public:
         glBindTexture(GL_TEXTURE_2D, tex);
         m_FramebufferShader->SetUniform1i("depthMap", 0);
         m_FramebufferShader->SetUniform1f("near_plane", 1.0f);
-        m_FramebufferShader->SetUniform1f("far_plane", 7.5f);
+        m_FramebufferShader->SetUniform1f("far_plane", 17.5f);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         quadVAO.Unbind();

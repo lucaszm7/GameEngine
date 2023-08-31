@@ -24,22 +24,23 @@ public:
 	BaseCam* GetCamera() override { return (BaseCam*)&*camera; }
 private:
 
-	std::shared_ptr < Player> player;
 	std::shared_ptr<ogl::Camera> camera;
 	Shader shader;
 
+	DirectionalLight dirlight;
+	SpotLight spotlight;
 	ShadowMap shadowMap;
 
-	Model scene;
+	std::vector<PointLight> pointlights;
+	std::shared_ptr < Player> player;
+
 	std::vector<Model> scene_objects;
 
 	bool isGravity = false;
 	bool hasCollisions = false;
+	bool isDepthMap = false;
 	float totalTime = 0.0f;
 
-	DirectionalLight dirlight;
-	SpotLight spotlight;
-	std::vector<PointLight> pointlights;
 	Cube cube;
 };
 
