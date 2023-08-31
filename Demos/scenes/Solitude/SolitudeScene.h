@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "model.h"
 #include "Timer.hpp"
+#include "ShadowMap.h"
 
 #include "src/Player.h"
 #include "src/Cube.h"
@@ -26,6 +27,8 @@ private:
 	std::shared_ptr < Player> player;
 	std::shared_ptr<ogl::Camera> camera;
 	Shader shader;
+
+	ShadowMap shadowMap;
 
 	Model scene;
 	std::vector<Model> scene_objects;

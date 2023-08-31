@@ -4,7 +4,8 @@ SolitudeScene::SolitudeScene()
 	:camera(), shader("resources/shaders/Solitude/vertex.shader", "resources/shaders/Solitude/fragment.shader"),
     dirlight({1.0f, 1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}),
     spotlight({1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}),
-    scene("resources/models/Solitude/Cave.obj")
+    scene("resources/models/Solitude/Cave.obj"),
+    shadowMap(pScreenWidth, pScreenHeight)
 {
     scene_objects.emplace_back("resources/models/cube_text.in");
     camera = std::make_shared<ogl::Camera>();
@@ -25,6 +26,9 @@ void SolitudeScene::OnUpdate(float deltaTime)
 {
     OnPhysics(deltaTime);
 
+    shadowMap.OnUpdate(spotlight.position, scene_objects);
+    shadowMap.DebugShadowMap();
+
     auto view = camera->GetViewMatrix();
     auto projection = camera->GetProjectionMatrix((float)*pScreenWidth / (float)*pScreenHeight);
 
@@ -36,7 +40,9 @@ void SolitudeScene::OnUpdate(float deltaTime)
     shader.Bind();
     shader.SetUniformMatrix4fv("view", view);
     shader.SetUniformMatrix4fv("projection", projection);
+    // shader.SetUniformMatrix4fv("lightSpaceMatrix", shadowMap.lightSpaceMatrix);
     shader.SetUniform3f("viewPos", camera->Position);
+    // shadowMap.Bind(3);
 
     spotlight.position = glm::vec3(camera->Position.x, camera->Position.y, camera->Position.z);
     spotlight.direction = glm::vec3(camera->Front.x, camera->Front.y, camera->Front.z);
