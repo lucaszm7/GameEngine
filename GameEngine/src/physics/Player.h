@@ -1,7 +1,7 @@
 #pragma once
 
 #include "camera.h"
-#include "physics/SphereCollider.h"
+#include "physics/Collider.h"
 
 struct Player
 {
