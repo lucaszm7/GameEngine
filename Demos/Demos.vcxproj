@@ -146,14 +146,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="scenes\Solitude\src\Player.cpp" />
     <ClCompile Include="scenes\Close2GL\SceneClose2GL.cpp" />
     <ClCompile Include="scenes\SplineCollDet\SceneSplineCollisionDetection.cpp" />
     <ClCompile Include="scenes\Solitude\SolitudeScene.cpp" />
     <ClCompile Include="src\Spline.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="scenes\Solitude\src\Player.h" />
     <ClInclude Include="scenes\Close2GL\SceneClose2GL.h" />
     <ClInclude Include="scenes\Solitude\src\Cube.h" />
     <ClInclude Include="scenes\SplineCollDet\SceneSplineCollisionDetection.h" />

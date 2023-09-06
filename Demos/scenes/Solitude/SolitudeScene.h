@@ -8,7 +8,7 @@
 #include "Timer.hpp"
 #include "ShadowMap.h"
 
-#include "src/Player.h"
+#include "physics/Player.h"
 #include "src/Cube.h"
 
 class SolitudeScene : public Scene_t
@@ -40,6 +40,8 @@ private:
 	bool hasCollisions = false;
 	bool isDepthMap = false;
 	float totalTime = 0.0f;
+
+	std::vector<Collider::Info> infos;
 
 	Cube cube;
 };

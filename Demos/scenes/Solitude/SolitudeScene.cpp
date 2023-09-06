@@ -86,14 +86,14 @@ void SolitudeScene::OnPhysics(float deltaTime)
 
     // Physics
     if(isGravity)
-        player->camera->velocitie += glm::vec3(0.0f, -9.8f, 0.0f) * deltaTime;
+        player->camera->velocity += (glm::vec3(0.0f, -0.98f, 0.0f) * deltaTime) / 4.0f;
 
     player->collider.center = player->camera->Position;
 
     if (hasCollisions)
     {
-        auto infos = Collider::CheckCollision(player->collider, scene_objects.front().meshes);
-        for (unsigned int infoCounter = 0; infoCounter < glm::min((int)5, (int)infos.size()); ++infoCounter)
+        auto infos = Collider::CheckCollision(player->collider, scene_objects.front());
+        for (unsigned int infoCounter = 0; infoCounter < glm::min((int)115, (int)infos.size()); ++infoCounter)
         {
             player->OnPhysics(infos[infoCounter]);
         }
@@ -119,6 +119,11 @@ void SolitudeScene::OnImGuiRender()
     ImGui::Checkbox("Collisions", &hasCollisions);
     ImGui::Checkbox("Depth Map", &isDepthMap);
 
+    ImGui::DragFloat3("Coll Pos", &player->collider.center[0]);
+
+    ImGui::Text("Collision Count: %d", (int)infos.size());
+
+    ImGui::Separator();
     textCentered("LIGHTS");
     for (int i = 0; i < pointlights.size(); ++i)
     {
