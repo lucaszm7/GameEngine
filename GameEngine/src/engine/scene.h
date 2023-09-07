@@ -53,10 +53,9 @@ public:
 
 	BaseCam* GetCamera() override { return &pCamera; }
 
-	template <typename T>
-	void RegisterApp(const std::string& name)
+	void RegisterApp(const std::string& name, const std::function<Scene_t* ()>& func)
 	{
 		std::cout << "Registering Scene: " << name << "\n";
-		m_Scenes.push_back(std::make_pair(name, []() { return new T(); }));
+		m_Scenes.push_back(std::make_pair(name, func));
 	}
 };

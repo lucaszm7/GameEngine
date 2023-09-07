@@ -62,6 +62,36 @@ Texture::Texture(const unsigned char* data, unsigned int width, unsigned int hei
 	}
 }
 
+Texture::Texture(unsigned int width, unsigned int height, Texture::Type type)
+	:type(type), m_Width(width), m_Height(height)
+{
+	if (type == Type::MULTISAMPLED)
+	{
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_RendererID);
+
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, m_Width, m_Height, GL_TRUE);
+
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	}
+
+	else
+	{
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		Unbind();
+	}
+}
+
 void Texture::Update(const unsigned char* data, unsigned int width, unsigned int height, Texture::Wrap texParam)
 {
 	if (data)

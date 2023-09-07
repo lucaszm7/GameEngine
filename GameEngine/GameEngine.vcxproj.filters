@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\IndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,15 +57,6 @@
     <ClCompile Include="src\engine\model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\Spline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\Close2GL\SceneClose2GL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\math\mat4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,13 +69,31 @@
     <ClCompile Include="src\math\vec2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\Lines.cpp">
+    <ClCompile Include="src\debug\Lines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\rasterizer\rasterizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\Timer.cpp">
+    <ClCompile Include="src\debug\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math\Quaternion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\Collider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physics\Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -166,19 +172,10 @@
     <ClInclude Include="src\engine\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Timer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\Spline.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scenes\SplineCollDet\SceneSplineCollisionDetection.h">
+    <ClInclude Include="src\debug\Timer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scenes\Close2GL\SceneClose2GL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math\mat4.h">
@@ -196,16 +193,34 @@
     <ClInclude Include="src\math\vec2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\ViewPort.hpp">
+    <ClInclude Include="src\engine\FrameBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\Lines.hpp">
+    <ClInclude Include="src\debug\Lines.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\math\mat.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\rasterizer\rasterizer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\math\Quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vendor\STB\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\Collider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\physics\Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

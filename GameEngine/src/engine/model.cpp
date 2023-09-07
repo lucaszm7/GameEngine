@@ -43,6 +43,13 @@ void Model::OnImGui() const
 	}
 }
 
+void Model::AddTexture(const std::string& path)
+{
+	std::shared_ptr<Texture> tex = std::make_shared<Texture>(path, Texture::Type::DIFFUSE);
+	meshes.front().textures.push_back(tex);
+	textures_loaded.push_back(tex);
+}
+
 void Model::LoadCustomModel(TriangleOrientation triOrientation)
 {
 	std::ifstream stream(m_Path);

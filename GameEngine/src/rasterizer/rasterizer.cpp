@@ -48,9 +48,9 @@ void Rasterizer::DrawSoftwareRasterized(
 
 	// Build Model Matrix
 	cgl::mat4 translate = cgl::mat4::translate(cgl::vec4(model.transform.position, 1.0f));
-	cgl::mat4 rotation = cgl::mat4::rotateX(model.transform.rotation.x);
-	rotation = rotation * cgl::mat4::rotateY(model.transform.rotation.y);
-	rotation = rotation * cgl::mat4::rotateZ(model.transform.rotation.z);
+	cgl::mat4 rotation =  Quaternion::rotation_matrix({1.0f, 0.0f, 0.0f}, model.transform.rotation.x);
+	rotation = rotation * Quaternion::rotation_matrix({0.0f, 1.0f, 0.0f}, model.transform.rotation.y);
+	rotation = rotation * Quaternion::rotation_matrix({0.0f, 0.0f, 1.0f}, model.transform.rotation.z);
 	cgl::mat4 scale = cgl::mat4::scale(model.transform.scale);
 	cgl::mat4 modelM = translate * rotation * scale;
 
@@ -231,7 +231,7 @@ void Rasterizer::DrawSoftwareRasterized(
 		m_TextureToDrawOn->Update(&m_FrameBuffer.data()->r, m_screenWidth, m_screenHeight);
 
 	if (!m_ViewportToDrawOn)
-		m_ViewportToDrawOn = std::make_unique<ViewPort>();
+		m_ViewportToDrawOn = std::make_unique<FrameBuffer>();
 
 	m_ViewportToDrawOn->OnRenderTexture(*m_TextureToDrawOn);
 }

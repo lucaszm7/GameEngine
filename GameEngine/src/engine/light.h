@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GLM/glm.hpp>
+#include <IMGUI/imgui.h>
 
 struct Light
 {
@@ -55,8 +56,19 @@ struct PointLight : public Light
 	float linear;
 	float quadratic;
 
-	PointLight(glm::vec3 lightColor, glm::vec3 pos, float cons = 1.0f, float lin = 0.09f, float quad = 0.032f)
-		: Light(lightColor), position(pos), constant(cons), linear(lin), quadratic(quad) {}
+	float intensity;
+
+	PointLight(glm::vec3 lightColor, glm::vec3 pos, float cons = 1.0f, float lin = 0.09f, float quad = 0.032f, float inte = 1.0f)
+		: Light(lightColor), position(pos), constant(cons), linear(lin), quadratic(quad), intensity(inte) {}
+
+	void OnImGui(const std::string& name)
+	{
+		ImGui::DragFloat(std::string("Int " + name).c_str(), &intensity);
+		ImGui::DragFloat3(std::string("Pos " + name).c_str(), &position[0]);
+		ImGui::ColorEdit3(std::string("Cor " + name).c_str(), &lightColor[0]);
+
+		SetLightColor();
+	}
 };
 
 struct SpotLight : public Light
@@ -70,7 +82,18 @@ struct SpotLight : public Light
 	float linear;
 	float quadratic;
 
+	float intensity;
+
+	void OnImGui(const std::string& name)
+	{
+		ImGui::DragFloat(std::string("Int " + name).c_str(), &intensity);
+		ImGui::DragFloat3(std::string("Pos " + name).c_str(), &position[0]);
+		ImGui::ColorEdit3(std::string("Cor " + name).c_str(), &lightColor[0]);
+
+		SetLightColor();
+	}
+
 	SpotLight(glm::vec3 lightColor, glm::vec3 pos, glm::vec3 dir, float cut = glm::cos(glm::radians(12.5f)), float outerCut = glm::cos(glm::radians(17.5f)),
-			  float cons = 1.0f, float lin = 0.09f, float quad = 0.032f)
-		: Light(lightColor), position(pos), direction(dir), cutOff(cut), outerCutOff(outerCut), constant(cons), linear(lin), quadratic(quad) {}
+			  float cons = 1.0f, float lin = 0.09f, float quad = 0.032f, float inte = 1.0f)
+		: Light(lightColor), position(pos), direction(dir), cutOff(cut), outerCutOff(outerCut), constant(cons), linear(lin), quadratic(quad), intensity(inte) {}
 };

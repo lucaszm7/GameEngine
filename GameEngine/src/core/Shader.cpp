@@ -24,7 +24,7 @@ Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentS
     if (vertexShaderSource.empty() || fragmentShaderSource.empty())
     {
         std::cout << "ERROR\nREADING SHADER FILE\n";
-        system("pause");
+        __cpp_static_assert;
     }
 
     m_RendererID = CreateShader(vertexShaderSource, fragmentShaderSource);
@@ -206,6 +206,7 @@ void Shader::SetUniformLight(const PointLight& light)
     this->SetUniform1f("pointLight.constant", light.constant);
     this->SetUniform1f("pointLight.linear", light.linear);
     this->SetUniform1f("pointLight.quadratic", light.quadratic);
+    this->SetUniform1f("pointLight.intensity", light.intensity);
 }
 
 void Shader::SetUniformLight(const std::vector<PointLight>& lights)
@@ -219,6 +220,7 @@ void Shader::SetUniformLight(const std::vector<PointLight>& lights)
         this->SetUniform1f("pointLights[" + std::to_string(i) + "].constant", lights[i].constant);
         this->SetUniform1f("pointLights[" + std::to_string(i) + "].linear",   lights[i].linear);
         this->SetUniform1f("pointLights[" + std::to_string(i) + "].quadratic",lights[i].quadratic);
+        this->SetUniform1f("pointLights[" + std::to_string(i) + "].intensity", lights[i].intensity);
     }
 }
 
@@ -235,6 +237,7 @@ void Shader::SetUniformLight(const SpotLight& light, ShaderStage shaderStage)
     this->SetUniform1f(stageName + "Spotlight.constant",    light.constant);
     this->SetUniform1f(stageName + "Spotlight.linear",      light.linear);
     this->SetUniform1f(stageName + "Spotlight.quadratic",   light.quadratic);
+    this->SetUniform1f(stageName + "Spotlight.intensity",   light.intensity);
 }
 
 int Shader::GetUniformLocation(const std::string& name)
