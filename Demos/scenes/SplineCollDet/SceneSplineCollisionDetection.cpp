@@ -13,10 +13,11 @@ SceneSplineCollisionDetection::SceneSplineCollisionDetection()
     colon.GenerateSplineMesh("resources/textures/4x_tex.png", TriangleOrientation::ClockWise);
     endo.GenerateSplineMesh("resources/textures/black_image.png", TriangleOrientation::ClockWise);
 
+    collDet.collisionResults.UpdateInterpolatedGranularity(endo.m_controlPoints.size() - 1);
 }
 
 SceneSplineCollisionDetection::~SceneSplineCollisionDetection() = default;
-
+  
 void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
 {
     endoSplineModel = endo.GetSplineModelTransform();
@@ -84,11 +85,11 @@ void SceneSplineCollisionDetection::OnUpdate(float deltaTime)
 
     if (debugCollDet && hasCollisionDetection)
     {
-        for (int i = 0; !collDet.collisionResults.collisionVectors.empty() &&
-                        i < collDet.collisionResults.collisionVectors.size() - 1; i+=2)
+        for (int i = 0; !collDet.collisionResults.collisionData.empty() &&
+                        i < collDet.collisionResults.collisionData.size(); i++)
         {
-            auto& controlPointA = collDet.collisionResults.collisionVectors[i];
-            auto& controlPointB = collDet.collisionResults.collisionVectors[i + 1];
+            auto& controlPointA = collDet.collisionResults.collisionData[i].from;
+            auto& controlPointB = collDet.collisionResults.collisionData[i].to;
             Debug::Line::Draw(
                 glm::vec3(controlPointA.x(), controlPointA.y(), controlPointA.z()),
                 glm::vec3(controlPointB.x(), controlPointB.y(), controlPointB.z()),
@@ -134,14 +135,21 @@ void SceneSplineCollisionDetection::OnImGuiRender()
     if (ImGui::Button("Disable Cull Face"))
         DisableCullFace();
 
-    ImGui::Text("Collisions Count %d", collDet.collisionResults.collisionVectors.size());
+    ImGui::Text("Collisions Count %d", collDet.collisionResults.collisionData.size());
     ImGui::Text("Collisions Time Taken: %f ms", collDetTimer.duration_ms());
 
     ImGui::Checkbox("Debug Collision Detection", &debugCollDet);
     ImGui::Checkbox("Debug Control Points Colon", &debugControlPointsColon);
     ImGui::Checkbox("Debug Control Points Endo", &debugControlPointsEndo);
 
-    ImGui::DragInt("Spline Precision", (int*)&collDet.collisionResults.nInterpolatedControlPoints, 1, 1, 1000);
+    if (ImGui::TreeNode("Collision Detection Granularity"))
+    {
+        for (int i = 0; i < collDet.collisionResults.nInterpolatedControlPoints.size(); ++i)
+        {
+            ImGui::DragInt(std::to_string(i).c_str(), (int*)&collDet.collisionResults.nInterpolatedControlPoints.at(i), 1, 1, 1000);
+        }
+        ImGui::TreePop();
+    }
     ImGui::Checkbox("Is Detection Outside Collisions", &collDet.collisionResults.isDetectingOutsideCollisions);
 
     colon.OnImGui();
@@ -177,9 +185,12 @@ void SceneSplineCollisionDetection::OnImGuiRender()
     }
     if (ImGui::TreeNode("Collision Points"))
     {
-        for (int i = 0; i < collDet.collisionResults.collisionVectors.size(); ++i)
+        for (int i = 0; i < collDet.collisionResults.collisionData.size(); ++i)
         {
-            ImGui::Text((std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), collDet.collisionResults.collisionVectors[i].x(), collDet.collisionResults.collisionVectors[i].y(), collDet.collisionResults.collisionVectors[i].z());
+            auto& from = collDet.collisionResults.collisionData[i].from;
+            auto& to = collDet.collisionResults.collisionData[i].to;
+            ImGui::Text(("From: " + std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), from.x(), from.y(), from.z());
+            ImGui::Text(("To:   " + std::to_string(i) + "  %.3f, %.3f, %.3f").c_str(), to.x(), to.y(), to.z());
         }
         ImGui::TreePop();
     }
