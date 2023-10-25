@@ -1,3 +1,6 @@
 [submodule "splinecollisiondetection"]
 	path = splinecollisiondetection
 	url = git@gitlab.com:ufrgs-sim/splinecollisiondetection.git
+[submodule "GVDBergenCollisionDetection"]
+	path = GVDBergenCollisionDetection
+	url = git@github.com:lucaszm7/GVDBergenCollisionDetection.git
