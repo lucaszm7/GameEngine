@@ -127,6 +127,13 @@ void SceneSplineCollisionDetection::OnImGuiRender()
 {
     ImGui::Text("Radius: %.2f", endoSplineModel->uniformRadius);
     ImGui::Checkbox("Turn Collision Detection", &hasCollisionDetection);
+
+    if(ImGui::RadioButton("Spline", isUsingSplineCollDet))
+        isUsingSplineCollDet = true;
+    ImGui::SameLine();
+    if (ImGui::RadioButton("GVDBergen", !isUsingSplineCollDet))
+		isUsingSplineCollDet = false;
+
     ImGui::Checkbox("Draw Meshs", &isDrawingMeshes);
     ImGui::Checkbox("Draw AABBs", &drawAABB);
     if (ImGui::Button("Enable Cull Face"))

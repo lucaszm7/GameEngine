@@ -18,6 +18,8 @@
 #include "AccelerationStructures.h"
 // #include "spline/SplineModel.hpp"
 
+#include "Plugin.h"
+
 class SceneSplineCollisionDetection : public Scene_t
 {
 private:
@@ -42,6 +44,7 @@ private:
 	bool hasCollisionDetection = true;
 	bool isDrawingMeshes = true;
 	bool drawAABB = false;
+	bool isUsingSplineCollDet = true;
 
 	Spline colon;
 	Spline endo;

@@ -73,13 +73,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)GameEngine\src\;$(SolutionDir)GameEngine\src\core\;$(SolutionDir)GameEngine\src\debug\;$(SolutionDir)GameEngine\src\vendor\;$(SolutionDir)GameEngine\src\engine\;$(SolutionDir)GameEngine\src\math\;$(SolutionDir)GameEngine\src\rasterizer\;$(SolutionDir)GameEngine\src\scenes\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include\</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)GameEngine\src\;$(SolutionDir)GameEngine\src\core\;$(SolutionDir)GameEngine\src\debug\;$(SolutionDir)GameEngine\src\vendor\;$(SolutionDir)GameEngine\src\engine\;$(SolutionDir)GameEngine\src\math\;$(SolutionDir)GameEngine\src\rasterizer\;$(SolutionDir)GameEngine\src\scenes\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include\;$(SolutionDir)GVDBergenCollisionDetection\samples\;$(SolutionDir)GVDBergenCollisionDetection\include\;$(SolutionDir)GVDBergenCollisionDetection\include\3D\;$(SolutionDir)GVDBergenCollisionDetection\include\SOLID\;$(SolutionDir)GVDBergenCollisionDetection\include\qhull\;$(SolutionDir)GVDBergenCollisionDetection\src\;$(SolutionDir)GVDBergenCollisionDetection\src\broad\;$(SolutionDir)GVDBergenCollisionDetection\src\complex\;$(SolutionDir)GVDBergenCollisionDetection\src\convex\;$(SolutionDir)GVDBergenCollisionDetection\src\qhull\;$(SolutionDir)GVDBergenCollisionDetection\include\MT\;%(AdditionalHeaderUnitDependencies);$(IncludePath)</ExternalIncludePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)src\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(ProjectName)\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(SolutionDir)bin\intermediates\$(ProjectName)\$(Configuration)\$(Platform)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)GameEngine\src\;$(SolutionDir)GameEngine\src\core\;$(SolutionDir)GameEngine\src\debug\;$(SolutionDir)GameEngine\src\vendor\;$(SolutionDir)GameEngine\src\engine\;$(SolutionDir)GameEngine\src\math\;$(SolutionDir)GameEngine\src\rasterizer\;$(SolutionDir)GameEngine\src\scenes\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include\</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)GameEngine\src\;$(SolutionDir)GameEngine\src\core\;$(SolutionDir)GameEngine\src\debug\;$(SolutionDir)GameEngine\src\vendor\;$(SolutionDir)GameEngine\src\engine\;$(SolutionDir)GameEngine\src\math\;$(SolutionDir)GameEngine\src\rasterizer\;$(SolutionDir)GameEngine\src\scenes\;$(SolutionDir)splinecollisiondetection\SplineCollisionDetection\include\;$(SolutionDir)GVDBergenCollisionDetection\samples\;$(SolutionDir)GVDBergenCollisionDetection\include\;$(SolutionDir)GVDBergenCollisionDetection\include\3D\;$(SolutionDir)GVDBergenCollisionDetection\include\SOLID\;$(SolutionDir)GVDBergenCollisionDetection\include\qhull\;$(SolutionDir)GVDBergenCollisionDetection\src\;$(SolutionDir)GVDBergenCollisionDetection\src\broad\;$(SolutionDir)GVDBergenCollisionDetection\src\complex\;$(SolutionDir)GVDBergenCollisionDetection\src\convex\;$(SolutionDir)GVDBergenCollisionDetection\src\qhull\;$(SolutionDir)GVDBergenCollisionDetection\include\MT\;%(AdditionalHeaderUnitDependencies);$(IncludePath)</ExternalIncludePath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)src\</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -122,8 +122,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\GameEngine\$(Configuration)\$(Platform)\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GameEngine.lib;SplineCollisionDetection.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin\GameEngine\$(Configuration)\$(Platform)\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\x64\;$(SolutionDir)bin\GVDBergenCollisionDetection\$(Configuration)\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GameEngine.lib;SplineCollisionDetection.lib;GVDBergenCollisionDetection.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,8 +142,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)bin\GameEngine\$(Configuration)\$(Platform)\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GameEngine.lib;SplineCollisionDetection.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin\GameEngine\$(Configuration)\$(Platform)\;$(SolutionDir)bin\SplineCollDet\$(Configuration)\x64\;$(SolutionDir)bin\GVDBergenCollisionDetection\$(Configuration)\x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GameEngine.lib;SplineCollisionDetection.lib;GVDBergenCollisionDetection.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
