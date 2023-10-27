@@ -6,7 +6,7 @@
 #include "SplineModel.hpp"
 #include <IMGUI/imgui.h>
 
-
+#pragma once
 
 // Layer of abstraction of SplineModel to Demo
 struct Spline
