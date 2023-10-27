@@ -30,6 +30,9 @@
     <ClCompile Include="scenes\Solitude\SolitudeScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="scenes\GVDB\GVDB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scenes\Close2GL\SceneClose2GL.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scenes\Solitude\SolitudeScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\GVDB\GVDB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

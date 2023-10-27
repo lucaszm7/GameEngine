@@ -15,6 +15,7 @@
 #include "scenes/SplineCollDet/SceneSplineCollisionDetection.h"
 #include "scenes/Close2GL/SceneClose2GL.h"
 #include "scenes/Solitude/SolitudeScene.h"
+#include "scenes/GVDB/GVDB.h"
 
 
 int main()
@@ -24,6 +25,7 @@ int main()
     gen::GameEngine::AddScene("Close 2 GL", []() {return new SceneClose2GL(); });
     gen::GameEngine::AddScene("Spline Coll Det", []() {return new SceneSplineCollisionDetection(); });
     gen::GameEngine::AddScene("Solitude", []() {return new SolitudeScene(); });
+    gen::GameEngine::AddScene("GVDB", []() {return new GVDB(); });
 
     gen::GameEngine::Run();
 }

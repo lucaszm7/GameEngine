@@ -1,7 +1,8 @@
 # Install Dependencies
 [CmdletBinding()]
 param (
-    [Parameter()] [Boolean] $installExternalDependencies=$false
+    [Parameter()] [Boolean] $installExternalDependencies=$false,
+    [Parameter()] [String] $Configuration="Release"
 )
 
 Write-Host "[LOG] Building Game Engine" -f Blue;
@@ -49,6 +50,8 @@ if (-not ($hasLocalVcpkg))
 
 if($installExternalDependencies)
 {
+    $solutionType = If ($Configuration.equals("Release")) { "Rel_LIB" } Else { "Deb_LIB" };
+
     Write-Host "[LOG] Building Dependencie: Spline Collision Detection..." -f Blue;
 
     if (Test-Path "splinecollisiondetection")
@@ -73,31 +76,85 @@ if($installExternalDependencies)
         }
     }
 
-    .\build.ps1 $False;
+    .\build.ps1 $False $Configuration;
     if ($?)
     {
         Write-Host "[LOG] Build Spline Collision Detection Sucefully!" -f Green;
         cd ..;
-        if(Test-Path "bin/SplineCollDet/Release/x64")
+        if(Test-Path "bin/SplineCollDet/$Configuration/x64")
         {
-            Copy-Item splinecollisiondetection\bin\Rel_LIB\x64\SplineCollisionDetection.lib bin\SplineCollDet\Release\x64\;
+            Copy-Item splinecollisiondetection\bin\$solutionType\x64\SplineCollisionDetection.lib bin\SplineCollDet\$Configuration\x64\;
         }
         else
         {
-            mkdir "bin/SplineCollDet/Release/x64";
-            Copy-Item splinecollisiondetection\bin\Rel_LIB\x64\SplineCollisionDetection.lib bin\SplineCollDet\Release\x64\;
+            mkdir "bin/SplineCollDet/$Configuration/x64";
+            Copy-Item splinecollisiondetection\bin\$solutionType\x64\SplineCollisionDetection.lib bin\SplineCollDet\$Configuration\x64\;
         }
         if($?)
         {
-            Write-Host "[LOG] SplineCollisionDetection.lib was put on bin/SplineCollDet/Release/x64" -f Green;
+            Write-Host "[LOG] SplineCollisionDetection.lib was put on bin/SplineCollDet/$Configuration/x64" -f Green;
         }
         else
         {
-            Write-Host "[ERROR] Failed copying SplineCollisionDetection.lib to bin/SplineCollDet/Release/x64" -f Red;
+            Write-Host "[ERROR] Failed copying SplineCollisionDetection.lib to bin/SplineCollDet/$Configuration/x64" -f Red;
         }
     }
     else {
         Write-Host "[ERROR] Failed to Build Spline Collision Detection" -f Red;
+        cd ..;
+        exit 1;
+    }
+
+
+    Write-Host "[LOG] Building Dependencie: GVDB Collision Detection..." -f Blue;
+
+    if (Test-Path "GVDBergenCollisionDetection")
+    {
+        cd GVDBergenCollisionDetection;
+    }
+    else
+    {
+        Write-Host "[LOG] Has not downloaded submodule GVDB Collision Detection" -f Yellow;
+        Write-Host "[LOG] Downloading submodule..." -f Blue;
+        git submodule init;
+        if($?)
+        {
+            git submodule update;
+            cd GVDBergenCollisionDetection;
+            Write-Host "[LOG] Download Sucess!" -f Green;
+        }
+        else
+        {
+            Write-Host "[ERROR] Failed initiating submodule..." -f Red;
+            exit 1;
+        }
+    }
+
+    .\build.ps1 $False $Configuration;
+    if ($?)
+    {
+        Write-Host "[LOG] Build GVDB Collision Detection Sucefully!" -f Green;
+        cd ..;
+        if(Test-Path "bin/GVDBergenCollisionDetection/$Configuration/x64")
+        {
+            Copy-Item GVDBergenCollisionDetection\bin\$solutionType\x64\GVDBergenCollisionDetection.lib bin\GVDBergenCollisionDetection\$Configuration\x64\;
+        }
+        else
+        {
+            mkdir "bin/GVDBergenCollisionDetection/$Configuration/x64";
+            Copy-Item GVDBergenCollisionDetection\bin\$solutionType\x64\GVDBergenCollisionDetection.lib bin\GVDBergenCollisionDetection\$Configuration\x64\;
+        }
+        if($?)
+        {
+            Write-Host "[LOG] GVDBergenCollisionDetection.lib was put on bin/GVDBergenCollisionDetection/$Configuration/x64" -f Green;
+        }
+        else
+        {
+            Write-Host "[ERROR] Failed copying GVDBergenCollisionDetection.lib to bin/GVDBergenCollisionDetection/$Configuration/x64" -f Red;
+        }
+    }
+    else {
+        Write-Host "[ERROR] Failed to Build GVDBergen Collision Detection" -f Red;
         cd ..;
         exit 1;
     }
