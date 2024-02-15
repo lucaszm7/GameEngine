@@ -107,6 +107,14 @@
     <None Include="resources\shaders\cgl_vertex.shader" />
     <None Include="resources\shaders\Lines_fragment.shader" />
     <None Include="resources\shaders\Lines_vertex.shader" />
+    <None Include="resources\shader\ShadowMap\debugShadowMap_fragment.shader" />
+    <None Include="resources\shader\ShadowMap\debugShadowMap_vertex.shader" />
+    <None Include="resources\shader\ShadowMap\shadowMap_fragment.shader" />
+    <None Include="resources\shader\ShadowMap\shadowMap_vertex.shader" />
+    <None Include="resources\shader\Lines_fragment.shader" />
+    <None Include="resources\shader\Lines_vertex.shader" />
+    <None Include="resources\shader\viewport_fragment.shader" />
+    <None Include="resources\shader\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">

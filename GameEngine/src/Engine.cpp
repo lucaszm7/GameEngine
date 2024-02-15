@@ -18,7 +18,7 @@ void gen::GameEngine::Start(unsigned int width, unsigned int height)
     m_MainMenu = new Menu(m_CurrentScene);
     m_CurrentScene = m_MainMenu;
 
-    m_DebugLineShader = std::make_unique<Shader>("../resources/shader/Lines_vertex.shader", "../resources/shader/Lines_fragment.shader");
+    m_DebugLineShader = std::make_unique<Shader>("../GameEngine/resources/shader/Lines_vertex.shader", "../GameEngine/resources/shader/Lines_fragment.shader");
 
     Scene_t::pScreenWidth = pScreenWidth;
     Scene_t::pScreenHeight = pScreenHeight;

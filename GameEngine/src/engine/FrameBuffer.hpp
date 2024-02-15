@@ -34,7 +34,7 @@ public:
 	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight, FrameBuffer::Type type)
 		:pScreenWidth(screenWidth), pScreenHeight(screenHeight), m_Type(type)
 	{
-		m_FramebufferShader = std::make_unique<Shader>("../resources/shader/viewport_vertex.shader", "../resources/shader/viewport_fragment.shader");
+		m_FramebufferShader = std::make_unique<Shader>("../GameEngine/resources/shader/viewport_vertex.shader", "../GameEngine/resources/shader/viewport_fragment.shader");
         
         float quadVertices[] = {
             // positions   // texCoords
@@ -57,7 +57,7 @@ public:
         _Init();
 	}
 
-    FrameBuffer(std::string vertex = "../resources/shader/viewport_vertex.shader", std::string fragment = "../resources/shader/viewport_fragment.shader")
+    FrameBuffer(std::string vertex = "../GameEngine/resources/shader/viewport_vertex.shader", std::string fragment = "../GameEngine/resources/shader/viewport_fragment.shader")
     {
         m_FramebufferShader = std::make_unique<Shader>(vertex, fragment);
 
