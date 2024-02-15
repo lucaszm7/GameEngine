@@ -87,9 +87,6 @@
     <ClCompile Include="src\physics\Collider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\ShadowMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

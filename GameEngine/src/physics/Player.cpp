@@ -10,11 +10,11 @@ void Player::OnPhysics(Collider::Info& collInfo)
 {
 	auto& normal = collInfo.normal;
 	auto& depth = collInfo.depth;
-	auto& velocity = camera->velocity;
+	// auto& velocity = camera->velocity;
 
 	camera->Position += normal * depth;
 
-	camera->velocity = velocity - 2.0f * glm::dot(velocity, normal) * normal;
+	// camera->velocity = velocity - 2.0f * glm::dot(velocity, normal) * normal;
 
 	collider.center = camera->Position;
 }

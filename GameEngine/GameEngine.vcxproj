@@ -224,7 +224,6 @@
   <ItemGroup>
     <ClCompile Include="src\engine\ShadowMap.cpp" />
     <ClCompile Include="src\Engine.cpp" />
-    <ClCompile Include="src\engine\camera.cpp" />
     <ClCompile Include="src\math\Quaternion.cpp" />
     <ClCompile Include="src\debug\Lines.cpp" />
     <ClCompile Include="src\debug\Timer.cpp" />
