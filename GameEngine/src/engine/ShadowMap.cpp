@@ -2,8 +2,8 @@
 
 ShadowMap::ShadowMap(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight)
 	:fboId(0), texId(0),
-	shader  ("../resources/shader/ShadowMap/shadowMap_vertex.shader",      "../resources/shader/ShadowMap/shadowMap_fragment.shader"),
-	debugFrameBuffer("../resources/shader/ShadowMap/debugShadowMap_vertex.shader", "../resources/shader/ShadowMap/debugShadowMap_fragment.shader")
+	shader  ("../GameEngine/resources/shader/ShadowMap/shadowMap_vertex.shader",      "../GameEngine/resources/shader/ShadowMap/shadowMap_fragment.shader"),
+	debugFrameBuffer("../GameEngine/resources/shader/ShadowMap/debugShadowMap_vertex.shader", "../GameEngine/resources/shader/ShadowMap/debugShadowMap_fragment.shader")
 {
 	pScreenWidth = screenWidth;
 	pScreenHeight = screenHeight;
