@@ -85,8 +85,8 @@ void SolitudeScene::OnPhysics(float deltaTime)
     }
 
     // Physics
-    if(isGravity)
-        player->camera->velocity += (glm::vec3(0.0f, -0.98f, 0.0f) * deltaTime) / 4.0f;
+    /*if(isGravity)
+        player->camera->velocity += (glm::vec3(0.0f, -0.98f, 0.0f) * deltaTime) / 4.0f;*/
 
     player->collider.center = player->camera->Position;
 
