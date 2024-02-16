@@ -1,7 +1,7 @@
 # GameEngine
 
 
-Is an OpenGL "renderer" of arbitrary geometries.
+It is an OpenGL "renderer" of arbitrary geometries.
 Supporting multiple scenes with an API for loading and controlling the models.
 
 # Cloning the Repository
@@ -10,15 +10,10 @@ Supporting multiple scenes with an API for loading and controlling the models.
 git clone --recurse-submodule git@github.com:lucaszm7/GameEngine.git
 ```
 
-Then on windows PowerShell
-
-```shell
-.\build.ps1
-```
 # Close 2 GL
 
-Is a software rasterizer integrated into the engine.
-Its goal is to produce the same result as OpenGL but instead of using OpenGL, everything is done on the CPU.
+It is a software rasterizer integrated into the engine.
+Its goal is to produce the same result as OpenGL, but everything is done on the CPU instead of using OpenGL.
 
 # Features
 
