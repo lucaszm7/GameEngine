@@ -209,8 +209,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib\;$(SolutionDir)Dependencies\GLEW\lib\</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)build.ps1"</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>
