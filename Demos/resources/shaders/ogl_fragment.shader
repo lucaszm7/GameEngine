@@ -67,16 +67,28 @@ uniform Spotlight fragmentSpotlight;
 subroutine vec3 Shading(vec3 normal, vec3 viewDir);
 subroutine uniform Shading shadingSelected;
 
-vec3 Gouraud(vec3 normal, vec3 viewDir);
-vec3 Phong(vec3 normal, vec3 viewDir);
-vec3 None(vec3 normal, vec3 viewDir);
+vec3 None    (vec3 normal, vec3 viewDir);
+vec3 Gouraud (vec3 normal, vec3 viewDir);
+vec3 Phong   (vec3 normal, vec3 viewDir);
+
+subroutine vec3 Coloring(bool isDiffuse);
+subroutine uniform Coloring coloringSelected;
+
+vec3 SolidColor   (bool isDiffuse);
+vec3 TextureColor (bool isDiffuse);
 
 vec3 PhongDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 PhongPointLight(PointLight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 vec3 PhongSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir);
 
-subroutine vec3 Coloring(bool isDiffuse);
-subroutine uniform Coloring coloringSelected;
+void main()
+{
+	vec3 norm = normalize(outNormal);
+    vec3 viewDir = normalize(outViewPos - outFragPos);
+    vec3 result = shadingSelected(norm, viewDir);
+
+	FragColor = vec4(result, 1.0);
+}
 
 subroutine (Coloring)
 vec3 SolidColor(bool isDiffuse)
@@ -88,15 +100,6 @@ subroutine (Coloring)
 vec3 TextureColor(bool isDiffuse)
 {
     return isDiffuse ? vec3(texture(material.diffuse, outTexCoord)) : vec3(texture(material.specular, outTexCoord));
-}
-
-void main()
-{
-	vec3 norm = normalize(outNormal);
-    vec3 viewDir = normalize(outViewPos - outFragPos);
-    vec3 result = shadingSelected(norm, viewDir);
-
-	FragColor = vec4(result, 1.0);
 }
 
 subroutine (Shading) 
