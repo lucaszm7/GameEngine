@@ -48,13 +48,13 @@ uniform Spotlight vertexSpotlight;
 
 subroutine vec3 Shading(vec3 pos, vec3 normal, vec3 viewDir);
 subroutine uniform Shading shadingSelected;
+
+vec3 None   (vec3 pos, vec3 normal, vec3 viewDir);
 vec3 Gouraud(vec3 pos, vec3 normal, vec3 viewDir);
-vec3 Phong(vec3 pos, vec3 normal, vec3 viewDir);
-vec3 None(vec3 pos, vec3 normal, vec3 viewDir);
+vec3 Phong  (vec3 pos, vec3 normal, vec3 viewDir);
 
 vec3 GouraudDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 GouraudSpotlight(Spotlight light, vec3 normal, vec3 FragPos, vec3 viewDir);
-
 
 void main()
 {

@@ -42,13 +42,13 @@ SceneClose2GL::SceneClose2GL()
     objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
     DisableCullFace();
 
+    VertexShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "None");
     VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
     VertexShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Phong");
-    VertexShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "None");
 
+    FragmentShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "None");
     FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Gouraud");
     FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Phong");
-    FragmentShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "None");
 
     FragmentColoringSolidIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "SolidColor");
     FragmentColoringTextureIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "TextureColor");
@@ -84,8 +84,8 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         unsigned int vertexSubroutineIndex = shading == SHADING::GOURAUD ? VertexShadingGouraudIndex : VertexShadingPhongIndex;
 
         std::array<unsigned int, 2> fragmentSubroutineIndex;
-        fragmentSubroutineIndex[0] = fragShadingIndex;
-        fragmentSubroutineIndex[1] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
+        fragmentSubroutineIndex[0] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
+        fragmentSubroutineIndex[1] = fragShadingIndex;
         
         OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
         OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &vertexSubroutineIndex);
