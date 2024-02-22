@@ -78,6 +78,9 @@ public:
 
 	static cgl::vec3 GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v);
 
+	static void FromPixelArrayToASCII(const std::string& image_path);
+	static std::tuple<std::vector<cgl::vec3>, int, int> GetPixelArrayFromImage(const std::string& textureBuffer);
+
 	std::shared_ptr<MipMap> GetMipMap() const { return m_MipMap; }
 
 	enum class Wrap

@@ -301,6 +301,7 @@
     <ClInclude Include="src\engine\mesh.h" />
     <ClInclude Include="src\engine\model.h" />
     <ClInclude Include="src\debug\Timer.hpp" />
+    <ClInclude Include="src\UI\UI.hpp" />
     <ClInclude Include="src\vendor\IMGUI\imconfig.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui.h" />
     <ClInclude Include="src\vendor\IMGUI\imgui_impl_glfw.h" />

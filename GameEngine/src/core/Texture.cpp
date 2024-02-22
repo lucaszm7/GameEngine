@@ -1,6 +1,8 @@
 #include "Texture.h"
 #include "stb_image.h"
 #include <format>
+#include <tuple>
+#include <fstream>
 
 Texture::Texture(const std::string& path, 
 	Texture::Type type, 
@@ -134,6 +136,66 @@ cgl::vec3 Texture::GetPixelColorFromTextureBuffer(const unsigned char* const tex
 {
 	auto currentPixelColor = &textureBuffer[(v * buffer_width + u) * 3];
 	return { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
+}
+
+void Texture::FromPixelArrayToASCII(const std::string& image_path)
+{
+	const auto imageData  = GetPixelArrayFromImage(image_path);
+	const auto pixelArray = std::get<0>(imageData);
+	const auto width      = std::get<1>(imageData);
+	const auto height     = std::get<2>(imageData);
+
+	std::cout << "Width: " << width << " Height: " << height << "\n";
+
+	std::string asciiArt;
+	std::string greyscale_0 = ".:+#$";
+	std::string greyscale_1 = "@#*+-:.";
+	std::string greyscale_2 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+
+	asciiArt.reserve(width * height);
+	for (int j = 0; j < height; ++j)
+	{
+		for (int i = 0; i < width; ++i)
+		{
+			auto& currentPixelColor = pixelArray[(j * width) + i];
+			auto r = (int)(currentPixelColor[0]);
+			auto g = (int)(currentPixelColor[1]);
+			auto b = (int)(currentPixelColor[2]);
+			auto gray = (r + g + b) / 3;
+
+			gray = (255 - gray);
+			auto char_index = (gray * (greyscale_1.size() - 1)) / 255;
+			asciiArt += greyscale_1[char_index];
+		}
+		asciiArt += '\n';
+	}
+
+	std::ofstream file("ascii_art.txt");
+	file << asciiArt;
+	file.close();
+}
+
+std::tuple<std::vector<cgl::vec3>, int, int> Texture::GetPixelArrayFromImage(const std::string& image_path)
+{
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(false);
+	unsigned char* data = stbi_load(image_path.c_str(), &width, &height, &nrChannels, 3);
+	stbi_set_flip_vertically_on_load(true);
+
+	std::vector<cgl::vec3> pixelArray;
+	pixelArray.reserve(width * height);
+
+	for (int j = 0; j < height; ++j)
+	{
+		for (int i = 0; i < width; ++i)
+		{
+			auto currentPixelColor = &data[((j * width) + i) * 3];
+			pixelArray.push_back({ ((float)currentPixelColor[0]), ((float)currentPixelColor[1]), ((float)currentPixelColor[2]) });
+		}
+	}
+
+	stbi_image_free(data);
+	return { pixelArray, width, height };
 }
 
 cgl::vec3 Texture::BilinearFiltering(const unsigned char* const buffer, unsigned int buffer_width, float u, float v)
