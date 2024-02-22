@@ -9,7 +9,7 @@ namespace UI
     class FileDialog
     {
     public:
-        static std::string Get()
+        static std::string GetFilePath()
         {
             nfdchar_t* outPath = NULL;
             nfdresult_t result = NFD_OpenDialog(NULL, NULL, &outPath);
