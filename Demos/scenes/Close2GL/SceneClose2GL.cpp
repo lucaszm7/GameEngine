@@ -1,5 +1,6 @@
 #include "SceneClose2GL.h"
 #include "Lines.hpp"
+#include <UI/UI.hpp>
 
 struct BoundingVolume
 {
@@ -151,6 +152,13 @@ void SceneClose2GL::OnImGuiRender()
         ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
         ImGui::TextColored(color, text.c_str());
     };
+
+    if (ImGui::Button("Select File"))
+    {
+        auto file = UI::FileDialog::Get();
+        std::cout << file << std::endl;
+        Texture::FromPixelArrayToASCII(file);
+    }
 
     ImGui::Separator();
     textCentered("Render API");
