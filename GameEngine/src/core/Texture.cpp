@@ -138,7 +138,7 @@ cgl::vec3 Texture::GetPixelColorFromTextureBuffer(const unsigned char* const tex
 	return { ((float)currentPixelColor[0]) / 255.0f, ((float)currentPixelColor[1]) / 255.0f, ((float)currentPixelColor[2]) / 255.0f };
 }
 
-void Texture::FromPixelArrayToASCII(const std::string& image_path)
+void Texture::FromPixelArrayToASCII(const std::string& image_path, bool light_to_dark, int mapping)
 {
 	const auto imageData  = GetPixelArrayFromImage(image_path);
 	const auto pixelArray = std::get<0>(imageData);
@@ -148,9 +148,7 @@ void Texture::FromPixelArrayToASCII(const std::string& image_path)
 	std::cout << "Width: " << width << " Height: " << height << "\n";
 
 	std::string asciiArt;
-	std::string greyscale_0 = ".:+#$";
-	std::string greyscale_1 = "@#*+-:.";
-	std::string greyscale_2 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+	std::array<std::string, 3> greyscale = { "$#+:.", "@#*+-:.", "$@B%8&WM#-_+~<>;:,^`'. " };
 
 	asciiArt.reserve(width * height);
 	for (int j = 0; j < height; ++j)
@@ -163,9 +161,9 @@ void Texture::FromPixelArrayToASCII(const std::string& image_path)
 			auto b = (int)(currentPixelColor[2]);
 			auto gray = (r + g + b) / 3;
 
-			gray = (255 - gray);
-			auto char_index = (gray * (greyscale_1.size() - 1)) / 255;
-			asciiArt += greyscale_1[char_index];
+			gray = light_to_dark ? (255 - gray) : gray;
+			auto char_index = (gray * (greyscale[mapping].size() - 1)) / 255;
+			asciiArt += greyscale[mapping][char_index];
 		}
 		asciiArt += '\n';
 	}

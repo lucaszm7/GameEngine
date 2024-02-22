@@ -14,6 +14,7 @@
 // Scenes
 #include "scenes/Close2GL/SceneClose2GL.h"
 #include "scenes/Solitude/SolitudeScene.h"
+#include "scenes/ASCIIMAGE/ASCIIMAGE.h"
 
 
 int main()
@@ -22,6 +23,7 @@ int main()
     
     gen::GameEngine::AddScene("Close 2 GL", []() {return new SceneClose2GL(); });
     gen::GameEngine::AddScene("Solitude", []() {return new SolitudeScene(); });
+    gen::GameEngine::AddScene("ASCII to Image", []() {return new ASCIIMAGE(); });
 
     gen::GameEngine::Run();
 }
