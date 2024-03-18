@@ -31,7 +31,7 @@ private:
 	std::unique_ptr<Shader> m_FramebufferShader;
 
 public:
-	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight, FrameBuffer::Type type)
+	FrameBuffer(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight, FrameBuffer::Type type = FrameBuffer::Type::MULTISAMPLE)
 		:pScreenWidth(screenWidth), pScreenHeight(screenHeight), m_Type(type)
 	{
 		m_FramebufferShader = std::make_unique<Shader>("../GameEngine/resources/shader/viewport_vertex.shader", "../GameEngine/resources/shader/viewport_fragment.shader");
@@ -87,7 +87,7 @@ public:
         glDisable(GL_DEPTH_TEST);
         m_FramebufferShader->Bind();
         quadVAO.Bind();
-        tex.Bind();
+        tex.BindAsTexture2D(0);
         tex.SetFiltering();
         m_FramebufferShader->SetUniform1i("screenTexture", 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -111,7 +111,7 @@ public:
     }
 
     // Render the frame buffer inside a texture
-	void OnRenderDirectlyToScreen()
+	void OnRenderDirectlyToScreen() const
 	{
         glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
 
@@ -126,6 +126,7 @@ public:
 	}
 
     // Catch the rendered texture and display as an image
+    // *This is only called in the Engine Class, cause this puts the texture on the ImGui Context
     void OnImGuiRender()
     {
         if (m_Type == Type::MULTISAMPLE)

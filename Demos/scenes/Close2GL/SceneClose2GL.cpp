@@ -200,6 +200,21 @@ void SceneClose2GL::OnImGuiRender()
     }
 
     ImGui::Separator();
+    if (!isOpenGLRendered)
+    {
+        ImGui::Text("Projection Type:");
+        if (ImGui::RadioButton("Perspective", cglCamera.projectionType == ProjectionType::PERSPECTIVE))
+        {
+			cglCamera.projectionType = ProjectionType::PERSPECTIVE;
+		}
+		ImGui::SameLine();
+        if (ImGui::RadioButton("Orthographic", cglCamera.projectionType == ProjectionType::ORTHOGRAPHIC))
+        {
+            cglCamera.projectionType = ProjectionType::ORTHOGRAPHIC;
+        }
+    }
+
+    ImGui::Separator();
     textCentered("SHADING Model");
 
     if (ImGui::RadioButton("No lighting", shading == SHADING::NONE))

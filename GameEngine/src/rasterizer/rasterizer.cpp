@@ -89,13 +89,20 @@ void Rasterizer::DrawSoftwareRasterized(
 		for (unsigned int j = 0; j < model.meshes[i].vertices.size(); j += 3)
 		{
 			// ===============================
-			// Go To Homogeneus Clipping Space
+			// Vertex Shader: Go To Homogeneus Clipping Space
 			// ===============================
 
-			// Vertex Transforms
+			// Vertex Transforms to Homogeneus Clipping Space
 			cgl::vec4 v0 = mvp * cgl::vec4(model.meshes[i].vertices[j + 0].Position, 1.0f);
 			cgl::vec4 v1 = mvp * cgl::vec4(model.meshes[i].vertices[j + 1].Position, 1.0f);
 			cgl::vec4 v2 = mvp * cgl::vec4(model.meshes[i].vertices[j + 2].Position, 1.0f);
+
+			// ===============================
+			// Primitive Setup: Grouping Vertices into Triangles
+			// Culling and Clipping: Discard Triangles
+			// Perspective Division: Go To Normalized Device Coordinates
+			// Viewport Transformation: Go To Pixel Coordinates
+			// ===============================
 
 			// Clipping
 			if (!v0.is_in_range(v0.w) || !v1.is_in_range(v1.w) || !v2.is_in_range(v2.w))
@@ -106,23 +113,27 @@ void Rasterizer::DrawSoftwareRasterized(
 			{
 				cgl::vec3 u = (v1 - v0).to_vec3();
 				cgl::vec3 v = (v2 - v0).to_vec3();
-				float sign = (u.x * v.y) - (v.x * u.y);
-				if (isCullingClockWise && sign > 0.0f)
+				float z_value_of_triangle_normal = (u.x * v.y) - (v.x * u.y); // z value of cross product of u and v
+				// Why if sign > 0.0f? Because the camera is looking at the negative z axis
+				// So, if the sign is positive, the triangle is facing the camera
+				// But why is (u.x * v.y) - (v.x * u.y) tell me that?
+				// Because the cross product of two vectors gives us a vector perpendicular to the plane formed by the two vectors
+				// And the sign of the z component of this vector tells us if the triangle is facing the camera or not
+
+				if (isCullingClockWise && z_value_of_triangle_normal > 0.0f)
 					continue;
-				if (!isCullingClockWise && sign < 0.0f)
+				if (!isCullingClockWise && z_value_of_triangle_normal < 0.0f)
 					continue;
 			}
-
-			// ===================================
-			// Go To Normalized Device Coordinates
-			// ===================================
 
 			// Save w for perspective correct interpolation
 			float v0w = v0.w;
 			float v1w = v1.w;
 			float v2w = v2.w;
 
-			// Perspective division of all coordinates (x,y,z,w)
+			// =======================
+			// Go To Normalized Device Coordinates
+			// Perspective division of all coordinates (x,y,z,w) to NDC
 			v0 /= v0.w;
 			v1 /= v1.w;
 			v2 /= v2.w;
@@ -144,9 +155,6 @@ void Rasterizer::DrawSoftwareRasterized(
 			cglVertices.push_back(v1);
 			cglVertices.push_back(v2);
 
-			// ==============
-			// Get Attributes
-			// ==============
 
 			// =================================
 			// Perspective Correct Interpolation

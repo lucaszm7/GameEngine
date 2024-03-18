@@ -150,12 +150,14 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="scenes\ComputeShader\ComputeShaderDemo.cpp" />
     <ClCompile Include="scenes\ASCIIMAGE\ASCIIMAGE.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="scenes\Close2GL\SceneClose2GL.cpp" />
     <ClCompile Include="scenes\Solitude\SolitudeScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="scenes\ComputeShader\ComputeShaderDemo.h" />
     <ClInclude Include="scenes\ASCIIMAGE\ASCIIMAGE.h" />
     <ClInclude Include="scenes\Close2GL\SceneClose2GL.h" />
     <ClInclude Include="scenes\Solitude\src\Cube.h" />

@@ -69,6 +69,12 @@ namespace gen
         static void Run();
         static void ResetEngine();
 
+        static glm::dvec2 GetMousePos();
+        static bool IsKeyPressed(int key);
+        static bool IsMouseButtonPressed(int button);
+        static bool IsMouseButtonReleased(int button);
+
+
     private:
         static void processInputs(GLFWwindow* window, double deltaTime);
         static void APIENTRY

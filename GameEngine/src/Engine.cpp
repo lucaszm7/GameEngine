@@ -126,6 +126,28 @@ void gen::GameEngine::ResetEngine()
     glEnable(GL_MULTISAMPLE);
 }
 
+glm::dvec2 gen::GameEngine::GetMousePos()
+{
+    double xpos, ypos;
+	glfwGetCursorPos(pWindow, &xpos, &ypos);
+	return { xpos, ypos };
+}
+
+bool gen::GameEngine::IsKeyPressed(int key)
+{
+	return glfwGetKey(pWindow, key) == GLFW_PRESS;
+}
+
+bool gen::GameEngine::IsMouseButtonPressed(int button)
+{
+    return glfwGetMouseButton(pWindow, button) == GLFW_PRESS;
+}
+
+bool gen::GameEngine::IsMouseButtonReleased(int button)
+{
+    return glfwGetMouseButton(pWindow, button) == GLFW_RELEASE;
+}
+
 void gen::GameEngine::processInputs(GLFWwindow* window, double deltaTime)
 {
     if(pCamera)

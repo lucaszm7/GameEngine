@@ -93,6 +93,9 @@
     <ClCompile Include="src\physics\Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\ComputeShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.shader" />
@@ -115,6 +118,8 @@
     <None Include="resources\shader\Lines_vertex.shader" />
     <None Include="resources\shader\viewport_fragment.shader" />
     <None Include="resources\shader\viewport_vertex.shader" />
+    <None Include="resources\shader\compute_shader_demo.shader" />
+    <None Include="resources\shader\mandelbrot.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\IndexBuffer.h">
@@ -229,6 +234,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\UI\UI.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\ComputeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

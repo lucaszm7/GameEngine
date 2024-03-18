@@ -24,6 +24,12 @@ enum class CamMovement
     NONE
 };
 
+enum class ProjectionType
+{
+	PERSPECTIVE,
+	ORTHOGRAPHIC
+};
+
 // Default camera values
 static const float YAW = -90.0f;
 static const float PITCH = 0.0f;
@@ -74,6 +80,8 @@ namespace cgl
         cgl::vec3 Up;
         cgl::vec3 Right;
         cgl::vec3 WorldUp;
+
+        ProjectionType projectionType = ProjectionType::PERSPECTIVE;
 
         // euler Angles
         float Yaw;
@@ -168,13 +176,21 @@ namespace cgl
 
         cgl::mat4 GetProjectionMatrix(float aspectRatio) const
         {
-            float top = Near * (- glm::tan(Zoom / 2));
+            if (projectionType == ProjectionType::PERSPECTIVE)
+				return getPerspectiveProjection(aspectRatio);
+			else
+				return getOrthographicProjection(aspectRatio);
+        }
+
+        cgl::mat4 getPerspectiveProjection(float aspectRatio) const
+        {
+            float top = Near * (-glm::tan(Zoom / 2));
             float bottom = -top;
             float right = aspectRatio * top;
             float left = -right;
 
             float depth = Far - Near;
-            
+
             cgl::mat4 H = cgl::mat4::identity();
             H[0][2] = (left + right) / (2 * Near);
             H[1][2] = (top + bottom) / (2 * Near);
@@ -194,6 +210,24 @@ namespace cgl
             cgl::mat4 perspectiveProjection = PI * S * H;
 
             return perspectiveProjection;
+		}
+
+        cgl::mat4 getOrthographicProjection(float aspectRatio) const
+        {
+            float top = Near * (glm::tan(Zoom / 2));
+			float bottom = -top;
+			float right = aspectRatio * top;
+			float left = -right;
+
+			cgl::mat4 orthographicProjection = cgl::mat4::identity();
+			orthographicProjection[0][0] = 2 / (right - left);
+			orthographicProjection[1][1] = 2 / (top - bottom);
+			orthographicProjection[2][2] = -2 / (Far - Near);
+			orthographicProjection[0][3] = -(right + left) / (right - left);
+			orthographicProjection[1][3] = -(top + bottom) / (top - bottom);
+			orthographicProjection[2][3] = -(Far + Near) / (Far - Near);
+
+			return orthographicProjection;
         }
 
         // processes input received from any keyboard-like input system. 
@@ -277,15 +311,45 @@ namespace cgl
         {
             // calculate the new Front vector
             cgl::vec3 front;
+
+            // The Front vector is calculated with the multiplication of the Roll, Pitch and Yaw matrix, then simplified them
+            // 
+            // Roll Matrix
+            // | cos(roll) -sin(roll) 0 |
+            // | sin(roll)  cos(roll) 0 |
+            // | 0          0         1 |
+            // 
+            // Yaw Matrix
+            // | cos(pitch) 0 -sin(pitch) |
+            // | 0          1  0          |
+            // | sin(pitch) 0  cos(pitch) |
+            // 
+            // Pitch Matrix
+            // | 1         0        0 |
+            // | 0 cos(yaw) -sin(yaw) |
+            // | 0 sin(yaw)  cos(yaw) |
+            // 
+            // Resulting Matrix: Roll * Pitch * Yaw
+            // | cos(yaw)cos(pitch) -cos(yaw)sin(pitch)sin(roll)-sin(yaw)cos(roll)  -cos(yaw)sin(pitch)cos(roll)+sin(yaw)sin(roll)   |
+            // | sin(pitch)          cos(pitch)sin(roll)                               cos(pitch)sin(roll)                           |
+            // | sin(yaw)cos(pitch) -sin(yaw)sin(pitch)sin(roll)+cos(yaw)cos(roll)  -sin(yaw)sin(pitch)cos(roll) - cos(yaw)sin(roll) |
+            // 
+            // Simplified Matrix
+            // | cos(yaw)cos(pitch) 0 0 |
+            // | sin(pitch)         0 0 |
+            // | sin(yaw)cos(pitch) 0 0 |
+
             front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
             front.y = sin(glm::radians(Pitch));
             front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+
             Front = isLookAt ? lookAtPos.normalized() : front.normalized();
             // also re-calculate the Right and Up vector
             cgl::vec3 right = Front.cross(WorldUp);
             Right = right.normalized(); // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
             cgl::vec3 up = Right.cross(Front);
             Up = up.normalized();
+            Right = Front.cross(Up).normalized();
         }
     };
 }

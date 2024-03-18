@@ -79,7 +79,20 @@ Texture::Texture(unsigned int width, unsigned int height, Texture::Type type)
 
 		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	}
+	else if (type == Type::IMAGE)
+	{
+		glGenTextures(1, &m_RendererID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 
+		glBindImageTexture(0, m_RendererID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		Unbind();
+	}
 	else
 	{
 		glGenTextures(1, &m_RendererID);
@@ -123,13 +136,55 @@ Texture::~Texture()
 
 void Texture::Bind(unsigned int slot) const
 {
+	if (type == Type::MULTISAMPLED)
+	{
+		BindAsMultisample(slot);
+		return;
+	}
+	else if (type == Type::IMAGE)
+	{
+		BindAsImage(slot, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		return;
+	}
+	else
+	{
+		BindAsTexture2D(slot);
+	}
+}
+
+void Texture::BindAsTexture2D(unsigned int slot) const
+{
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, m_RendererID);
 }
 
+void Texture::BindAsMultisample(unsigned int slot) const
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_RendererID);
+}
+
+void Texture::BindAsImage(unsigned int slot, unsigned int mipLevel, bool layered, unsigned int layer, GLenum access, GLenum format) const
+{
+	glBindImageTexture(slot, m_RendererID, mipLevel, layered, layer, access, format);
+}
+
 void Texture::Unbind() const
 {
-	glBindTexture(GL_TEXTURE_2D, 0);
+	if (type == Type::MULTISAMPLED)
+	{
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+		return;
+	}
+	else if (type == Type::IMAGE)
+	{
+		glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		return;
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 }
 
 cgl::vec3 Texture::GetPixelColorFromTextureBuffer(const unsigned char* const textureBuffer, unsigned int buffer_width, const unsigned int u, const unsigned int v)

@@ -225,6 +225,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\ComputeShader.cpp" />
     <ClCompile Include="src\engine\ShadowMap.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\math\Quaternion.cpp" />
@@ -265,8 +266,10 @@
     <None Include="resources\shaders\vertex.shader" />
     <None Include="resources\shaders\viewport_fragment.shader" />
     <None Include="resources\shaders\viewport_vertex.shader" />
+    <None Include="resources\shader\compute_shader_demo.shader" />
     <None Include="resources\shader\Lines_fragment.shader" />
     <None Include="resources\shader\Lines_vertex.shader" />
+    <None Include="resources\shader\mandelbrot.shader" />
     <None Include="resources\shader\ShadowMap\debugShadowMap_fragment.shader" />
     <None Include="resources\shader\ShadowMap\debugShadowMap_vertex.shader" />
     <None Include="resources\shader\ShadowMap\shadowMap_fragment.shader" />
@@ -275,6 +278,7 @@
     <None Include="resources\shader\viewport_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\ComputeShader.h" />
     <ClInclude Include="src\engine\ShadowMap.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\math\Quaternion.h" />

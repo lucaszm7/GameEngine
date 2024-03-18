@@ -62,6 +62,9 @@ public:
 	~Texture();
 
 	void Bind(unsigned int slot = 0) const;
+	void BindAsTexture2D(unsigned int slot) const;
+	void BindAsMultisample(unsigned int slot) const;
+	void BindAsImage(unsigned int slot, unsigned int mipLevel, bool layered, unsigned int layer, GLenum access, GLenum format) const;
 	void Unbind() const;
 
 	static void SetGlobalFiltering(Texture::Filtering filtering, Texture::Wrap texParam = Texture::Wrap::MIRROR);
@@ -95,7 +98,8 @@ public:
 		SPECULAR,
 		EMISSION,
 		RAW,
-		MULTISAMPLED
+		MULTISAMPLED,
+		IMAGE
 	};
 
 	enum class Filtering
