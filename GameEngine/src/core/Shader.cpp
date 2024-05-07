@@ -1,13 +1,13 @@
 #include "Shader.h"
 
-static std::string to_string(ShaderStage ss)
+static std::string to_string(Shader::STAGE ss)
 {
     switch (ss)
     {
-    case ShaderStage::VERTEX:
+    case Shader::STAGE::VERTEX:
         return "vertex";
         break;
-    case ShaderStage::FRAGMENT:
+    case Shader::STAGE::FRAGMENT:
         return "fragment";
         break;
     default:
@@ -125,47 +125,47 @@ void Shader::Unbind()
 * precisamos de um PONTEIRO para aquele objeto, e podemos perguntar ao OpenGL
 * qual a localização desse Uniform pelo nome.
 */
-void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) const
 {
     glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
 }
 
-void Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2)
+void Shader::SetUniform3f(const std::string& name, float v0, float v1, float v2) const
 {
     glUniform3f(GetUniformLocation(name), v0, v1, v2);
 }
 
-void Shader::SetUniform3f(const std::string& name, const glm::vec3& v)
+void Shader::SetUniform3f(const std::string& name, const glm::vec3& v) const
 {
     glUniform3f(GetUniformLocation(name), v.x, v.y, v.z);
 }
 
-void Shader::SetUniform3f(const std::string& name, const cgl::vec3& v)
+void Shader::SetUniform3f(const std::string& name, const cgl::vec3& v) const
 {
     glUniform3f(GetUniformLocation(name), v.x, v.y, v.z);
 }
 
-void Shader::SetUniform1i(const std::string& name, int v0)
+void Shader::SetUniform1i(const std::string& name, int v0) const
 {
     glUniform1i(GetUniformLocation(name), v0);
 }
 
-void Shader::SetUniform1f(const std::string& name, float v0)
+void Shader::SetUniform1f(const std::string& name, float v0) const
 {
     glUniform1f(GetUniformLocation(name), v0);
 }
 
-void Shader::SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4)
+void Shader::SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4) const
 {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat4));
 }
 
-void Shader::SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4)
+void Shader::SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4) const
 {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, mat4.get_pointer());
 }
 
-unsigned int Shader::GetSubroutineIndex(ShaderStage shaderStage, const std::string& subroutineIndexName) const
+unsigned int Shader::GetSubroutineIndex(Shader::STAGE shaderStage, const std::string& subroutineIndexName) const
 {
     auto r = glGetSubroutineIndex(m_RendererID, (GLenum)shaderStage, subroutineIndexName.c_str());
 #ifdef _DEBUG
@@ -175,12 +175,12 @@ unsigned int Shader::GetSubroutineIndex(ShaderStage shaderStage, const std::stri
     return r;
 }
 
-void Shader::SetUniformSubroutine(ShaderStage shaderStage, size_t count, unsigned int const* index) const
+void Shader::SetUniformSubroutine(Shader::STAGE shaderStage, size_t count, unsigned int const* index) const
 {
     glUniformSubroutinesuiv((GLenum)shaderStage, count, index);
 }
 
-void Shader::SetUniformMaterial(const Material& mat)
+void Shader::SetUniformMaterial(const Material& mat) const
 {
     this->SetUniform3f("material.ambient", mat.ambient);
     this->SetUniform3f("material.diffuse", mat.diffuse);
@@ -188,16 +188,16 @@ void Shader::SetUniformMaterial(const Material& mat)
     this->SetUniform1f("material.shininess", mat.shininess);
 }
 
-void Shader::SetUniformLight(const DirectionalLight& light, ShaderStage shaderStage)
+void Shader::SetUniformLight(const DirectionalLight& light, Shader::STAGE shaderStage) const
 {
     std::string stageName = to_string(shaderStage);
     this->SetUniform3f(stageName + "DirectionalLight.ambient", light.ambient);
     this->SetUniform3f(stageName + "DirectionalLight.diffuse", light.diffuse);
     this->SetUniform3f(stageName + "DirectionalLight.specular", light.specular);
-    this->SetUniform3f(stageName + "DirectionalLight.direction", light.direction);
+    this->SetUniform3f(stageName + "DirectionalLight.direction", light.GetDirection());
 }
 
-void Shader::SetUniformLight(const PointLight& light)
+void Shader::SetUniformLight(const PointLight& light) const
 {
     this->SetUniform3f("pointLight.ambient", light.ambient);
     this->SetUniform3f("pointLight.diffuse", light.diffuse);
@@ -209,7 +209,7 @@ void Shader::SetUniformLight(const PointLight& light)
     this->SetUniform1f("pointLight.intensity", light.intensity);
 }
 
-void Shader::SetUniformLight(const std::vector<PointLight>& lights)
+void Shader::SetUniformLight(const std::vector<PointLight>& lights) const
 {
     for (int i = 0; i < lights.size(); ++i)
     {
@@ -224,7 +224,7 @@ void Shader::SetUniformLight(const std::vector<PointLight>& lights)
     }
 }
 
-void Shader::SetUniformLight(const SpotLight& light, ShaderStage shaderStage)
+void Shader::SetUniformLight(const SpotLight& light, Shader::STAGE shaderStage) const
 {
     std::string stageName = to_string(shaderStage);
     this->SetUniform3f(stageName + "Spotlight.ambient",     light.ambient);
@@ -240,7 +240,7 @@ void Shader::SetUniformLight(const SpotLight& light, ShaderStage shaderStage)
     this->SetUniform1f(stageName + "Spotlight.intensity",   light.intensity);
 }
 
-int Shader::GetUniformLocation(const std::string& name)
+int Shader::GetUniformLocation(const std::string& name) const
 {
     if (m_UniformLocationCache.contains(name))
         return m_UniformLocationCache[name];

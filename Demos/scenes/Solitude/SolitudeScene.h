@@ -1,7 +1,7 @@
 #pragma once
 
 // Engine
-#include "shader.h"
+#include "ShaderManager.h"
 #include "scene.h"
 #include "camera.h"
 #include "model.h"
@@ -15,7 +15,7 @@ class SolitudeScene : public Scene_t
 {
 public:
 	SolitudeScene();
-	~SolitudeScene() final;
+	~SolitudeScene() final = default;
 
 	void OnUpdate(float deltaTime) override;
 	void OnImGuiRender() override;
@@ -25,14 +25,13 @@ public:
 private:
 
 	std::shared_ptr<ogl::Camera> camera;
-	Shader shader;
 
 	DirectionalLight dirlight;
 	SpotLight spotlight;
 	ShadowMap shadowMap;
 
 	std::vector<PointLight> pointlights;
-	std::shared_ptr < Player> player;
+	std::shared_ptr<Player> player;
 
 	std::vector<Model> scene_objects;
 

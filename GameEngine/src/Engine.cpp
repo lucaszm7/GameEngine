@@ -30,6 +30,8 @@ void gen::GameEngine::Start(unsigned int width, unsigned int height)
     lastY = 0.0f;
 
     firstMouse = true;
+
+    ShaderManager::Init();
 }
 
 void gen::GameEngine::AddScene(const std::string& name, const std::function<Scene_t* ()>& func)

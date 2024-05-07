@@ -34,7 +34,7 @@ void Rasterizer::DrawSoftwareRasterized(
 	const cgl::Camera& camera,
 	DirectionalLight& DirectionalLight,
 	PRIMITIVE primitive,
-	SHADING shading,
+	Shader::SHADING shading,
 	bool showTextures,
 	bool isCulling,
 	bool isCullingClockWise,
@@ -191,7 +191,7 @@ void Rasterizer::DrawSoftwareRasterized(
 			auto color1 = cgl::vec4(model.meshes[i].vertices[j + 1].Color, 1);
 			auto color2 = cgl::vec4(model.meshes[i].vertices[j + 2].Color, 1);
 
-			if (shading == SHADING::GOURAUD)
+			if (shading == Shader::SHADING::GOURAUD)
 			{
 				auto dirLight = cgl::vec3(-m_DirectionalLight.direction).normalized();
 
@@ -498,7 +498,7 @@ void Rasterizer::Scanline(
 					}
 				}
 
-				if (m_Shading == SHADING::PHONG)
+				if (m_Shading == Shader::SHADING::PHONG)
 				{
 					auto dirLight = cgl::vec3(-m_DirectionalLight.direction).normalized();
 					auto diff = std::max(0.0f, dirLight.dot(pixelNormal));
@@ -509,7 +509,7 @@ void Rasterizer::Scanline(
 					pixelColor = ambient + diffuse;
 				}
 
-				// else if (m_Shading == SHADING::NONE)
+				// else if (m_Shading == Shader::SHADING::NONE)
 
 				m_FrameBuffer.set(m_FrameBuffer.height() - 1 - y, x, to_pixel(pixelColor));
 				m_ZBuffer.set(m_ZBuffer.height() - 1 - y, x, z_buf.get());

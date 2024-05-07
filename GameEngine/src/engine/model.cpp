@@ -5,7 +5,25 @@ static glm::vec3 _random_normalized_color()
 	return { rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0) };
 }
 
-void Model::Draw(Shader& shader, PRIMITIVE drawPrimitive) const
+Model::DEFAULT Model::to_default_model(const std::string& type)
+{
+	if (type == "CUBE")
+		return DEFAULT::CUBE;
+	if (type == "SPHERE")
+		return DEFAULT::SPHERE;
+	if (type == "PLANE")
+		return DEFAULT::PLANE;
+	if (type == "BUNNY")
+		return DEFAULT::BUNNY;
+	if (type == "DRAGON")
+		return DEFAULT::DRAGON;
+	if (type == "TEAPOT")
+		return DEFAULT::TEAPOT;
+	if (type == "COW")
+		return DEFAULT::COW;
+}
+
+void Model::Draw(const Shader& shader, PRIMITIVE drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -48,6 +66,29 @@ void Model::AddTexture(const std::string& path)
 	std::shared_ptr<Texture> tex = std::make_shared<Texture>(path, Texture::Type::DIFFUSE);
 	meshes.front().textures.push_back(tex);
 	textures_loaded.push_back(tex);
+}
+
+Model Model::GetDefaultModel(const Model::DEFAULT& modelType)
+{
+	switch (modelType)
+	{
+	case Model::DEFAULT::CUBE:
+		return Model("resources/models/cube_text.in");
+	case Model::DEFAULT::PLANE:
+		return Model("resources/models/plane.in");
+	case Model::DEFAULT::SPHERE:
+		return Model("resources/models/sphere.obj");
+	case Model::DEFAULT::BUNNY:
+		return Model("resources/models/bunny.obj");
+	case Model::DEFAULT::DRAGON:
+		return Model("resources/models/dragon.obj");
+	case Model::DEFAULT::TEAPOT:
+		return Model("resources/models/teapot.obj");
+	case Model::DEFAULT::COW:
+		return Model("resources/models/cow_up_no_text.in");
+	default:
+		return Model("resources/models/cube_text.in");
+	}
 }
 
 void Model::LoadCustomModel(TriangleOrientation triOrientation)

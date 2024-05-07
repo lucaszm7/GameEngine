@@ -50,7 +50,7 @@ public:
 
 	Mesh() = default;
 	Mesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text);
-	void Draw(Shader& shader, PRIMITIVE drawPrimitive = PRIMITIVE::Triangle) const;
+	void Draw(const Shader& shader, PRIMITIVE drawPrimitive = PRIMITIVE::Triangle) const;
 	void SetupMesh(const std::vector<Vertex>& vert, const std::vector<unsigned int>& indi, const std::vector<std::shared_ptr<Texture>>& text);
 
 private:

@@ -34,7 +34,7 @@ void Mesh::setupBuffers()
 }
 
 
-void Mesh::Draw(Shader& shader, PRIMITIVE drawPrimitive) const
+void Mesh::Draw(const Shader& shader, PRIMITIVE drawPrimitive) const
 {
 	for (int i = 0; i < textures.size(); ++i)
 	{

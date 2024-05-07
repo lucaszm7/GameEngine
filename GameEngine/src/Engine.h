@@ -36,6 +36,7 @@
 #include "model.h"
 #include "Timer.hpp"
 #include "FrameBuffer.hpp"
+#include "ShaderManager.h"
 
 // Game Engine Namespace
 namespace gen

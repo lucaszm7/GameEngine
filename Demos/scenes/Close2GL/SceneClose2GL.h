@@ -3,7 +3,7 @@
 #include <string>
 
 // Engine
-#include "shader.h"
+#include "ShaderManager.h"
 #include "scene.h"
 #include "camera.h"
 #include "light.h"
@@ -26,8 +26,6 @@ public:
 	BaseCam* GetCamera() override { return isOpenGLRendered ? (BaseCam*)&oglCamera : (BaseCam*)&cglCamera; }
 
 private:
-	Shader OpenGLShader;
-
 	cgl::Camera cglCamera;
 	ogl::Camera oglCamera;
 
@@ -71,7 +69,7 @@ private:
 	unsigned int FragmentColoringSolidIndex;
 	unsigned int FragmentColoringTextureIndex;
 
-	SHADING shading = SHADING::PHONG;
+	Shader::SHADING shading = Shader::SHADING::PHONG;
 
 	PRIMITIVE drawPrimitive = PRIMITIVE::Triangle;
 

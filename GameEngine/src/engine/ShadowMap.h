@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "model.h"
-#include "shader.h"
+#include "ShaderManager.h"
 #include "FrameBuffer.hpp"
 
 class ShadowMap
@@ -13,7 +13,6 @@ class ShadowMap
 	unsigned int fboId;
 	unsigned int texId;
 
-	Shader shader;
 	FrameBuffer debugFrameBuffer;
 
 	inline static const unsigned int SHADOW_WIDTH = 1024;
@@ -26,8 +25,8 @@ public:
 	glm::mat4 lightSpaceMatrix;
 
 	ShadowMap(std::shared_ptr<unsigned int> screenWidth, std::shared_ptr<unsigned int> screenHeight);
-	void OnUpdate(glm::vec3& lightPosition, glm::vec3& lightDirection, float fov, const std::vector<Model>& objects);
-	void Bind(Shader& shader, unsigned int slot);
+	void OnUpdate(const glm::vec3& lightPosition, const glm::vec3& lightDirection, float fov, const std::vector<Model>& objects);
+	void Bind(const Shader& shader, unsigned int slot);
 	void DebugShadowMap() const;
 };
 
