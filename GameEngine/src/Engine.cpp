@@ -258,7 +258,7 @@ void gen::GameEngine::mouse_callback(GLFWwindow* window, double xpos, double ypo
     lastX = xpos;
     lastY = ypos;
 
-    if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
+    if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL && !IsMouseButtonPressed(GLFW_MOUSE_BUTTON_2))
         return;
 
     pCamera->ProcessMouseMovement(xOffSet, yOffSet);
