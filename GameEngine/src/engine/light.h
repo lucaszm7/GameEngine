@@ -40,12 +40,36 @@ struct Light
 
 struct DirectionalLight : public Light
 {
-	glm::vec3 direction = { 0.0f, 0.0f, -1.0f };
+	glm::vec3 direction = { 0.0f, -1.0f, 0.0f };
+	glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
 
 	DirectionalLight() = default;
 
 	DirectionalLight(glm::vec3 lightColor, glm::vec3 dir)
 		: Light(lightColor), direction(dir) {}
+
+	glm::vec3 GetDirection() const
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		return glm::normalize(glm::vec3(model * glm::vec4(direction, 1.0f)));
+	}
+
+	void OnImGui(const std::string& name)
+	{
+		if (ImGui::TreeNode(name.c_str()))
+		{
+			ImGui::DragFloat3(std::string("Rot " + name).c_str(), &rotation[0], 0.1f, -2 * glm::pi<float>(), 2 * glm::pi<float>());
+			ImGui::ColorEdit3(std::string("Cor " + name).c_str(), &lightColor[0]);
+
+			SetLightColor();
+
+			ImGui::TreePop();
+		}
+	}
 };
 
 struct PointLight : public Light

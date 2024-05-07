@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -14,28 +15,28 @@
 #include <vec3.h>
 #include <mat4.h>
 
-enum class ShaderStage
-{
-	VERTEX = GL_VERTEX_SHADER,
-	FRAGMENT = GL_FRAGMENT_SHADER
-};
-
-enum class SHADING
-{
-	GOURAUD,
-	PHONG,
-	NONE
-};
 
 class Shader
 {
+public:
+	enum STAGE
+	{
+		VERTEX = GL_VERTEX_SHADER,
+		FRAGMENT = GL_FRAGMENT_SHADER
+	};
+	enum SHADING
+	{
+		GOURAUD,
+		PHONG,
+		NONE
+};
 private:
 	std::string m_VertexShaderPath;
 	std::string m_FragmentShaderPath;
 
 	// Program ID
 	unsigned int m_RendererID;
-	std::unordered_map<std::string, int> m_UniformLocationCache;
+	mutable std::unordered_map<std::string, int> m_UniformLocationCache;
 public:
 	Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 	~Shader();
@@ -43,27 +44,27 @@ public:
 	// gl_useProgram();
 	void Bind() const;
 	static void Unbind();
-	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
-	void SetUniform3f(const std::string& name, float v0, float v1, float v2);
-	void SetUniform3f(const std::string& name, const glm::vec3& v);
-	void SetUniform3f(const std::string& name, const cgl::vec3& v);
-	void SetUniform1i(const std::string& name, int v0);
-	void SetUniform1f(const std::string& name, float v0);
-	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4);
-	void SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4);
+	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) const;
+	void SetUniform3f(const std::string& name, float v0, float v1, float v2) const;
+	void SetUniform3f(const std::string& name, const glm::vec3& v) const;
+	void SetUniform3f(const std::string& name, const cgl::vec3& v) const;
+	void SetUniform1i(const std::string& name, int v0) const;
+	void SetUniform1f(const std::string& name, float v0) const;
+	void SetUniformMatrix4fv(const std::string& name, const glm::mat4& mat4) const;
+	void SetUniformMatrix4fv(const std::string& name, const cgl::mat4& mat4) const;
 	
-	unsigned int GetSubroutineIndex(ShaderStage shaderStage, const std::string& subroutineIndexName) const;
-	void SetUniformSubroutine(ShaderStage shaderStage, size_t count, unsigned int const* index) const;
+	unsigned int GetSubroutineIndex(Shader::STAGE shaderStage, const std::string& subroutineIndexName) const;
+	void SetUniformSubroutine(Shader::STAGE shaderStage, size_t count, unsigned int const* index) const;
 
-	void SetUniformMaterial(const Material& mat);
-	void SetUniformLight(const DirectionalLight& light, ShaderStage shaderStage = ShaderStage::FRAGMENT);
-	void SetUniformLight(const PointLight& light);
-	void SetUniformLight(const std::vector<PointLight>& lights);
-	void SetUniformLight(const SpotLight& light, ShaderStage shaderStage = ShaderStage::FRAGMENT);
+	void SetUniformMaterial(const Material& mat) const;
+	void SetUniformLight(const DirectionalLight& light, Shader::STAGE shaderStage = Shader::STAGE::FRAGMENT) const;
+	void SetUniformLight(const PointLight& light) const;
+	void SetUniformLight(const std::vector<PointLight>& lights) const;
+	void SetUniformLight(const SpotLight& light, Shader::STAGE shaderStage = Shader::STAGE::FRAGMENT) const;
 
 private:
 	std::string ParseShader(const std::string& filepath) const;
 	unsigned int CompileShader(unsigned int type, const std::string& source) const;
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) const;
-	int GetUniformLocation(const std::string& name);
+	int GetUniformLocation(const std::string& name) const;
 };

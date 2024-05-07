@@ -50,6 +50,7 @@ struct Spotlight
 	float quadratic;
 };
 
+in vec3 outColor;
 in vec3 outNormal;
 in vec3 outFragPos;
 in vec2 outTexCoord;
@@ -82,7 +83,7 @@ void main()
 	//	result += CalculatePointLight(pointLights[i], norm, outFragPos, viewDir);
 
 	// Spotlight
-    result += CalculateSpotlight(fragmentSpotlight, norm, outFragPos, viewDir);
+    // result += CalculateSpotlight(fragmentSpotlight, norm, outFragPos, viewDir);
 
 	// Emission map
 	// result += texture(material.emission, outTexCoord).rgb;
@@ -104,6 +105,10 @@ vec3 CalculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 	vec3 ambient = light.ambient * vec3(texture(material.diffuse, outTexCoord));
 	vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, outTexCoord));
 	vec3 specular = light.specular * spec * vec3(texture(material.specular, outTexCoord));
+
+	// vec3 ambient  = light.ambient         * outColor;
+	// vec3 diffuse  = light.diffuse * diff  * outColor;
+	// vec3 specular = light.specular * spec * outColor;
 
 	return (ambient + diffuse + specular);
 }

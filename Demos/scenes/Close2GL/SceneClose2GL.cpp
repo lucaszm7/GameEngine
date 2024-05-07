@@ -34,24 +34,24 @@ BoundingVolume CalculateEnclosingAABB(const std::unique_ptr<Model>& obj)
 
 SceneClose2GL::SceneClose2GL()
     :
-    OpenGLShader("resources/shaders/ogl_vertex.shader", "resources/shaders/ogl_fragment.shader"),
     screenWidth(pScreenWidth), screenHeight(pScreenHeight),
-    dirLight({ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, -1.0f }),
+    dirLight({ 1.0f, 1.0f, 1.0f }, { 0.0f, -1.0f, 0.0f }),
     spotlight({ 1.0f, 1.0f, 1.0f }, oglCamera.Position, oglCamera.Right)
 {
     objects.emplace_back(std::make_unique<Model>("resources/models/cube_text.in"));
     DisableCullFace();
 
-    VertexShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "None");
-    VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Gouraud");
-    VertexShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::VERTEX, "Phong");
+    auto& OpenGLShader = ShaderManager::GetShader(SHADER_TYPE::OPENGL);
+    VertexShadingNoneIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::VERTEX, "None");
+    VertexShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::VERTEX, "Gouraud");
+    VertexShadingPhongIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::VERTEX, "Phong");
 
-    FragmentShadingNoneIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "None");
-    FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Gouraud");
-    FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "Phong");
+    FragmentShadingNoneIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::FRAGMENT, "None");
+    FragmentShadingGouraudIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::FRAGMENT, "Gouraud");
+    FragmentShadingPhongIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::FRAGMENT, "Phong");
 
-    FragmentColoringSolidIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "SolidColor");
-    FragmentColoringTextureIndex = OpenGLShader.GetSubroutineIndex(ShaderStage::FRAGMENT, "TextureColor");
+    FragmentColoringSolidIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::FRAGMENT, "SolidColor");
+    FragmentColoringTextureIndex = OpenGLShader.GetSubroutineIndex(Shader::STAGE::FRAGMENT, "TextureColor");
 }
 
 SceneClose2GL::~SceneClose2GL() = default;
@@ -65,6 +65,7 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         view = oglCamera.GetViewMatrix();
         projection = oglCamera.GetProjectionMatrix((float)*screenWidth / (float)*screenHeight);
     
+        const auto& OpenGLShader = ShaderManager::GetShader(SHADER_TYPE::OPENGL);
         OpenGLShader.Bind();
         OpenGLShader.SetUniformMatrix4fv("view", view);
         OpenGLShader.SetUniformMatrix4fv("projection", projection);
@@ -74,31 +75,31 @@ void SceneClose2GL::OnUpdate(float deltaTime)
         spotlight.direction = glm::vec3(oglCamera.Front.x, oglCamera.Front.y, oglCamera.Front.z);
         
         unsigned int fragShadingIndex;
-        if (shading == SHADING::GOURAUD)
+        if (shading == Shader::SHADING::GOURAUD)
             fragShadingIndex = FragmentShadingGouraudIndex;
-        else if (shading == SHADING::PHONG)
+        else if (shading == Shader::SHADING::PHONG)
             fragShadingIndex = FragmentShadingPhongIndex;
         else
             fragShadingIndex = FragmentShadingNoneIndex;
 
-        unsigned int vertexSubroutineIndex = shading == SHADING::GOURAUD ? VertexShadingGouraudIndex : VertexShadingPhongIndex;
+        unsigned int vertexSubroutineIndex = shading == Shader::SHADING::GOURAUD ? VertexShadingGouraudIndex : VertexShadingPhongIndex;
 
         std::array<unsigned int, 2> fragmentSubroutineIndex;
         fragmentSubroutineIndex[0] = (showTexture ? FragmentColoringTextureIndex : FragmentColoringSolidIndex);
         fragmentSubroutineIndex[1] = fragShadingIndex;
         
-        OpenGLShader.SetUniformSubroutine(ShaderStage::FRAGMENT, 2, fragmentSubroutineIndex.data());
-        OpenGLShader.SetUniformSubroutine(ShaderStage::VERTEX, 1, &vertexSubroutineIndex);
+        OpenGLShader.SetUniformSubroutine(Shader::STAGE::FRAGMENT, 2, fragmentSubroutineIndex.data());
+        OpenGLShader.SetUniformSubroutine(Shader::STAGE::VERTEX, 1, &vertexSubroutineIndex);
 
-        if (shading == SHADING::GOURAUD)
+        if (shading == Shader::SHADING::GOURAUD)
         {
-            OpenGLShader.SetUniformLight(dirLight, ShaderStage::VERTEX);
-            OpenGLShader.SetUniformLight(spotlight, ShaderStage::VERTEX);
+            OpenGLShader.SetUniformLight(dirLight, Shader::STAGE::VERTEX);
+            OpenGLShader.SetUniformLight(spotlight, Shader::STAGE::VERTEX);
         }
-        else if (shading == SHADING::PHONG)
+        else if (shading == Shader::SHADING::PHONG)
         {
-            OpenGLShader.SetUniformLight(dirLight, ShaderStage::FRAGMENT);
-            OpenGLShader.SetUniformLight(spotlight, ShaderStage::FRAGMENT);
+            OpenGLShader.SetUniformLight(dirLight, Shader::STAGE::FRAGMENT);
+            OpenGLShader.SetUniformLight(spotlight, Shader::STAGE::FRAGMENT);
         }
 
         for (int i = 0; i < objects.size(); ++i)
@@ -215,21 +216,21 @@ void SceneClose2GL::OnImGuiRender()
     }
 
     ImGui::Separator();
-    textCentered("SHADING Model");
+    textCentered("Shading Model");
 
-    if (ImGui::RadioButton("No lighting", shading == SHADING::NONE))
+    if (ImGui::RadioButton("No lighting", shading == Shader::SHADING::NONE))
     {
-        shading = SHADING::NONE;
+        shading = Shader::SHADING::NONE;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Gouraud SHADING", shading == SHADING::GOURAUD))
+    if (ImGui::RadioButton("Gouraud", shading == Shader::SHADING::GOURAUD))
     {
-        shading = SHADING::GOURAUD;
+        shading = Shader::SHADING::GOURAUD;
     }
     ImGui::SameLine();
-    if (ImGui::RadioButton("Phong SHADING", shading == SHADING::PHONG))
+    if (ImGui::RadioButton("Phong", shading == Shader::SHADING::PHONG))
     {
-        shading = SHADING::PHONG;
+        shading = Shader::SHADING::PHONG;
     }
 
     ImGui::Separator();
@@ -319,7 +320,7 @@ void SceneClose2GL::OnImGuiRender()
         if (ImGui::TreeNode(std::string((*it)->name).c_str()))
         {
             (*it)->OnImGui();
-            // ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &(*it)->color[0]);
+            // ImGui::ColorEdit3(std::string("Color of" + (*it)->name).c_str(), &(*it)->objectColor[0]);
             ImGui::TreePop();
         }
         else

@@ -15,8 +15,22 @@
 #include "vec4.h"
 #include "mat.hpp"
 
+
 struct Model
 {
+public:
+	enum DEFAULT
+	{
+		CUBE,
+		SPHERE,
+		PLANE,
+		BUNNY,
+		DRAGON,
+		TEAPOT,
+		COW,
+	};
+	static DEFAULT to_default_model(const std::string& type);
+
 public:
 	Model(const std::string& path, TriangleOrientation triOrientation = TriangleOrientation::CounterClockWise)
 		:m_Path(path)
@@ -27,18 +41,21 @@ public:
 			LoadClassicModel();
 	}
 
-	void Draw(Shader& shader, 
+	void Draw(const Shader& shader, 
 		PRIMITIVE drawPrimitive = PRIMITIVE::Triangle) const;
 	
 	cgl::mat4 GetModelMatrix() const;
 	void OnImGui() const;
 	void AddTexture(const std::string& path);
 
+	static Model GetDefaultModel(const Model::DEFAULT& modelType);
+
+	Transform transform;
 
 	std::vector<Mesh> meshes;
 	std::string name;
+	glm::vec3 objectColor;
 	std::vector<std::shared_ptr<Texture>> textures_loaded;
-	Transform transform;
 
 private:
 	std::string m_Path;

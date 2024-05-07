@@ -5,7 +5,25 @@ static glm::vec3 _random_normalized_color()
 	return { rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0), rand() / (RAND_MAX + 1.0) };
 }
 
-void Model::Draw(Shader& shader, PRIMITIVE drawPrimitive) const
+Model::DEFAULT Model::to_default_model(const std::string& type)
+{
+	if (type == "CUBE")
+		return DEFAULT::CUBE;
+	if (type == "SPHERE")
+		return DEFAULT::SPHERE;
+	if (type == "PLANE")
+		return DEFAULT::PLANE;
+	if (type == "BUNNY")
+		return DEFAULT::BUNNY;
+	if (type == "DRAGON")
+		return DEFAULT::DRAGON;
+	if (type == "TEAPOT")
+		return DEFAULT::TEAPOT;
+	if (type == "COW")
+		return DEFAULT::COW;
+}
+
+void Model::Draw(const Shader& shader, PRIMITIVE drawPrimitive) const
 {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, transform.position);
@@ -39,6 +57,7 @@ void Model::OnImGui() const
 		ImGui::DragFloat3("Position:", (float*)&transform.position[0], 0.1f, -1000.0f, 1000.0f);
 		ImGui::DragFloat3("Rotation:", (float*)&transform.rotation[0], 0.1f, -2*glm::pi<float>(), 2*glm::pi<float>());
 		ImGui::DragFloat3("Scale:",    (float*)&transform.scale[0], 0.01f, -100.0f, 100.0f);
+		ImGui::ColorEdit3("Color", (float*)&objectColor[0]);
 		ImGui::TreePop();
 	}
 }
@@ -48,6 +67,29 @@ void Model::AddTexture(const std::string& path)
 	std::shared_ptr<Texture> tex = std::make_shared<Texture>(path, Texture::Type::DIFFUSE);
 	meshes.front().textures.push_back(tex);
 	textures_loaded.push_back(tex);
+}
+
+Model Model::GetDefaultModel(const Model::DEFAULT& modelType)
+{
+	switch (modelType)
+	{
+	case Model::DEFAULT::CUBE:
+		return Model("resources/models/cube_text.in");
+	case Model::DEFAULT::PLANE:
+		return Model("resources/models/plane.in");
+	case Model::DEFAULT::SPHERE:
+		return Model("resources/models/sphere.obj");
+	case Model::DEFAULT::BUNNY:
+		return Model("resources/models/bunny.obj");
+	case Model::DEFAULT::DRAGON:
+		return Model("resources/models/dragon.obj");
+	case Model::DEFAULT::TEAPOT:
+		return Model("resources/models/teapot.obj");
+	case Model::DEFAULT::COW:
+		return Model("resources/models/cow_up_no_text.in");
+	default:
+		return Model("resources/models/cube_text.in");
+	}
 }
 
 void Model::LoadCustomModel(TriangleOrientation triOrientation)
@@ -154,9 +196,10 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		Vertex v1;
 		Vertex v2;
 
-		v0.Color = {1, 0, 0};
-		v1.Color = {0, 1, 0};
-		v2.Color = {0, 0, 1};
+		auto color = _random_normalized_color();
+		v0.Color = color;
+		v1.Color = color;
+		v2.Color = color;
 
 		std::getline(stream, line);
 		ss.str(std::string());
@@ -234,9 +277,13 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		indices.push_back(counter++);
 	}
 
+	stream.close();
+
 	std::shared_ptr<Texture> tex;
 	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::DIFFUSE, Texture::Wrap::MIRROR, Texture::Filtering::NEAREST_NEIGHBOR, true);
 	textures.push_back(tex);
+
+	objectColor = _random_normalized_color();
 
 	meshes.emplace_back(vertices, indices, textures);
 }
@@ -262,6 +309,8 @@ void Model::LoadClassicModel()
 
 	m_NamesMap[name] = id;
 	processNode(scene->mRootNode, scene);
+
+	objectColor = _random_normalized_color();
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -303,10 +352,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 		if (mesh->HasNormals())
 			vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+		else
+			vertex.Normal = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (mesh->mTextureCoords[0]) // Has texture coords
 			vertex.TexCoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-
 		else
 			vertex.TexCoord = glm::vec2(0.0f, 0.0f);
 

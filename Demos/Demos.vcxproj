@@ -155,6 +155,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="scenes\Close2GL\SceneClose2GL.cpp" />
     <ClCompile Include="scenes\Solitude\SolitudeScene.cpp" />
+    <ClCompile Include="scenes\ShowRoom\ShowRoom.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scenes\ComputeShader\ComputeShaderDemo.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="scenes\Close2GL\SceneClose2GL.h" />
     <ClInclude Include="scenes\Solitude\src\Cube.h" />
     <ClInclude Include="scenes\Solitude\SolitudeScene.h" />
+    <ClInclude Include="scenes\ShowRoom\ShowRoom.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

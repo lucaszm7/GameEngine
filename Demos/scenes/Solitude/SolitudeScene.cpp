@@ -1,7 +1,7 @@
 #include "SolitudeScene.h"
 
 SolitudeScene::SolitudeScene()
-	:camera(), shader("resources/shaders/Solitude/vertex.shader", "resources/shaders/Solitude/fragment.shader"),
+	:camera(),
     dirlight({1.0f, 1.0f, 1.0f}, {0.0f, -1.0f, 0.0f}),
     spotlight({1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}),
     shadowMap(pScreenWidth, pScreenHeight)
@@ -18,10 +18,6 @@ SolitudeScene::SolitudeScene()
     pointlights.push_back({ { 1.0f, 1.0f, 1.0f }, { -17.0f, 28.0f, 57.0f } });
 
     spotlight.intensity = 3.0f;
-}
-
-SolitudeScene::~SolitudeScene()
-{
 }
 
 void SolitudeScene::OnUpdate(float deltaTime)
@@ -56,6 +52,7 @@ void SolitudeScene::OnUpdate(float deltaTime)
     }
 #endif
 
+    const auto& shader = ShaderManager::GetShader(SHADER_TYPE::SOLITUDE);
     shader.Bind();
     shader.SetUniformMatrix4fv("view", view);
     shader.SetUniformMatrix4fv("projection", projection);
@@ -78,15 +75,11 @@ void SolitudeScene::OnUpdate(float deltaTime)
 void SolitudeScene::OnPhysics(float deltaTime)
 {
     totalTime += deltaTime;
-    // Lights
+
     for (auto& light : pointlights)
     {
         light.intensity = 5 * (1 + std::cos(totalTime * 1/3));
     }
-
-    // Physics
-    /*if(isGravity)
-        player->camera->velocity += (glm::vec3(0.0f, -0.98f, 0.0f) * deltaTime) / 4.0f;*/
 
     player->collider.center = player->camera->Position;
 

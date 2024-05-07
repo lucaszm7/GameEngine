@@ -66,7 +66,7 @@ public:
 		const cgl::Camera& camera,
 		DirectionalLight& DirectionalLight,
 		PRIMITIVE primitive = PRIMITIVE::Triangle,
-		SHADING shading = SHADING::NONE,
+		Shader::SHADING shading = Shader::SHADING::NONE,
 		bool showTextures = false,
 		bool isCulling = false,
 		bool isCullingClockWise = false,
@@ -98,7 +98,7 @@ private:
 		cgl::vec4 normal_left, cgl::vec4 normal_right,
 		cgl::vec3 uv_left, cgl::vec3 uv_right);
 
-	inline static SHADING m_Shading;
+	inline static Shader::SHADING m_Shading;
 	inline static PRIMITIVE m_Primitive;
 	inline static Texture::Filtering m_Filtering;
 	inline static bool m_ShowTexture;
