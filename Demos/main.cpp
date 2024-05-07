@@ -16,7 +16,7 @@
 #include "scenes/Solitude/SolitudeScene.h"
 #include "scenes/ASCIIMAGE/ASCIIMAGE.h"
 #include "scenes/ComputeShader/ComputeShaderDemo.h"
-
+#include "scenes/ShowRoom/ShowRoom.h"
 
 int main()
 {
@@ -26,6 +26,7 @@ int main()
     gen::GameEngine::AddScene("Solitude", []() {return new SolitudeScene(); });
     gen::GameEngine::AddScene("ASCII to Image", []() {return new ASCIIMAGE(); });
     gen::GameEngine::AddScene("Compute Shader", []() {return new ComputeShaderDemo(); });
+    gen::GameEngine::AddScene("Show Room", []() { return new ShowRoom(); });
 
     gen::GameEngine::Run();
 }

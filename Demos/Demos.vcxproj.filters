@@ -30,6 +30,9 @@
     <ClCompile Include="scenes\ComputeShader\ComputeShaderDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="scenes\ShowRoom\ShowRoom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scenes\Close2GL\SceneClose2GL.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="scenes\ComputeShader\ComputeShaderDemo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scenes\ShowRoom\ShowRoom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

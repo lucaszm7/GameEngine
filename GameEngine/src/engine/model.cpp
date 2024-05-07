@@ -57,6 +57,7 @@ void Model::OnImGui() const
 		ImGui::DragFloat3("Position:", (float*)&transform.position[0], 0.1f, -1000.0f, 1000.0f);
 		ImGui::DragFloat3("Rotation:", (float*)&transform.rotation[0], 0.1f, -2*glm::pi<float>(), 2*glm::pi<float>());
 		ImGui::DragFloat3("Scale:",    (float*)&transform.scale[0], 0.01f, -100.0f, 100.0f);
+		ImGui::ColorEdit3("Color", (float*)&objectColor[0]);
 		ImGui::TreePop();
 	}
 }
@@ -195,9 +196,10 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		Vertex v1;
 		Vertex v2;
 
-		v0.Color = {1, 0, 0};
-		v1.Color = {0, 1, 0};
-		v2.Color = {0, 0, 1};
+		auto color = _random_normalized_color();
+		v0.Color = color;
+		v1.Color = color;
+		v2.Color = color;
 
 		std::getline(stream, line);
 		ss.str(std::string());
@@ -275,9 +277,13 @@ void Model::LoadCustomModel(TriangleOrientation triOrientation)
 		indices.push_back(counter++);
 	}
 
+	stream.close();
+
 	std::shared_ptr<Texture> tex;
 	tex = std::make_shared<Texture>("resources/textures/mandrill_256.jpg", Texture::Type::DIFFUSE, Texture::Wrap::MIRROR, Texture::Filtering::NEAREST_NEIGHBOR, true);
 	textures.push_back(tex);
+
+	objectColor = _random_normalized_color();
 
 	meshes.emplace_back(vertices, indices, textures);
 }
@@ -303,6 +309,8 @@ void Model::LoadClassicModel()
 
 	m_NamesMap[name] = id;
 	processNode(scene->mRootNode, scene);
+
+	objectColor = _random_normalized_color();
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -344,10 +352,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 		if (mesh->HasNormals())
 			vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+		else
+			vertex.Normal = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		if (mesh->mTextureCoords[0]) // Has texture coords
 			vertex.TexCoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-
 		else
 			vertex.TexCoord = glm::vec2(0.0f, 0.0f);
 

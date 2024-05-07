@@ -48,11 +48,14 @@ public:
 	void OnImGui() const;
 	void AddTexture(const std::string& path);
 
+	static Model GetDefaultModel(const Model::DEFAULT& modelType);
+
+	Transform transform;
 
 	std::vector<Mesh> meshes;
 	std::string name;
+	glm::vec3 objectColor;
 	std::vector<std::shared_ptr<Texture>> textures_loaded;
-	Transform transform;
 
 private:
 	std::string m_Path;
