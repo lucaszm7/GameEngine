@@ -32,7 +32,7 @@ private:
 	ShadowMap shadowMap;
 
 	std::vector<PointLight> pointlights;
-	std::shared_ptr < Player> player;
+	// std::shared_ptr < Player> player;
 
 	std::vector<Model> scene_objects;
 
@@ -41,7 +41,7 @@ private:
 	bool isDepthMap = false;
 	float totalTime = 0.0f;
 
-	std::vector<Collider::Info> infos;
+	// std::vector<Collider::Info> infos;
 
 	Cube cube;
 };

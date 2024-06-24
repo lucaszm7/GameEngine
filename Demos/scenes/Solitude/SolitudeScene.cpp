@@ -11,7 +11,7 @@ SolitudeScene::SolitudeScene()
     scene_objects.emplace_back("resources/models/cube_text.in");
 
     camera = std::make_shared<ogl::Camera>();
-    player = std::make_shared<Player>(camera);
+    // player = std::make_shared<Player>(camera);
     pointlights.push_back({ { 1.0f, 0.0f, 0.0f }, {   0.0f,  5.0f,  0.0f } });
     pointlights.push_back({ { 0.0f, 1.0f, 0.0f }, {   0.0f, 10.0f, 42.0f } });
     pointlights.push_back({ { 0.0f, 0.0f, 1.0f }, { -18.0f, 14.0f, 35.0f } });
@@ -85,7 +85,7 @@ void SolitudeScene::OnPhysics(float deltaTime)
     }
 
     // Physics
-    if(isGravity)
+    /*if(isGravity)
         player->camera->velocity += (glm::vec3(0.0f, -0.98f, 0.0f) * deltaTime) / 4.0f;
 
     player->collider.center = player->camera->Position;
@@ -97,7 +97,7 @@ void SolitudeScene::OnPhysics(float deltaTime)
         {
             player->OnPhysics(infos[infoCounter]);
         }
-    }
+    }*/
 }
 
 void SolitudeScene::OnImGuiRender()

@@ -3,20 +3,17 @@
 void ogl::Camera::ProcessKeyboard(CamMovement direction, double deltaTime)
 {
     float baseVelocity = MovementSpeed * (float)deltaTime;
-    velocity -= velocity * 3.0f * (float)deltaTime;
 
     if (direction == CamMovement::FORWARD)
-        velocity += Front * baseVelocity;
+        Position += Front * baseVelocity;
     if (direction == CamMovement::BACKWARD)
-        velocity -= Front * baseVelocity;
+        Position -= Front * baseVelocity;
     if (direction == CamMovement::LEFT)
-        velocity -= Right * baseVelocity;
+        Position -= Right * baseVelocity;
     if (direction == CamMovement::RIGHT)
-        velocity += Right * baseVelocity;
+        Position += Right * baseVelocity;
     if (direction == CamMovement::UP)
-        velocity += Up * baseVelocity;
+        Position += Up * baseVelocity;
     if (direction == CamMovement::DOWN)
-        velocity -= Up * baseVelocity;
-
-    Position += velocity;
+        Position -= Up * baseVelocity;
 }

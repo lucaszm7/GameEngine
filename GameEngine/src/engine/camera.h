@@ -308,8 +308,6 @@ namespace ogl
         glm::vec3 Right;
         glm::vec3 WorldUp;
 
-        glm::vec3 velocity = glm::vec3(0.0f);
-
         // euler Angles
         float Yaw;
         float Pitch;
@@ -325,7 +323,7 @@ namespace ogl
 
         // constructor with vectors
         Camera(glm::vec3 position = glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH)
-            : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), velocity(0)
+            : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
         {
             Position = position;
             WorldUp = up;
@@ -336,7 +334,7 @@ namespace ogl
 
         // constructor with scalar values
         Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch)
-            : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), velocity(0)
+            : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
         {
             Position = glm::vec3(posX, posY, posZ);
             WorldUp = glm::vec3(upX, upY, upZ);
@@ -392,7 +390,6 @@ namespace ogl
                     this->Reset();
 
                 ImGui::DragFloat3("Position:", &Position[0], 0.1f, -10000.0f, 10000.0f);
-                ImGui::DragFloat3("Velocity:", &velocity[0], 0.1f, -1000.0f, 1000.0f);
                 ImGui::DragFloat("Yaw:", &Yaw, 0.1f, -2*glm::pi<float>(), 2*glm::pi<float>());
                 ImGui::DragFloat("Pitch:", &Pitch, 0.1f, -2*glm::pi<float>(), 2*glm::pi<float>());
                 ImGui::DragFloat("Near Plane:", &Near, 0.1f, -10000.0f, 10000.0f);
@@ -412,7 +409,6 @@ namespace ogl
 
             Far = 5000.0f;
             Near = 0.1f;
-            velocity = glm::vec3(0.0f);
 
             Position = glm::vec3(0.0f, 0.0f, 0.0f);
             WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
